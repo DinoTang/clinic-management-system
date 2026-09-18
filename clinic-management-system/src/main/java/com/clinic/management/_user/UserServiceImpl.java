@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import com.clinic.management.common.response.ApiResponse;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,4 +25,25 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public User getUserById(String id){
+        User user = userRepository.findById(id).orElse(null);
+        return user;
+    }
+
+    @Override
+    public User create(User user){
+        userRepository.save(user);
+        return user;
+    }
+
+    // @Override
+    // public ApiResponse<User> update(String id, User user){
+
+    // }
+
+    // @Override
+    // public ApiResponse<User> delete(String id){
+
+    // }
 }
