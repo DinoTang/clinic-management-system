@@ -3,6 +3,7 @@ package com.clinic.management._user;
 import jakarta.persistence.*;
 import lombok.Data;
 
+
 @Entity
 @Table(name = "NGUOIDUNG")
 @Data

@@ -55,6 +55,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> create(@RequestBody User user){
+        System.out.println("========== CREATE USER CALLED ==========");
+        System.out.println(user);
+        
         User userExistion = userService.getUserById(user.getId());
         ApiResponse response = null;
         if (userExistion==null){
@@ -64,6 +67,7 @@ public class UserController {
                 "Đăng ký tài khoản thành công",
                 user
             );
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
         else {
             response = new ApiResponse(
@@ -71,8 +75,8 @@ public class UserController {
                 "Tài khoản đã tồn tại",
                 null
             );
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
         }
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
