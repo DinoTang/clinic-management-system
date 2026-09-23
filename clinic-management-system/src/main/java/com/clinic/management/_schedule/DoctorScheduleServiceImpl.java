@@ -57,6 +57,24 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 
     @Override
     public DoctorSchedule createSchedule(DoctorSchedule schedule) {
+        if (schedule.getDoctor() == null || schedule.getDoctor().getId() == null || schedule.getDoctor().getId().isBlank()) {
+            throw new IllegalArgumentException("Bác sĩ không được để trống!");
+        }
+        if (schedule.getRoomId() == null || schedule.getRoomId().isBlank()) {
+            throw new IllegalArgumentException("Phòng khám không được để trống!");
+        }
+        if (schedule.getExaminationDate() == null) {
+            throw new IllegalArgumentException("Ngày khám không được để trống!");
+        }
+        if (schedule.getStartTime() != null && schedule.getEndTime() != null) {
+            if (!schedule.getEndTime().isAfter(schedule.getStartTime())) {
+                throw new IllegalArgumentException("Giờ kết thúc phải sau giờ bắt đầu!");
+            }
+        }
+        if (schedule.getMaxPatients() == null || schedule.getMaxPatients() <= 0) {
+            throw new IllegalArgumentException("Số bệnh nhân tối đa phải lớn hơn 0!");
+        }
+
         schedule.setId(generateNextScheduleId());
         schedule.setDeleted(false);
         return scheduleRepository.save(schedule);
@@ -86,4 +104,6 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
             scheduleRepository.save(existing);
         }
     }
+
+
 }
