@@ -1,14 +1,12 @@
 package com.clinic.management.common.enums;
 
-public enum Role {
-	PATIENT("Bệnh nhân"),
-	STAFF("Nhân viên"),
-	DOCTOR("Bác sĩ"),
-	ADMIN("Quản trị viên");
+public enum UserStatus {
+	ACTIVE("Đang hoạt động"),
+	LOCKED("Đã khóa");
 
 	private final String description;
 
-	private Role(String description) {
+	private UserStatus(String description) {
         this.description = description;
     }
     
@@ -16,4 +14,5 @@ public enum Role {
     public String toString() {
         return this.description;
     }
+
 }

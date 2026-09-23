@@ -1,6 +1,6 @@
 package com.clinic.management._patient;
 
-import com.clinic.management._user.User;
+import com.clinic.management._user.entities.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 

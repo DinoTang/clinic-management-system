@@ -1,6 +1,6 @@
 package com.clinic.management._doctor;
 
-import com.clinic.management._user.User;
+import com.clinic.management._user.entities.User;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
