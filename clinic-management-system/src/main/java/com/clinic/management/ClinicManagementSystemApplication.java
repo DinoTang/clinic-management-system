@@ -11,8 +11,8 @@ import java.sql.Connection;
 @SpringBootApplication
 public class ClinicManagementSystemApplication {
 
-//	public static void main(String[] args) {
-//		SpringApplication.run(ClinicManagementSystemApplication.class, args);
-//
-//	}
+	public static void main(String[] args) {
+		SpringApplication.run(ClinicManagementSystemApplication.class, args);
+
+	}
 }
