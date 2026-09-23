@@ -113,7 +113,7 @@ CREATE TABLE `chidinhdichvu` (
   `TRANGTHAI` varchar(20) DEFAULT 'DaChiDinh',
   `KETQUA` text DEFAULT NULL,
   `FILEKETQUA` varchar(255) DEFAULT NULL,
-  `THOIGIANGCHIDINH` timestamp NOT NULL DEFAULT current_timestamp(),
+  `THOIGIANCHIDINH` timestamp NOT NULL DEFAULT current_timestamp(),
   `THOIGIANKETQUA` timestamp NULL DEFAULT NULL,
   `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -122,7 +122,7 @@ CREATE TABLE `chidinhdichvu` (
 -- Dumping data for table `chidinhdichvu`
 --
 
-INSERT INTO `chidinhdichvu` (`MACHIDINH`, `MABENHAN`, `MADICHVU`, `SOLUONG`, `DONGIA`, `TRANGTHAI`, `KETQUA`, `FILEKETQUA`, `THOIGIANGCHIDINH`, `THOIGIANKETQUA`, `TRANGTHAIXOA`) VALUES
+INSERT INTO `chidinhdichvu` (`MACHIDINH`, `MABENHAN`, `MADICHVU`, `SOLUONG`, `DONGIA`, `TRANGTHAI`, `KETQUA`, `FILEKETQUA`, `THOIGIANCHIDINH`, `THOIGIANKETQUA`, `TRANGTHAIXOA`) VALUES
 ('CD001', 'BA001', 'DV_ECG', 1, 100000.00, 'HoanThanh', 'Nhịp xoang đều, phì đại thất trái nhẹ', '/uploads/results/ecg_ba001.pdf', '2026-09-18 01:15:00', '2026-09-18 01:45:00', 0),
 ('CD002', 'BA001', 'DV_ECHO', 1, 350000.00, 'HoanThanh', 'Chức năng tâm thu thất trái bảo tồn (EF = 62%), hở van 2 lá nhẹ 1/4', '/uploads/results/echo_ba001.pdf', '2026-09-18 01:15:00', '2026-09-18 02:10:00', 0),
 ('CD003', 'BA002', 'DV_XNBL', 1, 450000.00, 'HoanThanh', 'HP dương tính (Positive +++)', '/uploads/results/hp_ba002.pdf', '2026-09-18 01:50:00', '2026-09-18 02:25:00', 0);

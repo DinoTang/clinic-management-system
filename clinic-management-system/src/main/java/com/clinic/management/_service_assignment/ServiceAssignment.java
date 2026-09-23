@@ -30,7 +30,7 @@ public class ServiceAssignment {
     @Column(name = "KETQUA", columnDefinition = "TEXT")
     private String result;
 
-    @Column(name = "FILE_KETQUA", length = 255)
+    @Column(name = "FILEKETQUA", length = 255)
     private String resultFile;
 
     @Column(name = "THOIGIANCHIDINH")
