@@ -1,4 +1,6 @@
-package com.clinic.management._user;
+package com.clinic.management._user.entities;
+
+import com.clinic.management.common.enums.*;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -28,15 +30,31 @@ public class User {
     @Column(name = "SODIENTHOAI")
     private String phone;
 
-    @Column(name = "VAITRO")
-    private String role;
+    @Column(name = "VAITRO", columnDefinition = "bit")
+    private Role role;
 
-    @Column(name = "TRANGTHAI")
-    private Boolean status;
+    @Column(name = "TRANGTHAI", columnDefinition = "bit")
+    private UserStatus status;
 
     @Column(name = "TRANGTHAIXOA")
     private Boolean deleted;
 
+    public User(){}
+    public User(
+        String username,
+        String password,
+        String fullName,
+        String email,
+        String phone){
+        this.username = username;
+        this.password=password;
+        this.fullName=fullName;
+        this.email=email;
+        this.phone=phone;
+        this.role=Role.PATIENT;
+        this.status=UserStatus.ACTIVE;
+        this.deleted=false;
+    }
     // Getter and Setter 
     public String getId() {return id;}
     public void setId(String id) {this.id = id;}
@@ -56,11 +74,11 @@ public class User {
     public String getPhone() {return phone;}
     public void setPhone(String phone) {this.phone = phone;}
 
-    public String getRole() {return role;}
-    public void setRole(String role) {this.role = role;}
+    public Role getRole() {return role;}
+    public void setRole(Role role) {this.role = role;}
 
-    public Boolean getStatus() {return status;}
-    public void setStatus(Boolean status) {this.status = status;}
+    public UserStatus getStatus() {return status;}
+    public void setStatus(UserStatus status) {this.status = status;}
 
     public Boolean getDeleted() {return deleted;}
 
