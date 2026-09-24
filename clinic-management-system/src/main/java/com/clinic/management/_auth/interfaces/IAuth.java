@@ -6,5 +6,4 @@ public interface IAuth{
 	LoginResponse register(RegisterRequest request);
 	LoginResponse login(LoginRequest request);
 	LoginResponse me(String token);
-
 }

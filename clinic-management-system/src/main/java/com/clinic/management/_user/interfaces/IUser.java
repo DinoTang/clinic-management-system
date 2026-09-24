@@ -10,4 +10,5 @@ public interface IUser {
     User findByUsername(String username);
     User findByEmail(String email);
     User add(RegisterRequest request);
+    String genId();
 }
