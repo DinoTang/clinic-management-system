@@ -369,17 +369,17 @@ CREATE TABLE `nguoidung` (
 -- Dumping data for table `nguoidung`
 --
 
+-- Password123
 INSERT INTO `nguoidung` (`MANGUOIDUNG`, `TENDANGNHAP`, `MATKHAU`, `HOTEN`, `EMAIL`, `SODIENTHOAI`, `VAITRO`, `TRANGTHAI`, `TRANGTHAIXOA`, `NGAYTAO`, `NGAYCAPNHAT`) VALUES
-('ND001', 'admin', '$2y$10$hashedAdminPasswordHere123456', 'Nguyễn Quản Trị', 'admin@clinic.vn', '0901000001', 3, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
-('ND002', 'dr_nam', '$2y$10$hashedDoctorPasswordHere123456', 'BS.CKII Trần Văn Nam', 'nam.tv@clinic.vn', '0902000002', 2, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
-('ND003', 'dr_lan', '$2y$10$hashedDoctorPasswordHere123456', 'ThS.BS Lê Thị Lan', 'lan.lt@clinic.vn', '0903000003', 2, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
--- Password123!
-('ND004', 'dr_duc', '\$2a\$10\$e0MYzXy6HJ9G7jU98vM6eO3mBszKlmA1XFmK29Fq7E1F61B2O6X2a', 'BS Phạm Minh Đức', 'duc.pm@clinic.vn', '0904000004', 2, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
-('ND005', 'nv_mai', '$2y$10$hashedStaffPasswordHere123456', 'Hoàng Tuyết Mai', 'mai.ht@clinic.vn', '0905000005', 1, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
-('ND006', 'nv_hung', '$2y$10$hashedStaffPasswordHere123456', 'Vũ Quốc Hùng', 'hung.vq@clinic.vn', '0906000006', 1, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
-('ND007', 'bn_an', '$2y$10$hashedPatientPasswordHere123456', 'Nguyễn Văn An', 'an.nguyen@gmail.com', '0912345678', 0, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
-('ND008', 'bn_binh', '$2y$10$hashedPatientPasswordHere123456', 'Trần Thị Bình', 'binh.tran@gmail.com', '0913456789', 0, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
-('ND009', 'bn_cuong', '$2y$10$hashedPatientPasswordHere123456', 'Lê Hùng Cường', 'cuong.le@gmail.com', '0914567890', 0, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16');
+('ND001', 'admin', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'Nguyễn Quản Trị', 'admin@clinic.vn', '0901000001', 3, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND002', 'dr_nam', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'BS.CKII Trần Văn Nam', 'nam.tv@clinic.vn', '0902000002', 2, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND003', 'dr_lan', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'ThS.BS Lê Thị Lan', 'lan.lt@clinic.vn', '0903000003', 2, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND004', 'dr_duc', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'BS Phạm Minh Đức', 'duc.pm@clinic.vn', '0904000004', 2, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND005', 'nv_mai', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'Hoàng Tuyết Mai', 'mai.ht@clinic.vn', '0905000005', 1, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND006', 'nv_hung', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'Vũ Quốc Hùng', 'hung.vq@clinic.vn', '0906000006', 1, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND007', 'bn_an', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'Nguyễn Văn An', 'an.nguyen@gmail.com', '0912345678', 0, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND008', 'bn_binh', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'Trần Thị Bình', 'binh.tran@gmail.com', '0913456789', 0, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16'),
+('ND009', 'bn_cuong', '$2a$10$kCLfZBaLWwsLiUpFd2tqm.bB9Mh0fDd7qJyhNSnceFnXqdNPLL/Fq', 'Lê Hùng Cường', 'cuong.le@gmail.com', '0914567890', 0, 1, 0, '2026-09-18 01:33:16', '2026-09-18 01:33:16');
 
 -- --------------------------------------------------------
 

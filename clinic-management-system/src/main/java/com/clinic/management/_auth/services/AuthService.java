@@ -42,6 +42,7 @@ public class AuthService implements IAuth{
 	public LoginResponse login(LoginRequest request){
 		User user = userService.findByUsername(request.getUsername());
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
 		boolean isPassword = encoder.matches(request.getPassword(), user.getPassword());
 		if(!isPassword){
 			throw new RuntimeException("Tên tài khoản hoặc mật khẩu không chính xác");
