@@ -32,8 +32,8 @@ public class AuthService implements IAuth{
 
 		User user = userService.add(request);
 		LoginRequest loginRequest = new LoginRequest(
-			user.getUsername(),
-			user.getPassword()
+			request.getUsername(),
+			request.getPassword()
 		);
 		return this.login(loginRequest);
 	}
@@ -59,7 +59,7 @@ public class AuthService implements IAuth{
 
 	@Override
 	public LoginResponse me(String token){
-		String username = SecurityContextHolder.getContext().getAuthentication().getName();    
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
 	    User user = userService.findByUsername(username);
 		return new LoginResponse(
 			token,

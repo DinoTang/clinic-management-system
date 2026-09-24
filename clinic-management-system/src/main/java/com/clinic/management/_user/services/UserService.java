@@ -46,6 +46,7 @@ public class UserService implements IUser {
             request.getEmail(),
             request.getPhone()
         );
+        user.setId(this.genId());
         return userRepository.save(user);
     }
 
@@ -57,6 +58,12 @@ public class UserService implements IUser {
     @Override
     public boolean existsByEmail(String email){
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public String genId(){
+        long quantity = userRepository.count();
+        return String.format("ND%05d", quantity+1);
     }
 
 }
