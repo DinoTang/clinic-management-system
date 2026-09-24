@@ -22,16 +22,16 @@ public class UserService implements IUser {
     @Override
     public User findByUsername(String username) {
         User user = userRepository.findByUsername(username);
-        // if(user == null)
-        //     throw new RuntimeException("Không tìm thấy người dùng");
+        if(user == null)
+            throw new RuntimeException("Không tìm thấy người dùng");
         return user;
     }
 
     @Override
     public User findByEmail(String email) {
         User user =userRepository.findByEmail(email);
-        // if(user == null)
-        //     throw new RuntimeException("Không tìm thấy người dùng");
+        if(user == null)
+            throw new RuntimeException("Không tìm thấy người dùng");
         return user;
     }
 
