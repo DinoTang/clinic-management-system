@@ -37,7 +37,6 @@ public class UserUpdateService implements IUserUpdate {
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-
         return userRepository.save(user);
     }
 
@@ -53,5 +52,13 @@ public class UserUpdateService implements IUserUpdate {
         User user = userQueryService.findById(userId);
         user.setRole(role);
         return userRepository.save(user);
+    }
+
+    @Override
+    public User restoreById(String userId) {
+        if(!userRepository.existsById(userId))
+            throw new RuntimeException("Không tìm thấy người dùng");
+        User user =userRepository.restoreById(userId);
+        return user;
     }
 }

@@ -81,4 +81,5 @@ public class User {
     public void setStatus(UserStatus status) {this.status = status;}
 
     public Boolean getDeleted() {return deleted;}
+    public void setDeleted(Boolean deleted) {this.deleted=deleted;}
 }

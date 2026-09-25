@@ -6,6 +6,8 @@ import com.clinic.management._user.dtos.ProfileUpdateRequest;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._user.services.UserUpdateService;
 import com.clinic.management._user.services.UserQueryService;
+import com.clinic.management._user.interfaces.IUserDelete;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,13 +23,16 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
+    private final IUserDelete userDeleteService;    
     private final UserUpdateService userUpdateService;
     private final UserQueryService userQueryService;
 
     public UserController(
+        IUserDelete userDeleteService,
         UserUpdateService userUpdateService,
         UserQueryService userQueryService
     ){
+        this.userDeleteService=userDeleteService;
         this.userUpdateService=userUpdateService;
         this.userQueryService = userQueryService;
     }
@@ -59,6 +64,30 @@ public class UserController {
         @PathVariable String userId,
         @RequestBody Role request){
         User user = userUpdateService.updateRole(userId, request);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/restore/{userId}")
+    public ResponseEntity<User> restoreById(
+        @PathVariable String userId
+    ){
+        User user = userUpdateService.restoreById(userId);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/soft-delete/{userId}")
+    public ResponseEntity<User> softDeleteById(
+            @PathVariable String userId
+    ){
+        User user = userDeleteService.softDeleteById(userId);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/hard-delete/{userId}")
+    public ResponseEntity<User> hardDeleteById(
+            @PathVariable String userId
+    ){
+        User user = userDeleteService.hardDeleteById(userId);
         return ResponseEntity.ok(user);
     }
 
