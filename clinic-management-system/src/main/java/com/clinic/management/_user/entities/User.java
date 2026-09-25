@@ -1,6 +1,7 @@
 package com.clinic.management._user.entities;
 
-import com.clinic.management.common.enums.*;
+import com.clinic.management.common.enums.Role;
+import com.clinic.management.common.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 

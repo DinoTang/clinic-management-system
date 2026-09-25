@@ -1,21 +1,19 @@
 package com.clinic.management._user.services;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.clinic.management._user.entities.User;
-import com.clinic.management._user.interfaces.IUser;
+import com.clinic.management._user.interfaces.IUserQuery;
 import com.clinic.management._user.repositories.UserRepository;
 import com.clinic.management._auth.dtos.*;
 
 import java.util.List;
 
 @Service
-public class UserService implements IUser {
+public class UserQueryService implements IUserQuery {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository){
+    public UserQueryService(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 
@@ -35,19 +33,18 @@ public class UserService implements IUser {
         return user;
     }
 
-    public User add(RegisterRequest request){
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode(request.getPassword());
+    @Override
+    public User findById(String userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+    }
 
-        User user = new User(
-            request.getUsername(),
-            hashedPassword,
-            request.getFullName(),
-            request.getEmail(),
-            request.getPhone()
-        );
-        user.setId(this.genId());
-        return userRepository.save(user);
+    @Override
+    public List<User> findAll(){
+        List<User> users = userRepository.findAll();
+        if(users.isEmpty())
+            throw new RuntimeException("Danh sách người dùng rỗng");
+        return users;
     }
 
     @Override
@@ -58,12 +55,6 @@ public class UserService implements IUser {
     @Override
     public boolean existsByEmail(String email){
         return userRepository.existsByEmail(email);
-    }
-
-    @Override
-    public String genId(){
-        long quantity = userRepository.count();
-        return String.format("ND%05d", quantity+1);
     }
 
 }
