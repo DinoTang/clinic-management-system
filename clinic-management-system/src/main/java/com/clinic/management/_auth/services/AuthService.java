@@ -6,31 +6,38 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.clinic.management.security.JwtService;
 import com.clinic.management._auth.dtos.*;
 import com.clinic.management._auth.interfaces.IAuth;
-import com.clinic.management._user.services.UserService;
+import com.clinic.management._user.services.UserQueryService;
+import com.clinic.management._user.services.UserRegistrationService;
 import com.clinic.management._user.entities.User;
 
 @Service 
 public class AuthService implements IAuth{
-	private final UserService userService;
+	private final UserQueryService userQueryService;
+	private final UserRegistrationService userRegistrationService;
 	private final JwtService jwtService;
 
-	public AuthService(UserService userService, JwtService jwtService){
-		this.userService = userService;
+	public AuthService(
+		UserQueryService userQueryService,
+		UserRegistrationService userRegistrationService,
+		JwtService jwtService
+	){
+		this.userQueryService=userQueryService;
+		this.userRegistrationService = userRegistrationService;
 		this.jwtService = jwtService;
 	}
 
 	@Override
 	public LoginResponse register(RegisterRequest request){
 
-		if(userService.existsByUsername(request.getUsername())){
+		if(userQueryService.existsByUsername(request.getUsername())){
 			throw new RuntimeException("Tên tài khoản đã tồn tại. Vui lòng thử tên khác");
 		}
 
-		if(userService.existsByEmail(request.getEmail())){
+		if(userQueryService.existsByEmail(request.getEmail())){
 			throw new RuntimeException("Email đã tồn tại. Vui lòng thử email khác");
 		}
 
-		User user = userService.add(request);
+		User user = userRegistrationService.add(request);
 		LoginRequest loginRequest = new LoginRequest(
 			request.getUsername(),
 			request.getPassword()
@@ -40,7 +47,7 @@ public class AuthService implements IAuth{
 
 	@Override
 	public LoginResponse login(LoginRequest request){
-		User user = userService.findByUsername(request.getUsername());
+		User user = userQueryService.findByUsername(request.getUsername());
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
 		boolean isPassword = encoder.matches(request.getPassword(), user.getPassword());
@@ -60,7 +67,7 @@ public class AuthService implements IAuth{
 	@Override
 	public LoginResponse me(String token){
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-	    User user = userService.findByUsername(username);
+	    User user = userQueryService.findByUsername(username);
 		return new LoginResponse(
 			token,
 			user.getId(),

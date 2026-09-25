@@ -9,7 +9,7 @@ public enum UserStatus {
 	private UserStatus(String description) {
         this.description = description;
     }
-    
+
     @Override
     public String toString() {
         return this.description;

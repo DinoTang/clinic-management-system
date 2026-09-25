@@ -1,6 +1,7 @@
 package com.clinic.management._user.entities;
 
-import com.clinic.management.common.enums.*;
+import com.clinic.management.common.enums.Role;
+import com.clinic.management.common.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -80,4 +81,5 @@ public class User {
     public void setStatus(UserStatus status) {this.status = status;}
 
     public Boolean getDeleted() {return deleted;}
+    public void setDeleted(Boolean deleted) {this.deleted=deleted;}
 }
