@@ -390,7 +390,7 @@ INSERT INTO `nguoidung` (`MANGUOIDUNG`, `TENDANGNHAP`, `MATKHAU`, `HOTEN`, `EMAI
 CREATE TABLE `nhanvien` (
   `MANHANVIEN` varchar(20) NOT NULL,
   `MANGUOIDUNG` varchar(20) NOT NULL,
-  `VITRI` varchar(50) DEFAULT NULL,
+  `VITRI` tinyint(1) NOT NULL DEFAULT 0,
   `NGAYVAOLAM` date DEFAULT NULL,
   `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -400,8 +400,8 @@ CREATE TABLE `nhanvien` (
 --
 
 INSERT INTO `nhanvien` (`MANHANVIEN`, `MANGUOIDUNG`, `VITRI`, `NGAYVAOLAM`, `TRANGTHAIXOA`) VALUES
-('NV001', 'ND005', 'Lễ tân tiếp đón', '2023-01-15', 0),
-('NV002', 'ND006', 'Thu ngân viện phí', '2023-03-01', 0);
+('NV001', 'ND005', 0, '2023-01-15', 0),
+('NV002', 'ND006', 1, '2023-03-01', 0);
 
 -- --------------------------------------------------------
 

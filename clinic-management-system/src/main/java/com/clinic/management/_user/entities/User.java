@@ -5,7 +5,6 @@ import com.clinic.management.common.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
-
 @Entity
 @Table(name = "NGUOIDUNG")
 @Data
