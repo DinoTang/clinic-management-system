@@ -16,7 +16,7 @@ public class Reception {
     @Column(name = "MABENHNHAN", length = 20, nullable = false)
     private String patientId;
 
-    @Column(name = "MANHANVIEN", length = 20, nullable = false)
+    @Column(name = "MANHANVIEN", length = 20)
     private String employeeId;
 
     @Column(name = "MAPHONG", length = 20, nullable = false)
@@ -64,8 +64,26 @@ public class Reception {
     @Column(name = "TRANGTHAIXOA")
     private Boolean deleted = false;
 
+    // --- CÁC TRƯỜNG TRANSIENT ĐỂ HỨNG DỮ LIỆU BỆNH NHÂN MỚI (KHÁCH VÃNG LAI) ---
+    @Transient
+    private String patientName;
+
+    @Transient
+    private String patientPhone;
+
+    @Transient
+    private String patientGender;
+
+    @Transient
+    private LocalDate patientDob;
+
+    @Transient
+    private String patientAddress;
+
     public Reception() {
     }
+
+    // --- GETTER & SETTER CỦA CÁC CỘT DATABASE ---
 
     public String getId() {
         return id;
@@ -209,5 +227,47 @@ public class Reception {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    // --- GETTER & SETTER CỦA CÁC TRƯỜNG TRANSIENT (DÙNG CHO RECEPTION SERVICE) ---
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
+    public String getPatientPhone() {
+        return patientPhone;
+    }
+
+    public void setPatientPhone(String patientPhone) {
+        this.patientPhone = patientPhone;
+    }
+
+    public String getPatientGender() {
+        return patientGender;
+    }
+
+    public void setPatientGender(String patientGender) {
+        this.patientGender = patientGender;
+    }
+
+    public LocalDate getPatientDob() {
+        return patientDob;
+    }
+
+    public void setPatientDob(LocalDate patientDob) {
+        this.patientDob = patientDob;
+    }
+
+    public String getPatientAddress() {
+        return patientAddress;
+    }
+
+    public void setPatientAddress(String patientAddress) {
+        this.patientAddress = patientAddress;
     }
 }

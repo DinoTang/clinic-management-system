@@ -11,25 +11,26 @@ import java.util.List;
 @Repository
 public interface ReceptionRepository extends JpaRepository<Reception, String> {
 
+    // 1. Danh sách chưa xoá
     List<Reception> findByDeletedFalse();
 
-    // Lọc theo ngày tiếp đón
-    List<Reception> findByReceptionDateAndDeletedFalse(LocalDate date);
+    // 2. Theo ngày: dùng @Query để bỏ đoạn OrderBy dài dòng
+    @Query("SELECT r FROM Reception r WHERE r.receptionDate = :date AND r.deleted = false ORDER BY r.queueNumber ASC")
+    List<Reception> findByDate(@Param("date") LocalDate date);
 
-    // Lọc theo phòng khám và ngày (dùng cho màn hình gọi số theo phòng)
-    List<Reception> findByRoomIdAndReceptionDateAndDeletedFalseOrderByQueueNumberAsc(String roomId, LocalDate date);
+    // 3. Theo phòng và ngày
+    @Query("SELECT r FROM Reception r WHERE r.roomId = :roomId AND r.receptionDate = :date AND r.deleted = false ORDER BY r.queueNumber ASC")
+    List<Reception> findByRoomAndDate(@Param("roomId") String roomId, @Param("date") LocalDate date);
 
-    // Lọc theo bác sĩ và ngày
-    List<Reception> findByDoctorIdAndReceptionDateAndDeletedFalseOrderByQueueNumberAsc(String doctorId, LocalDate date);
+    // 4. Theo bác sĩ và ngày
+    @Query("SELECT r FROM Reception r WHERE r.doctorId = :doctorId AND r.receptionDate = :date AND r.deleted = false ORDER BY r.queueNumber ASC")
+    List<Reception> findByDoctorAndDate(@Param("doctorId") String doctorId, @Param("date") LocalDate date);
 
-    // Tìm số thứ tự lớn nhất trong ngày tại 1 phòng khám để cấp STT tiếp theo
-    @Query("SELECT COALESCE(MAX(r.queueNumber), 0) FROM Reception r " +
-            "WHERE r.roomId = :roomId AND r.receptionDate = :date AND r.deleted = false")
-    Integer findMaxQueueNumberByRoomAndDate(@Param("roomId") String roomId, @Param("date") LocalDate date);
+    // 5. STT lớn nhất theo phòng và ngày
+    @Query("SELECT COALESCE(MAX(r.queueNumber), 0) FROM Reception r WHERE r.roomId = :roomId AND r.receptionDate = :date AND r.deleted = false")
+    Integer findMaxQueue(@Param("roomId") String roomId, @Param("date") LocalDate date);
 
-    // Tìm mã tiếp đón mới nhất dạng TDxxx để tự tăng
-    @Query(value = "SELECT MATIEPDON FROM tiepdonkham WHERE MATIEPDON REGEXP '^TD[0-9]+$' " +
-            "ORDER BY CAST(SUBSTRING(MATIEPDON, 3) AS UNSIGNED) DESC LIMIT 1",
-            nativeQuery = true)
-    String findLatestReceptionId();
+    // 6. Mã tiếp đón TDxxx lớn nhất
+    @Query("SELECT MAX(r.id) FROM Reception r WHERE r.id LIKE 'TD%'")
+    String findMaxId();
 }

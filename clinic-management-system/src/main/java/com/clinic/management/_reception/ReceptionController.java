@@ -56,12 +56,19 @@ public class ReceptionController {
     }
 
     @PostMapping
-    public Reception createReception(@RequestBody Reception reception) {
-        return receptionService.createReception(reception);
+    public ResponseEntity<?> createReception(@RequestBody Reception reception) {
+        try {
+            Reception created = receptionService.createReception(reception);
+            return ResponseEntity.ok(created);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Lỗi tiếp nhận: " + e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Reception> updateReception(@PathVariable String id, @RequestBody Reception reception) {
+    public ResponseEntity<?> updateReception(@PathVariable String id, @RequestBody Reception reception) {
         Reception updated = receptionService.updateReception(id, reception);
         if (updated == null) {
             return ResponseEntity.notFound().build();
@@ -69,10 +76,12 @@ public class ReceptionController {
         return ResponseEntity.ok(updated);
     }
 
-    // API nhanh để Bác sĩ/Điều dưỡng đổi trạng thái hàng đợi: ChoKham -> DangKham -> DaKham
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Reception> updateQueueStatus(@PathVariable String id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> updateQueueStatus(@PathVariable String id, @RequestBody Map<String, String> body) {
         String status = body.get("status");
+        if (status == null || status.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Trạng thái không hợp lệ"));
+        }
         Reception updated = receptionService.updateQueueStatus(id, status);
         if (updated == null) {
             return ResponseEntity.notFound().build();
