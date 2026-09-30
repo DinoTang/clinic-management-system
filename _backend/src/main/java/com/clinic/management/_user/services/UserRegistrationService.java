@@ -22,6 +22,18 @@ public class UserRegistrationService implements IUserRegistration {
 
     @Override
     public User add(RegisterRequest request){
+        if(userRepository.existsByEmail(request.getEmail())){
+            throw new RuntimeException("Email đã tồn tại, hãy dùng email khác");
+        }
+
+        if(userRepository.existsByPhone(request.getPhone())){
+            throw new RuntimeException("Số điện thoại đã tồn tại, hãy dùng số khác");
+        }
+
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new RuntimeException("Tên đăng nhập đã tồn tại, hãy dùng tên khác");
+        }
+
         String hashedPassword = userGeneratorService.hashPassword(request.getPassword());
 
         User user = new User(

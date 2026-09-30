@@ -10,5 +10,5 @@ public interface IUserQuery {
     List<User> findAll();
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-
+    boolean existsByPhone(String phone);
 }

@@ -57,4 +57,9 @@ public class UserQueryService implements IUserQuery {
         return userRepository.existsByEmail(email);
     }
 
+    @Override
+    public boolean existsByPhone(String phone){
+        return userRepository.existsByPhone(phone);
+    }
+
 }

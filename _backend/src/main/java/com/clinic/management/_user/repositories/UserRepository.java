@@ -1,14 +1,9 @@
 package com.clinic.management._user.repositories;
 
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import com.clinic.management._auth.dtos.*;
 import com.clinic.management._user.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
@@ -17,6 +12,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	boolean existsByUsername(String username);
 	boolean existsById(String userId);
     boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
     long count();
 
 	default User softDeleteById(String userId) {
