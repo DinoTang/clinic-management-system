@@ -57,10 +57,7 @@ public class AuthService implements IAuth{
 		String token = jwtService.generateToken(request.getUsername());
 		return new LoginResponse(
 			token,
-			user.getId(),
-			user.getUsername(),
-			user.getEmail(),
-			user.getRole()
+			user
 		);
 	}
 
@@ -70,10 +67,7 @@ public class AuthService implements IAuth{
 	    User user = userQueryService.findByUsername(username);
 		return new LoginResponse(
 			token,
-			user.getId(),
-			user.getUsername(),
-			user.getEmail(),
-			user.getRole()
+			user
 		);
 	}
 }

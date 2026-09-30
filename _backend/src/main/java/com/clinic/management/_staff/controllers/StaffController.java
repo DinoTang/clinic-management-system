@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -43,6 +44,7 @@ public class StaffController {
 
     @PostMapping
     public ResponseEntity<Staff> create(
+        @Valid
         @RequestBody ProfileCreateRequest request
     ){
         Staff result = staffCreateService.create(request);
