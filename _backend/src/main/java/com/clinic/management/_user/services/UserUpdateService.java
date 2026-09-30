@@ -29,6 +29,18 @@ public class UserUpdateService implements IUserUpdate {
 
     @Override
     public User updateProfile(String userId, ProfileUpdateRequest request){
+        if(userRepository.existsByEmail(request.getEmail())){
+            throw new RuntimeException("Email đã tồn tại, hãy dùng email khác");
+        }
+
+        if(userRepository.existsByPhone(request.getPhone())){
+            throw new RuntimeException("Số điện thoại đã tồn tại, hãy dùng số khác");
+        }
+
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new RuntimeException("Tên đăng nhập đã tồn tại, hãy dùng tên khác");
+        }
+        
         User user = userQueryService.findById(userId);
         String hashedPassword = userGeneratorService.hashPassword(request.getPassword());
 

@@ -1,6 +1,7 @@
 package com.clinic.management._staff.entities;
 
 import com.clinic.management.common.enums.StaffPosition;
+import com.clinic.management._user.entities.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.Data;
@@ -14,8 +15,9 @@ public class Staff {
     @Column(name = "MANHANVIEN")
     private String id;
 
-    @Column(name = "MANGUOIDUNG")
-    private String userId;
+    @OneToOne
+    @JoinColumn(name = "MANGUOIDUNG", referencedColumnName = "MANGUOIDUNG") 
+    private User user;
 
     @Column(name = "VITRI", columnDefinition = "bit")
     private StaffPosition position;
@@ -28,10 +30,10 @@ public class Staff {
 
     public Staff(){}
     public Staff(
-        String userId,
+        User user,
         StaffPosition position
     ){
-        this.userId = userId;
+        this.user = user;
         this.position=position;
         this.startAt=LocalDate.now();
         this.deleted=false;
@@ -41,8 +43,8 @@ public class Staff {
     public String getId() {return id;}
     public void setId(String id) {this.id = id;}
 
-    public String getUserId() {return userId;}
-    public void setUserId(String userId) {this.userId = userId;}
+    public User getUser() {return user;}
+    public void setUser(User user) {this.user = user;}
 
     public LocalDate getStartAt() {return startAt;}
     public void setStartAt(LocalDate startAt) {this.startAt = startAt;}

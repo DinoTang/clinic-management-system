@@ -1,7 +1,6 @@
 package com.clinic.management._user.entities;
 
 import com.clinic.management.common.enums.Role;
-// import com.clinic.management.common.enums.RoleConverter;
 import com.clinic.management.common.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -30,7 +29,6 @@ public class User {
     @Column(name = "SODIENTHOAI")
     private String phone;
 
-    // @Convert(converter = RoleConverter.class)
     @Column(name = "VAITRO", columnDefinition = "bit")
     private Role role;
 

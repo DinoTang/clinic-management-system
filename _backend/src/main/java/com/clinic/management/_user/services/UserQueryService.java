@@ -5,7 +5,9 @@ import com.clinic.management._user.entities.User;
 import com.clinic.management._user.interfaces.IUserQuery;
 import com.clinic.management._user.repositories.UserRepository;
 import com.clinic.management._auth.dtos.*;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Service
@@ -40,11 +42,10 @@ public class UserQueryService implements IUserQuery {
     }
 
     @Override
-    public List<User> findAll(){
-        List<User> users = userRepository.findAll();
-        if(users.isEmpty())
-            throw new RuntimeException("Danh sách người dùng rỗng");
-        return users;
+    public Page<User> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return userRepository.findAll(pageable);
     }
 
     @Override
