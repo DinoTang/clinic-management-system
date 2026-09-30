@@ -1,22 +1,16 @@
 package com.clinic.management._auth.dtos;
 
-import com.clinic.management.common.enums.Role;
+import com.clinic.management._user.entities.User;
 
 public class LoginResponse {
     private String token;
     private String type = "Bearer";
-    private String id;
-    private String username;
-    private String email;
-    private Role role;
+    private User user;
 
     public LoginResponse(){}
-    public LoginResponse(String token, String id, String username, String email, Role role) {
+    public LoginResponse(String token, User user) {
         this.token = token;
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.role = role;
+        this.user = user;
     }
 
     public String getToken(){return token;}
@@ -25,15 +19,7 @@ public class LoginResponse {
     public String getType(){return type;}
     public void setType(String type){this.type=type;}
 
-    public String getId(){return id;}
-    public void setId(String id){this.id =id;}
+    public User getUser(){return user;}
+    public void setUser(User id){this.user =user;}
 
-    public String getUsername(){return username;}
-    public void setUsername(String username){this.username=username;}
-
-    public String getEmail(){return email;}
-    public void setEmail(String email){this.email=email;}
-
-    public Role getRole(){return role;}
-    public void setRole(Role role){this.role=role;}
 }
