@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
-const DOCTOR_API = "http://localhost:8080/api/doctors";
-const ROOM_API = "http://localhost:8080/api/rooms";
+const SCHEDULE_API = "/api/doctor-schedules";
+const DOCTOR_API = "/api/doctors";
+const ROOM_API = "/api/rooms";
 
 function SchedulePage() {
   const [schedules, setSchedules] = useState([]);
