@@ -39,7 +39,7 @@ function PatientBookingPage() {
   useEffect(() => {
     axios
       .get(SPECIALTY_API)
-      .then((res) => setSpecialties(res.data))
+      .then((res) => setSpecialties(getCollectionData(res.data)))
       .catch((err) => console.error("Lỗi tải chuyên khoa:", err));
 
     axios
@@ -60,7 +60,10 @@ function PatientBookingPage() {
 
     if (specId) {
       const filtered = doctors.filter(
-        (d) => d.departmentId === specId || d.specialtyId === specId,
+        (d) =>
+          d.departmentId === specId ||
+          d.specialtyId === specId ||
+          d.specialty?.id === specId,
       );
       setFilteredDoctors(filtered);
     } else {

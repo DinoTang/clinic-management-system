@@ -75,20 +75,20 @@ function ReceptionPage() {
   useEffect(() => {
     axios
       .get(SPECIALTY_API)
-      .then((res) => setSpecialties(res.data))
+      .then((res) => setSpecialties(getCollectionData(res.data)))
       .catch(() => {
         console.warn(
           "Chưa có API chuyên khoa riêng, thử lấy từ /api/departments...",
         );
         axios
           .get("http://localhost:8080/api/departments")
-          .then((res) => setSpecialties(res.data))
+          .then((res) => setSpecialties(getCollectionData(res.data)))
           .catch(console.error);
       });
 
     axios
       .get(ROOM_API)
-      .then((res) => setRooms(res.data))
+      .then((res) => setRooms(getCollectionData(res.data)))
       .catch(console.error);
     axios
       .get(DOCTOR_API)
@@ -113,10 +113,15 @@ function ReceptionPage() {
     let matchedRoomId = "";
 
     if (doc) {
-      const docDepartmentId = doc.departmentId || doc.specialtyId;
+      const docDepartmentId =
+        doc.departmentId || doc.specialtyId || doc.specialty?.id;
       if (docDepartmentId) {
         const foundRoom = rooms.find((r) => {
-          const roomDept = r.departmentId || r.specialtyId || r.machuyenkhoa;
+          const roomDept =
+            r.departmentId ||
+            r.specialtyId ||
+            r.machuyenkhoa ||
+            r.specialty?.id;
           return roomDept && String(roomDept) === String(docDepartmentId);
         });
         if (foundRoom) matchedRoomId = foundRoom.id;
@@ -171,8 +176,10 @@ function ReceptionPage() {
           if (!assignedRoomId) {
             const matched = rooms.find(
               (r) =>
-                (r.specialtyId || r.departmentId || r.machuyenkhoa) ===
-                docSpecId,
+                (r.specialtyId ||
+                  r.departmentId ||
+                  r.machuyenkhoa ||
+                  r.specialty?.id) === docSpecId,
             );
             if (matched) assignedRoomId = matched.id;
           }
@@ -542,7 +549,10 @@ function ReceptionPage() {
                   .filter((r) => {
                     if (!selectedSpecialtyId) return false;
                     const roomDept =
-                      r.departmentId || r.specialtyId || r.machuyenkhoa;
+                      r.departmentId ||
+                      r.specialtyId ||
+                      r.machuyenkhoa ||
+                      r.specialty?.id;
                     return String(roomDept) === String(selectedSpecialtyId);
                   })
                   .map((r) => (
