@@ -1,13 +1,19 @@
 package com.clinic.management._doctor.dtos;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 
 public class ProfileCreateRequest {
 
+    @NotBlank(message="Mã tài khoản không được để trống")
     private String userId;
+
+    @NotBlank(message="Mã chuyên khoa không được để trống")    
     private String specialtyId;
+
     private String academicDegree;
     private int experienceYears;
     private String bio;

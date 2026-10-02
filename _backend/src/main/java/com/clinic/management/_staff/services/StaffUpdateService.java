@@ -5,7 +5,6 @@ import com.clinic.management._staff.interfaces.IStaffUpdate;
 import com.clinic.management._staff.entities.Staff;
 import com.clinic.management._staff.repositories.StaffRepository;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class StaffUpdateService implements IStaffUpdate{
