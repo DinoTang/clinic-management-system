@@ -1,12 +1,35 @@
 package com.clinic.management._user.dtos;
 
-public class ProfileUpdateRequest{
-	private String username;
-	private String password;
-	private String fullName;
-	private String email;
-	private String phone;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 
+public class ProfileUpdateRequest{
+
+    @NotBlank(message="Tên đăng nhập không được để trống")
+    @Size(min=5, max=20, message="Tên đăng nhập từ 2 đến 20 ký tự")
+    private String username;
+
+    @NotBlank(message="Mật khẩu không được để trống")
+    @Size(min=8, max=20, message="Mật khẩu từ 8 đến 20 ký tự")
+    private String password;
+
+    @NotBlank(message="Họ tên không được để trống")
+    @Size(min=5, max=20, message="Họ tên từ 2 đến 50 ký tự")
+    private String fullName;
+
+    @Email(message="Hãy cung cấp địa chỉ email hợp lệ")
+    @NotBlank(message="Email không được để trống")
+    private String email;
+
+    @NotBlank(message="Số điện thoại không được để trống")
+    @Pattern(
+        regexp="^0\\d{9}$",
+        message="Phải bắt đầu bằng 0 và đủ 10 số"
+    )
+    private String phone;
+    
 	public ProfileUpdateRequest(){}
 	public ProfileUpdateRequest(
 		String username,

@@ -418,7 +418,7 @@ CREATE TABLE `phongkham` (
   `SOPHONG` varchar(20) NOT NULL,
   `TENPHONG` varchar(100) NOT NULL,
   `TANG` varchar(20) DEFAULT NULL,
-  `TRANGTHAI` varchar(20) DEFAULT 'HoatDong',
+  `TRANGTHAI` tinyint(1) NOT NULL DEFAULT 0,
   `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -427,10 +427,10 @@ CREATE TABLE `phongkham` (
 --
 
 INSERT INTO `phongkham` (`MAPHONG`, `MACHUYENKHOA`, `SOPHONG`, `TENPHONG`, `TANG`, `TRANGTHAI`, `TRANGTHAIXOA`) VALUES
-('PK101', 'CK_NOI', 'P.101', 'Phòng Khám Nội 1', 'Tầng 1', 'HoatDong', 0),
-('PK102', 'CK_TIM', 'P.102', 'Phòng Khám Tim Mạch', 'Tầng 1', 'HoatDong', 0),
-('PK201', 'CK_NHI', 'P.201', 'Phòng Khám Nhi Đồng', 'Tầng 2', 'HoatDong', 0),
-('PKCL01', 'CK_NOI', 'P.CL01', 'Phòng Xét Nghiệm - Siêu Âm', 'Tầng Trệt', 'HoatDong', 0);
+('PK101', 'CK_NOI', 'P.101', 'Phòng Khám Nội 1', 'Tầng 1', 0, 0),
+('PK102', 'CK_TIM', 'P.102', 'Phòng Khám Tim Mạch', 'Tầng 1', 0, 0),
+('PK201', 'CK_NHI', 'P.201', 'Phòng Khám Nhi Đồng', 'Tầng 2', 0, 0),
+('PKCL01', 'CK_NOI', 'P.CL01', 'Phòng Xét Nghiệm - Siêu Âm', 'Tầng Trệt', 0, 0);
 
 -- --------------------------------------------------------
 
