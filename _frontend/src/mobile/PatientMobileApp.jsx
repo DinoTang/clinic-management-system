@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./PatientMobileApp.css";
 import Avatar from "./components/Avatar";
+import AuthPage from "./screens/AuthPage";
 import PatientHomeScreen from "./screens/PatientHomeScreen";
 
 const patientProfile = {
@@ -190,7 +191,11 @@ function SectionPage({ page, Icon, onNavigate }) {
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("home");
+  const [currentPage, setCurrentPage] = useState("auth");
+
+  if (currentPage === "auth") {
+    return <AuthPage />;
+  }
 
   return (
     <div className="app-shell">
