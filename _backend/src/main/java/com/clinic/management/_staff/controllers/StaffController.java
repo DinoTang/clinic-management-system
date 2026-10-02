@@ -90,7 +90,7 @@ public class StaffController {
     public ResponseEntity<Staff> hardDeleteById(
         @PathVariable String staffId
     ){
-        Staff staff = staffDeleteService.softDeleteById(staffId);
+        Staff staff = staffDeleteService.hardDeleteById(staffId);
         return ResponseEntity.ok(staff);
     }
 
