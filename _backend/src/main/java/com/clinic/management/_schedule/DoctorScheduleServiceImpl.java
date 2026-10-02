@@ -105,5 +105,10 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
         }
     }
 
+    @Override
+    public List<DoctorSchedule> getSchedulesByDoctorAndDate(String doctorId, LocalDate date) {
+        return scheduleRepository.findByDoctorIdAndExaminationDate(doctorId, date);
+    }
+
 
 }
