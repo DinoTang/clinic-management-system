@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { getCollectionData } from "../../utils/apiResponse.js";
 import "../../styles/schedule.css";
 
 const SCHEDULE_API = "/api/doctor-schedules";
@@ -57,7 +58,7 @@ function SchedulePage() {
 
     axios
       .get(DOCTOR_API)
-      .then((res) => setDoctors(res.data))
+      .then((res) => setDoctors(getCollectionData(res.data)))
       .catch((err) => console.error("Lỗi nạp bác sĩ:", err));
   }, []);
 

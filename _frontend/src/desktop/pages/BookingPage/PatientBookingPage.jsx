@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { getCollectionData } from "../../../utils/apiResponse.js";
 import "../../styles/booking.css";
 import "../../styles/desktop-schedule.css";
 
@@ -43,7 +44,7 @@ function PatientBookingPage() {
 
     axios
       .get(DOCTOR_API)
-      .then((res) => setDoctors(res.data))
+      .then((res) => setDoctors(getCollectionData(res.data)))
       .catch((err) => console.error("Lỗi tải bác sĩ:", err));
   }, []);
 
