@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
+import { getCollectionData } from "../../../utils/apiResponse.js";
 import "../../styles/reception.css";
 import "../../styles/desktop-schedule.css";
 
@@ -91,7 +92,7 @@ function ReceptionPage() {
       .catch(console.error);
     axios
       .get(DOCTOR_API)
-      .then((res) => setDoctors(res.data))
+      .then((res) => setDoctors(getCollectionData(res.data)))
       .catch(console.error);
     fetchTodayQueue();
   }, [fetchTodayQueue]);
