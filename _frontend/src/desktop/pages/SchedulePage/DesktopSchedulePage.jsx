@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import "../../styles/schedule.css";
+import "../../styles/desktop-schedule.css";
 
-const SCHEDULE_API = "/api/doctor-schedules";
-const DOCTOR_API = "/api/doctors";
-const ROOM_API = "/api/rooms";
+const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
+const DOCTOR_API = "http://localhost:8080/api/doctors";
+const ROOM_API = "http://localhost:8080/api/rooms";
 
 function SchedulePage() {
   const [schedules, setSchedules] = useState([]);
@@ -14,8 +14,7 @@ function SchedulePage() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const today = new Date().toISOString().split("T")[0];
 
   const initialFormData = {
     doctorId: "",
