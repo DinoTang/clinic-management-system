@@ -1,0 +1,28 @@
+.desktop-app-root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  background-color: #f0f7fd;
+  color: #2c3e50;
+  -webkit-font-smoothing: antialiased;
+}
+
+.desktop-app-root * {
+  box-sizing: border-box;
+}
+
+html.desktop-mode,
+body.desktop-mode {
+  height: auto;
+  min-height: 100%;
+}
+
+body.desktop-mode {
+  min-height: 100vh;
+  overflow: auto;
+  background-color: #f0f7fd;
+}

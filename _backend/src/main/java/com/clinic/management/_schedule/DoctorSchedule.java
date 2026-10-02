@@ -1,6 +1,6 @@
 package com.clinic.management._schedule;
 
-import com.clinic.management._doctor.Doctor;
+import com.clinic.management._doctor.entities.Doctor;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
