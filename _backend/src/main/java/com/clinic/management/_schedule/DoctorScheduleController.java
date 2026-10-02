@@ -61,4 +61,11 @@ public class DoctorScheduleController {
         scheduleService.deleteSchedule(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/doctor/{doctorId}/date")
+    public ResponseEntity<List<DoctorSchedule>> getSchedulesByDoctorAndDate(
+            @PathVariable String doctorId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(scheduleService.getSchedulesByDoctorAndDate(doctorId, date));
+    }
 }

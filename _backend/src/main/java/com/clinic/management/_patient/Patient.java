@@ -16,6 +16,15 @@ public class Patient {
     @JoinColumn(name = "MANGUOIDUNG", referencedColumnName = "MANGUOIDUNG")
     private User user;
 
+    @Column(name = "HOTEN", length = 100)
+    private String fullName;
+
+    @Column(name = "SODIENTHOAI", length = 15)
+    private String phoneNumber;
+
+    @Column(name = "EMAIL", length = 100)
+    private String email;
+
     @Column(name = "NGAYSINH")
     private LocalDate dateOfBirth;
 
@@ -67,6 +76,30 @@ public class Patient {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getFullName() {
+        return fullName != null ? fullName : user != null ? user.getFullName() : null;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber != null ? phoneNumber : user != null ? user.getPhone() : null;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email != null ? email : user != null ? user.getEmail() : null;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public LocalDate getDateOfBirth() {

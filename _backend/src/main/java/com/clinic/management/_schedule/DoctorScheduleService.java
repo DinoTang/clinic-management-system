@@ -8,6 +8,7 @@ public interface DoctorScheduleService {
     DoctorSchedule getScheduleById(String id);
     List<DoctorSchedule> getSchedulesByDoctor(String doctorId);
     List<DoctorSchedule> getSchedulesByDate(LocalDate date);
+    List<DoctorSchedule> getSchedulesByDoctorAndDate(String doctorId, LocalDate date);
     DoctorSchedule createSchedule(DoctorSchedule schedule);
     DoctorSchedule updateSchedule(String id, DoctorSchedule schedule);
     void deleteSchedule(String id);
