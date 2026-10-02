@@ -1,0 +1,108 @@
+package com.clinic.management._user;
+
+import com.clinic.management.common.enums.Role;
+import com.clinic.management.common.enums.UserStatus;
+import com.clinic.management._user.dtos.ProfileUpdateRequest;
+import com.clinic.management._user.entities.User;
+import com.clinic.management._user.services.UserUpdateService;
+import com.clinic.management._user.services.UserQueryService;
+import com.clinic.management._user.interfaces.IUserDelete;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.ResponseEntity; 
+import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    private final IUserDelete userDeleteService;    
+    private final UserUpdateService userUpdateService;
+    private final UserQueryService userQueryService;
+
+    public UserController(
+        IUserDelete userDeleteService,
+        UserUpdateService userUpdateService,
+        UserQueryService userQueryService
+    ){
+        this.userDeleteService=userDeleteService;
+        this.userUpdateService=userUpdateService;
+        this.userQueryService = userQueryService;
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<User>> findAll(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<User> users = userQueryService.findAll(page, size);
+
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> findById(
+        @PathVariable String userId
+    ){
+        User result = userQueryService.findById(userId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/update-profile/{userId}")
+    public ResponseEntity<User> updateProfile(
+        @PathVariable String userId,
+        @RequestBody ProfileUpdateRequest request){
+        User user = userUpdateService.updateProfile(userId, request);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/update-status/{userId}")
+    public ResponseEntity<User> updateStatus(
+        @PathVariable String userId,
+        @RequestBody UserStatus request){
+        User user = userUpdateService.updateStatus(userId, request);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/update-role/{userId}")
+    public ResponseEntity<User> updateRole(
+        @PathVariable String userId,
+        @RequestBody Role request){
+        User user = userUpdateService.updateRole(userId, request);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/restore/{userId}")
+    public ResponseEntity<User> restoreById(
+        @PathVariable String userId
+    ){
+        User user = userUpdateService.restoreById(userId);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/soft-delete/{userId}")
+    public ResponseEntity<User> softDeleteById(
+            @PathVariable String userId
+    ){
+        User user = userDeleteService.softDeleteById(userId);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/hard-delete/{userId}")
+    public ResponseEntity<User> hardDeleteById(
+            @PathVariable String userId
+    ){
+        User user = userDeleteService.hardDeleteById(userId);
+        return ResponseEntity.ok(user);
+    }
+
+}
