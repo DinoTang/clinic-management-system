@@ -1,0 +1,48 @@
+{
+  "appId": "com.clinic.medigo",
+  "productName": "MediGo",
+  "directories": {
+    "output": "release-mobile"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "icon": "electron/clinic.ico",
+  "extraMetadata": {
+    "main": "electron/main-mobile.cjs"
+  },
+  "extraResources": [
+    {
+      "from": "../_backend/src",
+      "to": "backend/src",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../_backend/pom.xml",
+      "to": "backend/pom.xml"
+    },
+    {
+      "from": "../_backend/mvnw",
+      "to": "backend/mvnw"
+    },
+    {
+      "from": "../_backend/mvnw.cmd",
+      "to": "backend/mvnw.cmd"
+    },
+    {
+      "from": "../_backend/.mvn",
+      "to": "backend/.mvn",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "../_backend/docs",
+      "to": "backend/docs",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "icon": "electron/clinic.ico",
+    "target": "nsis"
+  }
+}

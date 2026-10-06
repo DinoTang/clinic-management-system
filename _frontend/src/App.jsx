@@ -4,7 +4,10 @@ const PatientMobileApp = lazy(() => import("./mobile/PatientMobileApp.jsx"));
 const DesktopApp = lazy(() => import("./desktop/DesktopApp.jsx"));
 
 function App() {
-  const isDesktop = window.location.pathname.startsWith("/desktop");
+  const query = new URLSearchParams(window.location.search);
+  const isDesktop = query.get("app") === "desktop" ||
+    window.location.pathname.startsWith("/desktop") ||
+    query.get("desktop") === "1";
 
   useEffect(() => {
     document.documentElement.classList.toggle("desktop-mode", isDesktop);

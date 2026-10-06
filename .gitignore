@@ -35,6 +35,9 @@ build/
 _backend/src/main/resources/application.properties
 
 ### Frontend ###
+node_modules/
 _frontend/node_modules/
 _frontend/dist/
 _frontend/build/
+_frontend/release/
+_frontend/release-mobile/
