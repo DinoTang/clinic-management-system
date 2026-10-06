@@ -1,28 +1,15 @@
-import { lazy, Suspense, useEffect } from "react";
-
-const PatientMobileApp = lazy(() => import("./mobile/PatientMobileApp.jsx"));
-const DesktopApp = lazy(() => import("./desktop/DesktopApp.jsx"));
+import { lazy, Suspense } from "react";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes.jsx";
 
 function App() {
-  const isDesktop = window.location.pathname.startsWith("/desktop");
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("desktop-mode", isDesktop);
-    document.body.classList.toggle("desktop-mode", isDesktop);
-
-    return () => {
-      document.documentElement.classList.remove("desktop-mode");
-      document.body.classList.remove("desktop-mode");
-    };
-  }, [isDesktop]);
-
-  const CurrentApp = isDesktop ? DesktopApp : PatientMobileApp;
-
-  return (
-    <Suspense fallback={<div aria-live="polite">Đang tải giao diện...</div>}>
-      <CurrentApp />
-    </Suspense>
-  );
+    return (
+        <BrowserRouter>
+            <Suspense fallback={<div aria-live="polite">Đang tải giao diện...</div>}>
+                <AppRoutes />
+            </Suspense>
+        </BrowserRouter>
+    );
 }
 
 export default App;
