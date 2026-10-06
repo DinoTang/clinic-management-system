@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
+import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/reception.css";
 import "../../styles/desktop-schedule.css";
 
@@ -13,7 +14,7 @@ const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
 const SPECIALTY_API = "http://localhost:8080/api/specialties";
 
 function ReceptionPage() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
 
   const [specialties, setSpecialties] = useState([]);
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
@@ -75,20 +76,20 @@ function ReceptionPage() {
   useEffect(() => {
     axios
       .get(SPECIALTY_API)
-      .then((res) => setSpecialties(res.data))
+      .then((res) => setSpecialties(getCollectionData(res.data)))
       .catch(() => {
         console.warn(
           "Chưa có API chuyên khoa riêng, thử lấy từ /api/departments...",
         );
         axios
           .get("http://localhost:8080/api/departments")
-          .then((res) => setSpecialties(res.data))
+          .then((res) => setSpecialties(getCollectionData(res.data)))
           .catch(console.error);
       });
 
     axios
       .get(ROOM_API)
-      .then((res) => setRooms(res.data))
+      .then((res) => setRooms(getCollectionData(res.data)))
       .catch(console.error);
     axios
       .get(DOCTOR_API)
@@ -113,10 +114,15 @@ function ReceptionPage() {
     let matchedRoomId = "";
 
     if (doc) {
-      const docDepartmentId = doc.departmentId || doc.specialtyId;
+      const docDepartmentId =
+        doc.departmentId || doc.specialtyId || doc.specialty?.id;
       if (docDepartmentId) {
         const foundRoom = rooms.find((r) => {
-          const roomDept = r.departmentId || r.specialtyId || r.machuyenkhoa;
+          const roomDept =
+            r.departmentId ||
+            r.specialtyId ||
+            r.machuyenkhoa ||
+            r.specialty?.id;
           return roomDept && String(roomDept) === String(docDepartmentId);
         });
         if (foundRoom) matchedRoomId = foundRoom.id;
@@ -171,8 +177,10 @@ function ReceptionPage() {
           if (!assignedRoomId) {
             const matched = rooms.find(
               (r) =>
-                (r.specialtyId || r.departmentId || r.machuyenkhoa) ===
-                docSpecId,
+                (r.specialtyId ||
+                  r.departmentId ||
+                  r.machuyenkhoa ||
+                  r.specialty?.id) === docSpecId,
             );
             if (matched) assignedRoomId = matched.id;
           }
@@ -542,7 +550,10 @@ function ReceptionPage() {
                   .filter((r) => {
                     if (!selectedSpecialtyId) return false;
                     const roomDept =
-                      r.departmentId || r.specialtyId || r.machuyenkhoa;
+                      r.departmentId ||
+                      r.specialtyId ||
+                      r.machuyenkhoa ||
+                      r.specialty?.id;
                     return String(roomDept) === String(selectedSpecialtyId);
                   })
                   .map((r) => (

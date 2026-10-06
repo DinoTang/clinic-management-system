@@ -2,12 +2,75 @@
   "name": "clinic-frontend",
   "private": true,
   "version": "0.0.0",
+  "description": "Desktop clinic management interface",
+  "author": "Clinic Management",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DinoTang/clinic-management-system.git"
+  },
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "electron:dev": "concurrently -k \"vite --host localhost\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:dev:mobile": "concurrently -k \"vite --host localhost\" \"wait-on http://localhost:5173 && electron electron/main-mobile.cjs\"",
     "build": "vite build",
+    "electron:build": "npm run build && electron-builder --publish never",
+    "electron:build:mobile": "npm run build && electron-builder --config electron-builder.mobile.json --publish never",
+    "electron:build:all": "npm run electron:build && npm run electron:build:mobile",
     "lint": "eslint .",
     "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.clinic.frontend",
+    "productName": "Clinic Management",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "icon": "electron/clinic.ico",
+    "extraResources": [
+      {
+        "from": "../_backend/src",
+        "to": "backend/src",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../_backend/pom.xml",
+        "to": "backend/pom.xml"
+      },
+      {
+        "from": "../_backend/mvnw",
+        "to": "backend/mvnw"
+      },
+      {
+        "from": "../_backend/mvnw.cmd",
+        "to": "backend/mvnw.cmd"
+      },
+      {
+        "from": "../_backend/.mvn",
+        "to": "backend/.mvn",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../_backend/docs",
+        "to": "backend/docs",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "electron/clinic.ico",
+      "target": "nsis"
+    }
   },
   "dependencies": {
     "@boxicons/react": "^1.0.3",
@@ -24,10 +87,14 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "concurrently": "^9.0.0",
+    "electron": "44.5.1",
+    "electron-builder": "^26.0.0",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17.12.0",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wait-on": "^8.0.0"
   }
 }

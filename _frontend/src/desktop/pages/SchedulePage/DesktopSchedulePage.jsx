@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
+import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/desktop-schedule.css";
 
 const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
@@ -15,7 +16,7 @@ function SchedulePage() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
 
   const initialFormData = {
     doctorId: "",
@@ -74,11 +75,19 @@ function SchedulePage() {
   const fetchRoomsForDoctor = async (doctorId) => {
     if (!doctorId) return [];
     const doc = doctors.find((d) => d.id === doctorId);
-    const specialtyId = doc?.departmentId || doc?.specialtyId;
+    const specialtyId =
+      doc?.departmentId || doc?.specialtyId || doc?.specialty?.id;
     if (specialtyId) {
       try {
-        const res = await axios.get(`${ROOM_API}/by-specialty/${specialtyId}`);
-        return res.data;
+        const res = await axios.get(ROOM_API);
+        return getCollectionData(res.data).filter((room) => {
+          const roomSpecialtyId =
+            room.departmentId ||
+            room.specialtyId ||
+            room.machuyenkhoa ||
+            room.specialty?.id;
+          return String(roomSpecialtyId) === String(specialtyId);
+        });
       } catch (err) {
         console.error("Lỗi tải phòng:", err);
         return [];
