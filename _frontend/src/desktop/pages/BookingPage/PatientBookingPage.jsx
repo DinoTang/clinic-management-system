@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
+import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/booking.css";
 import "../../styles/desktop-schedule.css";
 
@@ -19,7 +20,7 @@ function PatientBookingPage() {
   const [availableSchedules, setAvailableSchedules] = useState([]);
 
   // Dữ liệu đặt lịch bệnh nhân lựa chọn
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
   const [bookingData, setBookingData] = useState({
     specialtyId: "",
     doctorId: "",

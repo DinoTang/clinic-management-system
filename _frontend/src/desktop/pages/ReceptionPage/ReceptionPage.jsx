@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
+import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/reception.css";
 import "../../styles/desktop-schedule.css";
 
@@ -13,7 +14,7 @@ const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
 const SPECIALTY_API = "http://localhost:8080/api/specialties";
 
 function ReceptionPage() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
 
   const [specialties, setSpecialties] = useState([]);
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");

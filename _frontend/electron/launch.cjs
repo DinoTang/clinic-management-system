@@ -91,8 +91,6 @@ async function waitForExistingDesktopFrontend() {
   }
 }
 
-const DESKTOP_LOGIN_MODE = "demo"; // Change to "database" to validate staff accounts through the API.
-
 async function launchClinicApp({ mode, app = electronApp }) {
   const isDesktop = mode === "desktop";
   const isPackaged = app.isPackaged;
@@ -115,7 +113,6 @@ async function launchClinicApp({ mode, app = electronApp }) {
   const frontendUrl = useDevServer ? devUrl : frontendServer.url;
   const appUrl = new URL(frontendUrl);
   appUrl.searchParams.set("app", mode);
-  if (isDesktop) appUrl.searchParams.set("loginMode", DESKTOP_LOGIN_MODE);
 
   const createWindow = () => {
     const window = new BrowserWindow({

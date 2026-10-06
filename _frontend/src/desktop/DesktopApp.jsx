@@ -9,8 +9,11 @@ import "./styles/desktop-schedule.css";
 import "./styles/reception.css";
 
 function App() {
+  const hostname = window.location.hostname;
   const demoLogin =
-    new URLSearchParams(window.location.search).get("loginMode") === "demo";
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]";
 
   const [currentPage, setCurrentPage] = useState("reception"); // Mặc định mở trang Tiếp đón
   const [isAuthenticated, setIsAuthenticated] = useState(() => {

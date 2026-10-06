@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
+import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/desktop-schedule.css";
 
 const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
@@ -15,7 +16,7 @@ function SchedulePage() {
   const [loadingRooms, setLoadingRooms] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateString();
 
   const initialFormData = {
     doctorId: "",

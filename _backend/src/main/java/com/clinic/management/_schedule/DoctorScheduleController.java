@@ -1,5 +1,7 @@
 package com.clinic.management._schedule;
 
+import com.clinic.management._doctor.entities.Doctor;
+import com.clinic.management._doctor.repositories.DoctorRepository;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +15,13 @@ import java.util.List;
 public class DoctorScheduleController {
 
     private final DoctorScheduleService scheduleService;
+    private final DoctorRepository doctorRepository;
 
-    public DoctorScheduleController(DoctorScheduleService scheduleService) {
+    public DoctorScheduleController(
+            DoctorScheduleService scheduleService,
+            DoctorRepository doctorRepository) {
         this.scheduleService = scheduleService;
+        this.doctorRepository = doctorRepository;
     }
 
     @GetMapping
@@ -43,17 +49,36 @@ public class DoctorScheduleController {
     }
 
     @PostMapping
-    public DoctorSchedule createSchedule(@RequestBody DoctorSchedule schedule) {
-        return scheduleService.createSchedule(schedule);
+    public DoctorSchedule createSchedule(@RequestBody DoctorScheduleRequest request) {
+        return scheduleService.createSchedule(toSchedule(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DoctorSchedule> updateSchedule(@PathVariable String id, @RequestBody DoctorSchedule schedule) {
-        DoctorSchedule updated = scheduleService.updateSchedule(id, schedule);
+    public ResponseEntity<DoctorSchedule> updateSchedule(
+            @PathVariable String id,
+            @RequestBody DoctorScheduleRequest request) {
+        DoctorSchedule updated = scheduleService.updateSchedule(id, toSchedule(request));
         if (updated == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(updated);
+    }
+
+    private DoctorSchedule toSchedule(DoctorScheduleRequest request) {
+        DoctorSchedule schedule = new DoctorSchedule();
+        DoctorScheduleRequest.DoctorReference doctorReference = request.getDoctor();
+        if (doctorReference != null && doctorReference.getId() != null
+                && !doctorReference.getId().isBlank()) {
+            Doctor doctor = doctorRepository.findById(doctorReference.getId()).orElse(null);
+            schedule.setDoctor(doctor);
+        }
+        schedule.setRoomId(request.getRoomId());
+        schedule.setExaminationDate(request.getExaminationDate());
+        schedule.setStartTime(request.getStartTime());
+        schedule.setEndTime(request.getEndTime());
+        schedule.setMaxPatients(request.getMaxPatients());
+        schedule.setStatus(request.getStatus());
+        return schedule;
     }
 
     @DeleteMapping("/{id}")
