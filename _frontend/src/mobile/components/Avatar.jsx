@@ -1,7 +1,7 @@
-import femaleAvatar from "../../assets/Female Avatar.png";
-import femaleDoctorAvatar from "../../assets/Female Doctor Avatar.png";
-import maleAvatar from "../../assets/Male Avatar.png";
-import maleDoctorAvatar from "../../assets/Male Doctor Avatar.png";
+import femaleAvatar from "../../assets/FemaleAvatar.png";
+import femaleDoctorAvatar from "../../assets/FemaleDoctorAvatar.png";
+import maleAvatar from "../../assets/MaleAvatar.png";
+import maleDoctorAvatar from "../../assets/MaleDoctorAvatar.png";
 
 function getGender(gender) {
   const normalizedGender = String(gender || "")

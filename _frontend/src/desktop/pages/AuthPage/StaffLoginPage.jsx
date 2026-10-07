@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import appIcon from "../../../assets/Icon App.png";
+import appIcon from "../../../assets/IconApp.png";
 import "./staff-login.css";
 
 const staffRoles = new Set([
