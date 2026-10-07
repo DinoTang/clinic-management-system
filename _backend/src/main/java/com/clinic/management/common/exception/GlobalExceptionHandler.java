@@ -1,5 +1,6 @@
-package com.clinic.management.common.exceptions;
+package com.clinic.management.common.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,5 +24,24 @@ public class GlobalExceptionHandler {
         );
         
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        return new ResponseEntity<>(Map.of("message", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String detail = ex.getMostSpecificCause().getMessage() == null ? "" : ex.getMostSpecificCause().getMessage();
+        String message;
+        if (detail.contains("Duplicate entry")) {
+            message = "Dữ liệu đã tồn tại (vi phạm khóa chính/duy nhất).";
+        } else if (detail.contains("TRANGTHAIXOA")) {
+            message = "Dữ liệu không hợp lệ: cờ TRANGTHAIXOA không được để trống.";
+        } else {
+            message = "Dữ liệu vi phạm ràng buộc khóa ngoại hoặc dữ liệu trùng.";
+        }
+        return new ResponseEntity<>(Map.of("message", message, "detail", detail), HttpStatus.BAD_REQUEST);
     }
 }

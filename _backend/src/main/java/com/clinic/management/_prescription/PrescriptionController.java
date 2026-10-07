@@ -1,6 +1,9 @@
 package com.clinic.management._prescription;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/prescriptions")
@@ -13,12 +16,20 @@ public class PrescriptionController {
     }
 
     @PostMapping
-    public Prescription createPrescription(@RequestBody Prescription prescription) {
-        return prescriptionService.createPrescription(prescription);
+    public ResponseEntity<?> createPrescription(@RequestBody Prescription prescription) {
+        try {
+            return ResponseEntity.ok(prescriptionService.createPrescription(prescription));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 
     @GetMapping("/medical-record/{medicalRecordId}")
-    public Prescription getByMedicalRecordId(@PathVariable String medicalRecordId) {
-        return prescriptionService.getByMedicalRecordId(medicalRecordId);
+    public ResponseEntity<?> getByMedicalRecordId(@PathVariable String medicalRecordId) {
+        try {
+            return ResponseEntity.ok(prescriptionService.getByMedicalRecordId(medicalRecordId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
     }
 }

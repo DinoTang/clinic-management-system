@@ -1,4 +1,4 @@
-package com.clinic.management._staff;
+package com.clinic.management._staff.controllers;
 
 import com.clinic.management.common.enums.StaffPosition;
 import com.clinic.management._staff.dtos.ProfileCreateRequest;
