@@ -1,0 +1,1020 @@
+/* ==========================================================
+   TRANG KHÁM BỆNH CỦA BÁC SĨ
+   Cùng tông màu với desktop-schedule.css / reception.css
+   ========================================================== */
+
+.exam-container {
+  background-color: #f0f7fd;
+  height: 100vh;
+  padding: 20px 32px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- Header ---------- */
+.exam-header {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 14px 24px;
+  box-shadow: 0 4px 12px rgba(186, 215, 233, 0.35);
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.exam-header h1 {
+  margin: 0;
+  font-size: 21px;
+  color: #1976d2;
+  font-weight: 700;
+}
+
+.exam-header p {
+  margin: 4px 0 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.exam-header-tools {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.exam-header-tools .tool-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exam-header-tools label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.exam-header-tools select,
+.exam-header-tools input {
+  padding: 8px 12px;
+  border: 1px solid #cfe2f3;
+  border-radius: 8px;
+  font-size: 13px;
+  background-color: #ffffff;
+  outline: none;
+  min-width: 170px;
+}
+
+.exam-header-tools select:focus,
+.exam-header-tools input:focus {
+  border-color: #1976d2;
+}
+
+/* ---------- Thanh thông báo (notice banner) ---------- */
+.exam-notice {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.exam-notice-info {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border: 1px solid #bbdefb;
+}
+
+.exam-notice-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.exam-notice-warn {
+  background-color: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+.exam-notice-error {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.exam-notice button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+  opacity: 0.7;
+}
+
+.exam-notice button:hover {
+  opacity: 1;
+}
+
+/* ---------- Bố cục 3 cột ---------- */
+.exam-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 310px minmax(0, 1fr) 390px;
+  gap: 18px;
+  min-height: 0;
+}
+
+.exam-panel {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(186, 215, 233, 0.35);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.exam-panel-title {
+  font-size: 15px;
+  margin: 0 0 12px 0;
+  color: #0d47a1;
+  font-weight: 700;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.exam-panel-title .title-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1976d2;
+  background: #e3f2fd;
+  border-radius: 10px;
+  padding: 2px 9px;
+}
+
+/* ---------- Cột 1: Hàng đợi ---------- */
+.exam-queue-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.exam-queue-tools input[type="text"] {
+  padding: 8px 14px;
+  border: 1px solid #bbdefb;
+  border-radius: 20px;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+}
+
+.exam-queue-tools input[type="text"]:focus {
+  border-color: #1976d2;
+}
+
+.exam-status-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.exam-status-tab {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid #cfe2f3;
+  background: #f8fafc;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.exam-status-tab:hover {
+  background: #e3f2fd;
+}
+
+.exam-status-tab.active {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: #ffffff;
+}
+
+.exam-queue-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.exam-queue-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.exam-queue-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.exam-queue-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: #fcfdff;
+  transition: all 0.15s;
+}
+
+.exam-queue-item:hover {
+  border-color: #90caf9;
+  background: #f8fbff;
+}
+
+.exam-queue-item.selected {
+  border-color: #1976d2;
+  background: #e3f2fd;
+  box-shadow: 0 3px 8px rgba(25, 118, 210, 0.18);
+}
+
+.exam-queue-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.exam-queue-item-id {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0d47a1;
+}
+
+.exam-queue-item-meta {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.exam-queue-empty {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+  padding: 30px 10px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  margin-top: 6px;
+}
+
+/* ---------- Cột 2: Hồ sơ + khám ---------- */
+.exam-main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 6px;
+}
+
+.exam-main-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.exam-main-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+/* Card thông tin bệnh nhân */
+.exam-patient-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.exam-patient-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.exam-patient-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0d47a1;
+  margin: 0;
+}
+
+.exam-patient-sub {
+  font-size: 12.5px;
+  color: #64748b;
+  margin-top: 3px;
+}
+
+.exam-patient-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.exam-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 10px;
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.exam-tag-green {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.exam-tag-amber {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+/* Badge trạng thái Bỏ qua (ngoài 3 badge có sẵn ở reception.css) */
+.status-boqua {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.exam-patient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px 16px;
+  margin-top: 12px;
+  font-size: 12.5px;
+}
+
+.exam-patient-grid div {
+  color: #475569;
+}
+
+.exam-patient-grid b {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.exam-history-box {
+  margin-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 10px;
+}
+
+.exam-history-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d47a1;
+  margin-bottom: 6px;
+}
+
+.exam-history-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #475569;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  margin-bottom: 5px;
+}
+
+/* Sinh hiệu */
+.exam-vitals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.exam-vital {
+  background: #f8fafc;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.exam-vital label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.exam-vital input {
+  width: 100%;
+  padding: 6px 9px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-sizing: border-box;
+  outline: none;
+  background: #ffffff;
+}
+
+.exam-vital input:focus {
+  border-color: #1976d2;
+}
+
+/* Form khám lâm sàng */
+.exam-form-section {
+  margin-bottom: 14px;
+}
+
+.exam-form-section > label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.exam-form-section textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 62px;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 9px 12px;
+  border: 1px solid #cfe2f3;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #1e293b;
+  background-color: #ffffff;
+}
+
+.exam-form-section textarea:focus {
+  border-color: #1976d2;
+}
+
+.exam-form-section textarea:disabled {
+  background-color: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.exam-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+}
+
+.exam-required {
+  color: #dc2626;
+}
+
+/* ---------- Cột 3: Đơn thuốc / chỉ định ---------- */
+.exam-right-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  min-width: 0;
+  padding-right: 6px;
+}
+
+.exam-right-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.exam-right-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.exam-sub-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0d47a1;
+  margin: 4px 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.exam-source-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9px;
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+
+.exam-source-badge.live {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+}
+
+/* Bảng dòng kê đơn */
+.exam-lines {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.exam-lines th {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 7px 8px;
+  letter-spacing: 0.3px;
+}
+
+.exam-lines th:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.exam-lines th:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.exam-lines td {
+  padding: 6px 6px;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+}
+
+.exam-lines select,
+.exam-lines input {
+  width: 100%;
+  padding: 6px 7px;
+  border: 1px solid #cfe2f3;
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.exam-lines select:focus,
+.exam-lines input:focus {
+  border-color: #1976d2;
+}
+
+.exam-lines .cell-qty {
+  min-width: 58px;
+}
+
+.exam-lines .cell-price {
+  white-space: nowrap;
+  color: #475569;
+  font-weight: 600;
+}
+
+.exam-lines .cell-total {
+  white-space: nowrap;
+  color: #0d47a1;
+  font-weight: 700;
+}
+
+.exam-line-remove {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.exam-line-remove:hover {
+  background: #ffcdd2;
+}
+
+.exam-add-line {
+  width: 100%;
+  background: #f8fafc;
+  color: #1976d2;
+  border: 1px dashed #90caf9;
+  border-radius: 8px;
+  padding: 7px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+
+.exam-add-line:hover {
+  background: #e3f2fd;
+}
+
+.exam-add-line:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tổng cộng */
+.exam-totals {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.exam-totals .row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.exam-totals .row b {
+  color: #0d47a1;
+}
+
+.exam-totals .row.grand {
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 6px;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0d47a1;
+}
+
+/* Hành động */
+.exam-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  border-top: 2px solid #e3f2fd;
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.exam-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.exam-actions-row > button {
+  flex: 1;
+}
+
+.exam-btn-primary {
+  background-color: #1976d2;
+  color: #ffffff;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13.5px;
+  transition: background-color 0.2s;
+}
+
+.exam-btn-primary:hover {
+  background-color: #1565c0;
+}
+
+.exam-btn-success {
+  background-color: #2e7d32;
+  color: #ffffff;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13.5px;
+  transition: background-color 0.2s;
+}
+
+.exam-btn-success:hover {
+  background-color: #256628;
+}
+
+.exam-btn-outline {
+  background-color: #ffffff;
+  color: #475569;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background-color 0.2s;
+}
+
+.exam-btn-outline:hover {
+  background-color: #e2e8f0;
+}
+
+.exam-btn-call {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.exam-btn-call:hover {
+  background: #bbdefb;
+}
+
+.exam-btn-done {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.exam-btn-done:hover {
+  background: #c8e6c9;
+}
+
+.exam-btn-primary:disabled,
+.exam-btn-success:disabled,
+.exam-btn-outline:disabled,
+.exam-btn-call:disabled,
+.exam-btn-done:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.exam-hint {
+  font-size: 11.5px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+/* Empty state khi chưa chọn bệnh nhân */
+.exam-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  text-align: center;
+  gap: 8px;
+  padding: 30px;
+}
+
+.exam-placeholder .icon {
+  font-size: 42px;
+}
+
+.exam-placeholder h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #64748b;
+}
+
+.exam-placeholder p {
+  margin: 0;
+  font-size: 13px;
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+/* ---------- Modal in phiếu ---------- */
+.exam-print-card {
+  background: #ffffff;
+  padding: 26px 30px;
+  border-radius: 12px;
+  width: 620px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.exam-print-head {
+  text-align: center;
+  border-bottom: 2px solid #1976d2;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.exam-print-head h2 {
+  margin: 0;
+  color: #0d47a1;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.exam-print-head p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.exam-print-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 18px;
+  font-size: 13px;
+  color: #334155;
+  margin-bottom: 14px;
+}
+
+.exam-print-section {
+  margin-bottom: 14px;
+}
+
+.exam-print-section h4 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #0d47a1;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px dashed #cbd5e1;
+  padding-bottom: 4px;
+}
+
+.exam-print-section p {
+  margin: 0;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.exam-print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+}
+
+.exam-print-table th,
+.exam-print-table td {
+  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.exam-print-table th {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.exam-print-sign {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 26px;
+  font-size: 13px;
+  color: #334155;
+  text-align: center;
+}
+
+.exam-print-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+
+/* In phiếu: chỉ in phần phiếu */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .exam-print-card,
+  .exam-print-card * {
+    visibility: visible !important;
+  }
+
+  .exam-print-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-height: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .exam-print-actions {
+    display: none !important;
+  }
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+@media (max-width: 1279px) {
+  .exam-content {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .exam-panel-right {
+    grid-column: 1 / -1;
+    max-height: 560px;
+  }
+}
+
+@media (max-width: 991px) {
+  .exam-container {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .exam-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .exam-panel {
+    min-height: auto;
+  }
+
+  .exam-queue-list {
+    max-height: 340px;
+  }
+
+  .exam-panel-right {
+    max-height: none;
+  }
+
+  .exam-main-scroll,
+  .exam-right-scroll {
+    overflow: visible;
+  }
+
+  .exam-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575px) {
+  .exam-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exam-header-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exam-header-tools select,
+  .exam-header-tools input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .exam-print-info {
+    grid-template-columns: 1fr;
+  }
+}
