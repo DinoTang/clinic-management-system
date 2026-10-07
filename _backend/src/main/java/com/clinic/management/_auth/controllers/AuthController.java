@@ -2,8 +2,10 @@ package com.clinic.management._auth.controllers;
 
 import com.clinic.management._auth.dtos.LoginRequest;
 import com.clinic.management._auth.dtos.LoginResponse;
+import com.clinic.management._auth.dtos.PatientLoginRequest;
 import com.clinic.management._auth.dtos.RegisterRequest;
 import com.clinic.management._auth.services.AuthService;
+import com.clinic.management._auth.dtos.PatientRegisterRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +32,14 @@ public class AuthController {
 		return ResponseEntity.ok(result);
 	}
 
+	@PostMapping("/patient/login")
+	public ResponseEntity<LoginResponse> loginPatient(
+		@Valid @RequestBody PatientLoginRequest request
+	) {
+		LoginResponse result = authService.loginPatient(request);
+		return ResponseEntity.ok(result);
+	}
+
 	@GetMapping("/me")
 	public ResponseEntity<LoginResponse> me(
 		@RequestHeader("Authorization")
@@ -49,4 +59,11 @@ public class AuthController {
 		return ResponseEntity.ok(result);
 	}
 
+    @PostMapping("/patient/register")
+    public ResponseEntity<LoginResponse> registerPatient(
+            @Valid @RequestBody PatientRegisterRequest request
+    ) {
+        LoginResponse result = authService.registerPatient(request);
+        return ResponseEntity.ok(result);
+    }
 }

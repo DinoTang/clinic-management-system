@@ -42,6 +42,15 @@ public class UserQueryService implements IUserQuery {
     }
 
     @Override
+    public User findByPhone(String phone) {
+        User user = userRepository.findByPhone(phone);
+        if (user == null) {
+            throw new RuntimeException("Số điện thoại hoặc mật khẩu không chính xác");
+        }
+        return user;
+    }
+
+    @Override
     public Page<User> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 

@@ -4,11 +4,6 @@ import Avatar from "./components/Avatar";
 import AuthPage from "./screens/AuthPage";
 import PatientHomeScreen from "./screens/PatientHomeScreen";
 
-const patientProfile = {
-  fullName: "Nguyễn Văn An",
-  gender: "MALE",
-};
-
 const navigation = [
   { id: "home", label: "Trang chủ", icon: "home" },
   { id: "appointments", label: "Lịch khám", icon: "calendar" },
@@ -134,6 +129,12 @@ function Icon({ name, size = 24, filled = false }) {
         <path d="M4 12h4l2-3 3.5 7 2-4H20" />
       </>
     ),
+    logout: (
+      <>
+        <path d="M10 17l5-5-5-5M15 12H3" />
+        <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+      </>
+    ),
   };
 
   return (
@@ -153,7 +154,7 @@ function Icon({ name, size = 24, filled = false }) {
   );
 }
 
-function SectionPage({ page, Icon, onNavigate }) {
+function SectionPage({ page, Icon, onNavigate, onLogout }) {
   const content = sectionContent[page];
 
   return (
@@ -186,15 +187,52 @@ function SectionPage({ page, Icon, onNavigate }) {
       >
         <Icon name="home" size={18} /> Về trang chủ
       </button>
+      {page === "profile" && (
+        <button
+          className="patient-logout-button"
+          onClick={onLogout}
+          type="button"
+        >
+          <Icon name="logout" size={19} />
+          Đăng xuất
+        </button>
+      )}
     </section>
   );
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("auth");
+  const [patientProfile, setPatientProfile] = useState(() => {
+    const savedSession =
+      sessionStorage.getItem("clinic-patient-session") ||
+      localStorage.getItem("clinic-patient-session");
+
+    return savedSession ? JSON.parse(savedSession).patient : null;
+  });
+  const [currentPage, setCurrentPage] = useState(() =>
+    patientProfile ? "home" : "auth",
+  );
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+
+  const handleLoginSuccess = (profile) => {
+    setPatientProfile(profile);
+    setCurrentPage("home");
+  };
+
+  const requestLogout = () => {
+    setShowLogoutConfirmation(true);
+  };
+
+  const confirmLogout = () => {
+    localStorage.removeItem("clinic-patient-session");
+    sessionStorage.removeItem("clinic-patient-session");
+    setShowLogoutConfirmation(false);
+    setPatientProfile(null);
+    setCurrentPage("auth");
+  };
 
   if (currentPage === "auth") {
-    return <AuthPage />;
+    return <AuthPage onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
@@ -202,8 +240,8 @@ function App() {
       <header className="app-header">
         <div className="patient-greeting">
           <span>Xin chào,</span>
-          <h1>{patientProfile.fullName}</h1>
-          <p>Bệnh nhân</p>
+          <h1>{patientProfile?.fullName || "Bệnh nhân"}</h1>
+          <p>{patientProfile?.role || "Bệnh nhân"}</p>
         </div>
         <button
           aria-label="Thông báo"
@@ -236,6 +274,7 @@ function App() {
             page={currentPage}
             Icon={Icon}
             onNavigate={setCurrentPage}
+            onLogout={requestLogout}
           />
         )}
       </main>
@@ -260,6 +299,42 @@ function App() {
           </button>
         ))}
       </nav>
+      {showLogoutConfirmation && (
+        <div
+          className="logout-dialog-backdrop"
+          onClick={() => setShowLogoutConfirmation(false)}
+        >
+          <section
+            aria-labelledby="logout-dialog-title"
+            aria-modal="true"
+            className="logout-dialog"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <span className="logout-dialog-icon">
+              <Icon name="logout" size={25} />
+            </span>
+            <h2 id="logout-dialog-title">Đăng xuất?</h2>
+            <p>Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này không?</p>
+            <div className="logout-dialog-actions">
+              <button
+                className="logout-cancel-button"
+                onClick={() => setShowLogoutConfirmation(false)}
+                type="button"
+              >
+                Ở lại
+              </button>
+              <button
+                className="logout-confirm-button"
+                onClick={confirmLogout}
+                type="button"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

@@ -662,6 +662,140 @@ button {
   font-weight: 650;
 }
 
+.patient-logout-button {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 18px;
+  border: 1px solid #f1caca;
+  border-radius: 16px;
+  color: #b83232;
+  background: #fffafa;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+  touch-action: manipulation;
+  transition: transform 120ms ease;
+}
+
+.patient-logout-button:hover {
+  border-color: #e8aaaa;
+  background: #fff2f2;
+}
+
+.patient-logout-button:active {
+  background: #fce4e4;
+  transform: scale(0.98);
+  transition: none;
+}
+
+.patient-logout-button:focus-visible {
+  outline: 3px solid rgba(184, 50, 50, 0.24);
+  outline-offset: 2px;
+}
+
+.logout-dialog-backdrop {
+  position: fixed;
+  z-index: 20;
+  display: grid;
+  padding: 24px;
+  place-items: center;
+  background: rgba(22, 42, 63, 0.48);
+  inset: 0;
+}
+
+.logout-dialog {
+  width: min(100%, 360px);
+  padding: 28px 24px 22px;
+  border: 1px solid rgba(228, 238, 247, 0.9);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(22, 42, 63, 0.2);
+  text-align: center;
+  animation: logout-dialog-enter 160ms ease-out;
+}
+
+.logout-dialog-icon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 18px;
+  place-items: center;
+  color: #b83232;
+  background: #fff0f0;
+}
+
+.logout-dialog h2 {
+  margin: 0 0 8px;
+  color: #20364c;
+  font-size: 21px;
+}
+
+.logout-dialog p {
+  margin: 0;
+  color: #71839a;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.logout-dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.logout-dialog-actions button {
+  min-height: 48px;
+  border-radius: 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+  transition:
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+
+.logout-dialog-actions button:active {
+  transform: scale(0.97);
+}
+
+.logout-cancel-button {
+  border: 1px solid #dce7f1;
+  color: #47617a;
+  background: #f7faff;
+}
+
+.logout-cancel-button:hover {
+  background: #edf4fb;
+}
+
+.logout-confirm-button {
+  border: 1px solid #b83232;
+  color: #fff;
+  background: #b83232;
+}
+
+.logout-confirm-button:hover {
+  background: #a42a2a;
+}
+
+@keyframes logout-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 600px) {
   .app-header {
     min-height: 94px;

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import axios from "axios";
+import { useRef, useState } from "react";
 import appIcon from "../../assets/Icon App.png";
 import "./AuthPage.css";
 
@@ -84,23 +85,32 @@ function AuthIcon({ name, size = 22 }) {
   );
 }
 
-function AuthPage() {
+function AuthPage({ onLoginSuccess }) {
   const [mode, setMode] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(true);
   const [message, setMessage] = useState("");
   const [registration, setRegistration] = useState(initialRegistration);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginPhone, setLoginPhone] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginCredentialsInvalid, setLoginCredentialsInvalid] = useState(false);
+  const [showForgotPasswordHelp, setShowForgotPasswordHelp] = useState(false);
+  const phoneInputRef = useRef(null);
 
   const isRegistering = mode === "register";
 
   const switchMode = (nextMode) => {
     setMode(nextMode);
     setMessage("");
+    setLoginCredentialsInvalid(false);
+    setShowForgotPasswordHelp(false);
     setShowPassword(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setMessage("");
 
     if (
       isRegistering &&
@@ -110,11 +120,80 @@ function AuthPage() {
       return;
     }
 
-    setMessage(
-      isRegistering
-        ? "Giao diện đăng ký đã sẵn sàng; API đăng ký chưa được kết nối."
-        : "Giao diện đăng nhập đã sẵn sàng; API đăng nhập chưa được kết nối.",
-    );
+    setIsSubmitting(true);
+
+    try {
+      if (isRegistering) {
+        await axios.post("http://localhost:8080/api/auth/patient/register", {
+          fullName: registration.fullName,
+          birthDate: registration.birthDate,
+          gender: registration.gender,
+          phone: registration.phone,
+          email: registration.email,
+          password: registration.password,
+        });
+
+        setLoginPhone(registration.phone);
+        setMode("login");
+        setMessage("Đăng ký thành công. Hãy nhập mật khẩu để đăng nhập.");
+      } else {
+        const { data } = await axios.post(
+          "http://localhost:8080/api/auth/patient/login",
+          {
+            phone: loginPhone,
+            password: loginPassword,
+          },
+        );
+
+        const patient = {
+          fullName: data.user.fullName,
+          role: data.user.role,
+        };
+        const session = JSON.stringify({ token: data.token, patient });
+
+        if (rememberLogin) {
+          localStorage.setItem("clinic-patient-session", session);
+          sessionStorage.removeItem("clinic-patient-session");
+        } else {
+          sessionStorage.setItem("clinic-patient-session", session);
+          localStorage.removeItem("clinic-patient-session");
+        }
+
+        onLoginSuccess(patient);
+      }
+    } catch (error) {
+      const responseData = error.response?.data;
+      const responseMessage =
+        responseData?.message ||
+        responseData?.detail ||
+        (Array.isArray(responseData?.errors)
+          ? responseData.errors.map((item) => item.defaultMessage).join(" ")
+          : null);
+
+      if (
+        !isRegistering &&
+        error.response &&
+        (error.response.status === 401 ||
+          error.response.status === 403 ||
+          (typeof responseMessage === "string" &&
+            responseMessage.toLocaleLowerCase("vi").includes("số điện thoại hoặc mật khẩu")))
+      ) {
+        setLoginCredentialsInvalid(true);
+        setMessage("Số điện thoại hoặc mật khẩu không chính xác.");
+        requestAnimationFrame(() => phoneInputRef.current?.focus());
+        return;
+      }
+
+      setMessage(
+        typeof responseMessage === "string" && responseMessage
+          ? responseMessage
+          : isRegistering
+            ? "Không thể đăng ký. Hãy kiểm tra thông tin và đảm bảo backend đang chạy."
+            : "Không thể đăng nhập. Hãy kiểm tra số điện thoại, mật khẩu và backend.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const updateRegistration = (field) => (event) => {
@@ -132,18 +211,25 @@ function AuthPage() {
     icon,
     autoComplete,
     trailing,
+    invalid = false,
+    inputRef,
     ...inputProps
   }) => (
-    <label className="auth-field" key={name}>
-      <span className="auth-field-icon">
-        <AuthIcon name={icon} />
-      </span>
-      <input
-        autoComplete={autoComplete}
-        name={name}
-        placeholder={placeholder}
-        type={type}
-        {...inputProps}
+  <label
+    className={`auth-field${invalid ? " auth-field-invalid" : ""}`}
+    key={name}
+  >
+    <span className="auth-field-icon">
+      <AuthIcon name={icon} />
+    </span>
+    <input
+      aria-invalid={invalid || undefined}
+      autoComplete={autoComplete}
+      name={name}
+      placeholder={placeholder}
+      ref={inputRef}
+      type={type}
+      {...inputProps}
       />
       {trailing}
     </label>
@@ -156,6 +242,21 @@ function AuthPage() {
       icon: "lock",
       type: showPassword ? "text" : "password",
       autoComplete,
+      value: isRegistering
+        ? registration[name]
+        : name === "password"
+          ? loginPassword
+          : undefined,
+      onChange: isRegistering
+        ? updateRegistration(name)
+        : name === "password"
+          ? (event) => {
+              setLoginPassword(event.target.value);
+              setLoginCredentialsInvalid(false);
+              setMessage("");
+            }
+          : undefined,
+      invalid: !isRegistering && loginCredentialsInvalid,
       minLength: 8,
       maxLength: 20,
       required: true,
@@ -279,6 +380,14 @@ function AuthPage() {
                 type: "tel",
                 icon: "phone",
                 autoComplete: "tel",
+                inputRef: phoneInputRef,
+                invalid: loginCredentialsInvalid,
+                value: loginPhone,
+                onChange: (event) => {
+                  setLoginPhone(event.target.value);
+                  setLoginCredentialsInvalid(false);
+                  setMessage("");
+                },
                 required: true,
                 pattern: "0[0-9]{9}",
                 maxLength: 10,
@@ -297,9 +406,10 @@ function AuthPage() {
                 </label>
                 <button
                   className="auth-text-button"
-                  onClick={() =>
-                    setMessage("Vui lòng liên hệ phòng khám để đặt lại mật khẩu.")
-                  }
+                  onClick={() => {
+                    setShowForgotPasswordHelp((visible) => !visible);
+                    setMessage("");
+                  }}
                   type="button"
                 >
                   Quên mật khẩu?
@@ -309,13 +419,34 @@ function AuthPage() {
           )}
 
           {message && (
-            <p className="auth-message" aria-live="polite" role="status">
+            <p
+              className={`auth-message${loginCredentialsInvalid ? " auth-message-error" : ""}`}
+              aria-live="polite"
+              role={loginCredentialsInvalid ? "alert" : "status"}
+            >
               {message}
             </p>
           )}
 
-          <button className="auth-submit" type="submit">
-            <span>{isRegistering ? "Đăng ký" : "Đăng nhập"}</span>
+          {showForgotPasswordHelp && !isRegistering && (
+            <p className="auth-forgot-help" role="status">
+              Vui lòng liên hệ phòng khám trực tuyến hay gọi về số hotline để
+              đặt lại mật khẩu.
+            </p>
+          )}
+
+          <button
+            className="auth-submit"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            <span>
+              {isSubmitting
+                ? "Đang xử lý..."
+                : isRegistering
+                  ? "Đăng ký"
+                  : "Đăng nhập"}
+            </span>
             <AuthIcon name="arrow" size={25} />
           </button>
         </form>
@@ -347,6 +478,11 @@ function AuthPage() {
             <span>Đăng ký tài khoản</span>
           </button>
         )}
+        <footer className="auth-footer">
+          <p>
+            Hotline <strong>1900xxxx</strong>
+          </p>
+        </footer>
       </div>
     </main>
   );

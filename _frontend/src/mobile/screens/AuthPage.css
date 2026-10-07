@@ -115,6 +115,17 @@
   box-shadow: 0 0 0 3px rgba(47, 139, 224, 0.1);
 }
 
+.auth-field.auth-field-invalid,
+.auth-field.auth-field-invalid:focus-within {
+  border-color: #d93636;
+  background: rgba(255, 247, 247, 0.88);
+  box-shadow: 0 0 0 3px rgba(217, 54, 54, 0.12);
+}
+
+.auth-field.auth-field-invalid .auth-field-icon {
+  color: #c92f2f;
+}
+
 .auth-field-icon {
   display: grid;
   width: 23px;
@@ -231,6 +242,23 @@
   text-align: center;
 }
 
+.auth-message-error {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.auth-forgot-help {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(123, 169, 210, 0.34);
+  border-radius: 14px;
+  color: #476783;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .auth-submit {
   display: flex;
   width: 100%;
@@ -305,6 +333,24 @@
   background: rgba(255, 255, 255, 0.28);
   font-size: 14px;
   text-align: center;
+}
+
+.auth-footer {
+  margin-top: 20px;
+  color: #718ba9;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.auth-footer p {
+  margin: 0;
+}
+
+.auth-footer strong {
+  color: #2185d8;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .is-registering .auth-brand-icon {
