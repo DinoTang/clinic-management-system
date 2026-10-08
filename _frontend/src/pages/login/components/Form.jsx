@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Lock, Eye, ArrowRightStroke, DoorOpenAlt } from "@boxicons/react";
+import { useAuth } from "../../../context/AuthContext";
+import { User, Lock, Eye, ArrowRightStroke, UserPlus } from "@boxicons/react";
 import Swal from "sweetalert2";
-import { login } from "../../../services/auth/authService.js";
+import { login as loginApi } from "../../../services/auth/authService.js";
 
 function Form() {
 	const [username, setUsername] = useState("");
@@ -10,7 +11,7 @@ function Form() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
+	const { login: loginContext} = useAuth();
 	const navigate = useNavigate();
 
     async function handleLogin(event) {
@@ -20,7 +21,8 @@ function Form() {
         setLoading(true);
 
         try {
-            const data = await login(username, password);
+            const data = await loginApi(username, password);
+			loginContext(data.token, data.user);
 			Swal.fire({
 			    icon: "success",
 			    title: "Đăng nhập thành công",
@@ -28,9 +30,8 @@ function Form() {
 			    timer: 2000,
 	        showConfirmButton: true,
 		    });
-            localStorage.setItem("token", data.token);
 
-            console.log(data);
+		    navigate("/");
 			// if (data.user.role === 0) navigate("/patient");
 			// else if (data.user.role === 1) navigate("/staff");
 			// else if (data.user.role === 2) navigate("/doctor");
@@ -110,7 +111,7 @@ function Form() {
 				</button>
 				<button type="button" className="flex flex-row gap-2 !p-3 border rounded font-bold bg-green-500 text-white justify-center">
 					Đăng ký
-					<DoorOpenAlt />
+					<UserPlus />
 				</button>
 
 			</div>

@@ -8,14 +8,14 @@ export async function login(username, password) {
         },
         body: JSON.stringify({
             username,
-            password,
+            password
         }),
     });
 
     const data = await response.json();
     if (!response.ok) {
     	if(response.status==400){
-	        throw new Error(data.password ?? data.username);    		
+	        throw new Error(data.password ?? data.username ?? data.message);    		
     	}
         throw new Error(data.message);
     }

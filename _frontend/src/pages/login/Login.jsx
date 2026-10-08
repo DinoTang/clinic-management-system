@@ -5,7 +5,7 @@ function Login() {
 
 	return(
 		<>
-		<div className="flex flex-row rounded w-9/10 min-h-screen items-start justify-between shadow-xl/30 !mx-auto ">
+		<div className="flex flex-row rounded w-9/10 min-h-screen items-start justify-between shadow-xl/30 rounded-[20px] overflow-hidden !mx-auto ">
 			<div className="w-1/2 hidden md:block">
 				<Background/>
 			</div>
