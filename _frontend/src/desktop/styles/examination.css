@@ -575,7 +575,7 @@
 .exam-lines td {
   padding: 6px 6px;
   border-bottom: 1px solid #eef2f7;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 .exam-lines select,

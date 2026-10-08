@@ -962,7 +962,7 @@ function DoctorExaminationPage() {
 
           {!selected ? (
             <div className="exam-placeholder">
-              <span className="icon">🩻</span>
+              <span className="icon"></span>
               <h3>Chưa chọn bệnh nhân</h3>
               <p>
                 Chọn một lượt khám trong hàng đợi bên trái (hoặc bấm &quot;Gọi
@@ -1243,7 +1243,7 @@ function DoctorExaminationPage() {
 
           {!selected ? (
             <div className="exam-placeholder">
-              <span className="icon">💊</span>
+              <span className="icon"></span>
               <h3>Chưa có bệnh nhân</h3>
               <p>
                 Chọn lượt khám để kê đơn thuốc và chỉ định dịch vụ cho bệnh
