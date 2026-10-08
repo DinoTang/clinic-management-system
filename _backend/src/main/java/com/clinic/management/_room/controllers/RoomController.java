@@ -1,4 +1,4 @@
-package com.clinic.management._room;
+package com.clinic.management._room.controllers;
 
 import com.clinic.management.common.enums.RoomStatus;
 import com.clinic.management._room.dtos.ProfileCreateRequest;

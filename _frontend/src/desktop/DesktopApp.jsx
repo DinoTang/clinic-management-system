@@ -4,6 +4,7 @@ import PatientBookingPage from "./pages/BookingPage/PatientBookingPage";
 import StaffLoginPage from "./pages/AuthPage/StaffLoginPage";
 import ReceptionPage from "./pages/ReceptionPage/ReceptionPage";
 import DesktopSchedulePage from "./pages/SchedulePage/DesktopSchedulePage";
+import DoctorExaminationPage from "./pages/ExaminationPage/DoctorExaminationPage";
 import "./styles/desktop-index.css";
 import "./styles/desktop-schedule.css";
 import "./styles/reception.css";
@@ -123,6 +124,21 @@ function App() {
         >
           👨‍⚕️ Quản Lý Lịch Trực (Bác Sĩ / Admin)
         </button>
+
+        <button
+          onClick={() => setCurrentPage("examination")}
+          style={{
+            padding: "8px 16px",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: 600,
+            background: currentPage === "examination" ? "#1976d2" : "#f1f5f9",
+            color: currentPage === "examination" ? "#ffffff" : "#475569",
+          }}
+        >
+          🩺 Khám Bệnh (Bác Sĩ)
+        </button>
         <button
           onClick={handleLogout}
           style={{
@@ -142,6 +158,7 @@ function App() {
       {currentPage === "reception" && <ReceptionPage />}
       {currentPage === "booking" && <PatientBookingPage />}
       {currentPage === "schedule" && <DesktopSchedulePage />}
+      {currentPage === "examination" && <DoctorExaminationPage />}
     </div>
   );
 }

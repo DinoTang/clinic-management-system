@@ -1,4 +1,4 @@
-package com.clinic.management._user;
+package com.clinic.management._user.controllers;
 
 import com.clinic.management.common.enums.Role;
 import com.clinic.management.common.enums.UserStatus;

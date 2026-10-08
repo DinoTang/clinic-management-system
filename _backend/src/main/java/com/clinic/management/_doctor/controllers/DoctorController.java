@@ -1,4 +1,4 @@
-package com.clinic.management._doctor;
+package com.clinic.management._doctor.controllers;
 
 import com.clinic.management._doctor.dtos.ProfileCreateRequest;
 import com.clinic.management._doctor.dtos.ProfileUpdateRequest;
