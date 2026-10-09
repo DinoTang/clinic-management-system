@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { User, Lock, Eye, ArrowRightStroke, UserPlus } from "@boxicons/react";
 import Swal from "sweetalert2";
@@ -8,7 +8,7 @@ import { login as loginApi } from "../../../services/auth/authService.js";
 function Form() {
 	const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 	const { login: loginContext} = useAuth();
@@ -17,7 +17,7 @@ function Form() {
     async function handleLogin(event) {
         event.preventDefault();
 
-        setError("");
+        setError(null);
         setLoading(true);
 
         try {
@@ -38,11 +38,16 @@ function Form() {
 			// else if (data.user.role === 3) navigate("/admin");
 
         } catch (error) {
-        	Swal.fire({
-		        icon: "error",
-		        title: "Đăng nhập thất bại",
-		        text: error.message,
-		    });
+        	setError(error);
+        	if(error.status==500){
+				Swal.fire({
+				    icon: "error",
+				    title: "Đăng nhập thất bại",
+				    text: error.message,
+				    timer: 2000,
+		        showConfirmButton: true,
+			    });
+        	}
         } finally {
             setLoading(false);
         }
@@ -63,8 +68,7 @@ function Form() {
 				<p className="text-s text-gray-500">Sử dụng tài khoản nội bộ để tiếp tục làm việc</p>
 			</div>
 			<div className="flex flex-col gap-4">
-				<div className="flex flex-col gap-2 text-blue-900 font-bold">
-					<label htmlFor="username">
+				<div className={`flex flex-col gap-2 text-blue-900 font-bold ${error?.username && "text-red-500"}`}>					<label htmlFor="username">
 						Tên đăng nhập
 					</label>
 					<div className="flex flex-row border rounded gap-2 !p-2">
@@ -80,9 +84,12 @@ function Form() {
                             placeholder="Nhập tên đăng nhập"
                             className="w-full appearance-none border-0 focus:outline-none focus:ring-0"/>
 					</div>
+					{error?.username && 
+						(<p className="text-sm text-red-400">{error.username}</p>)
+					}
 				</div>
 
-				<div className="flex flex-col gap-2 text-blue-900 font-bold">
+				<div className={`${error?.password && "text-red-500"} flex flex-col gap-2 text-blue-900 font-bold`}>
 					<label htmlFor="password">
 						Mật khẩu
 					</label>
@@ -100,8 +107,12 @@ function Form() {
 							className="w-full appearance-none border-0 focus:outline-none focus:ring-0"/>
 						<Eye onClick={togglePassword} className="cursor-pointer"/>
 					</div>
+					{error?.password && 
+						(<p className="text-sm text-red-400">{error.password}</p>)
+					}
 				</div>
 				<p className="text-blue-500 text-s font-bold text-right ">Quên mật khẩu?</p>
+
 			</div>
 
 			<div className="flex gap-4 flex-col">
@@ -109,10 +120,11 @@ function Form() {
 					{loading ? "Đang đăng nhập..." : "Đăng nhập"}
 					<ArrowRightStroke />
 				</button>
-				<button type="button" className="flex flex-row gap-2 !p-3 border rounded font-bold bg-green-500 text-white justify-center">
+				<p className="text-center">-----hoặc-----</p>
+				<Link to="/register" className="flex flex-row gap-2 !p-3 border rounded font-bold bg-green-500 text-white justify-center cursor-pointer">
 					Đăng ký
 					<UserPlus />
-				</button>
+				</Link>
 
 			</div>
 		</form>

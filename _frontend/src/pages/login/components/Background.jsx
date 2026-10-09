@@ -4,7 +4,7 @@ import BgApp from "../../../assets/bglogin.jpg";
 function Background() {
 	return (
 		<>
-		<div className="relative min-h-screen h-full">
+		<div className="relative h-full">
 			<div className="flex flex-col relative !p-16 justify-between gap-32 z-10 bg-transparent">
 				<div className="flex flex-row gap-2 items-center h-fit">
 					<img src={IconApp} alt="App icon" className="w-9 h-9"/>

@@ -45,6 +45,12 @@ locally and must not be committed.
 
 ![Màn hình mobile dành cho bệnh nhân](./imgs/login/login_1_mobile.png)
 
+**Trang đăng ký (register)**
+
+![Màn hình desktop](./imgs/register/register_desktop.png)
+
+![Màn hình mobile](./imgs/register/register_mobile.png)
+
 **Trang chủ (home)**
 
 ![Màn hình desktop](./imgs/home/home_desktop.png)

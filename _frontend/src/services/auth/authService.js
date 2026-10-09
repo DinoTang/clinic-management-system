@@ -14,10 +14,29 @@ export async function login(username, password) {
 
     const data = await response.json();
     if (!response.ok) {
-    	if(response.status==400){
-	        throw new Error(data.password ?? data.username ?? data.message);    		
-    	}
-        throw new Error(data.message);
+        throw data;
+    }
+    return data;
+}
+
+export async function register({username, password, email, fullName, phone}) {
+    const response = await fetch(`${API_URL}/register`,{
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            "username": username,
+            "password":password,
+            "email": email,
+            "phone": phone,
+            "fullName": fullName
+        })
+    });
+
+    const data= await response.json();
+    if(!response.ok){
+        throw data;
     }
     return data;
 }
