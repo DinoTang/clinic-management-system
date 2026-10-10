@@ -1,6 +1,7 @@
 package com.clinic.management._reception;
 
 import com.clinic.management._appointment.AppointmentRepository;
+import com.clinic.management._checkin.CheckInService;
 import com.clinic.management._patient.Patient;
 import com.clinic.management._patient.PatientRepository;
 import org.springframework.stereotype.Service;
@@ -12,16 +13,22 @@ import java.util.List;
 @Service
 public class ReceptionServiceImpl implements ReceptionService {
 
+    private static final String STATUS_CANCELLED = "DaHuy";
+    private static final String STATUS_ARRIVED = "DaDen";
+
     private final ReceptionRepository receptionRepository;
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
+    private final CheckInService checkInService;
 
     public ReceptionServiceImpl(ReceptionRepository receptionRepository,
                                 PatientRepository patientRepository,
-                                AppointmentRepository appointmentRepository) {
+                                AppointmentRepository appointmentRepository,
+                                CheckInService checkInService) {
         this.receptionRepository = receptionRepository;
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
+        this.checkInService = checkInService;
     }
 
     @Override
@@ -116,11 +123,19 @@ public class ReceptionServiceImpl implements ReceptionService {
                     .filter(a -> !Boolean.TRUE.equals(a.getDeleted()))
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Không tìm thấy lịch hẹn: " + reception.getAppointmentId()));
-            appointment.setStatus("DaDen");
+            if (STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())) {
+                throw new IllegalStateException(
+                        "Lịch hẹn " + appointment.getId() + " đã bị huỷ, không thể tiếp đón.");
+            }
+            appointment.setStatus(STATUS_ARRIVED);
             appointmentRepository.save(appointment);
         }
 
-        return receptionRepository.save(reception);
+        Reception saved = receptionRepository.save(reception);
+        if (saved.getAppointmentId() != null) {
+            checkInService.linkReception(saved.getAppointmentId(), saved.getId());
+        }
+        return saved;
     }
 
     @Override

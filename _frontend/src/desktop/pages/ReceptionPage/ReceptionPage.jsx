@@ -2,15 +2,15 @@ import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
 import { getLocalDateString } from "../../../utils/date.js";
+import QrCheckInScanner from "./QrCheckInScanner.jsx";
 import "../../styles/reception.css";
 import "../../styles/desktop-schedule.css";
 
 const RECEPTION_API = "http://localhost:8080/api/receptions";
-const APPOINTMENT_API = "http://localhost:8080/api/appointments";
+const CHECKIN_API = "http://localhost:8080/api/checkin";
 const ROOM_API = "http://localhost:8080/api/rooms";
 const DOCTOR_API = "http://localhost:8080/api/doctors";
 const PATIENT_API = "http://localhost:8080/api/patients";
-const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
 const SPECIALTY_API = "http://localhost:8080/api/specialties";
 
 function ReceptionPage() {
@@ -26,6 +26,8 @@ function ReceptionPage() {
   const [lookupAppointmentId, setLookupAppointmentId] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [filterRoomId, setFilterRoomId] = useState("");
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanNotice, setScanNotice] = useState(null);
 
   const [formData, setFormData] = useState({
     patientId: "",
@@ -136,73 +138,77 @@ function ReceptionPage() {
     }));
   };
 
-  // 6. Tra cứu lịch hẹn LHxxx
-  const handleLookupAppointment = () => {
-    if (!lookupAppointmentId.trim()) {
-      alert("Vui lòng nhập Mã lịch hẹn!");
+  // 6. Quét QR / tra cứu lịch hẹn tại quầy (mọi lần quét đều ghi vết vào bảng lichsucheckin)
+  const applyCheckInResult = (result) => {
+    if (!result) return;
+
+    if (!result.ok) {
+      setScanNotice({ tone: "error", text: result.message });
+      return;
+    }
+
+    const doc = doctors.find((d) => String(d.id) === String(result.doctorId));
+    const docSpecId = doc
+      ? doc.specialtyId || doc.departmentId || doc.specialty?.id
+      : "";
+    if (docSpecId) setSelectedSpecialtyId(docSpecId);
+
+    setLookupAppointmentId(result.appointmentId || "");
+    setFormData((prev) => ({
+      ...prev,
+      patientId: result.patientId || prev.patientId,
+      patientName: result.patientName || prev.patientName,
+      patientPhone: result.patientPhone || prev.patientPhone,
+      doctorId: result.doctorId || "",
+      roomId: result.roomId || prev.roomId,
+      appointmentId: result.appointmentId || "",
+      receptionType: "HenTruoc",
+      initialSymptoms: result.reason || "Khám theo lịch hẹn",
+    }));
+
+    const when = [result.appointmentDate, result.appointmentTime]
+      .filter(Boolean)
+      .join(" ");
+    setScanNotice({
+      tone: result.alreadyCheckedIn ? "warning" : "success",
+      text: `${result.message} · ${result.appointmentId} · ${
+        result.patientName || result.patientId || ""
+      } ${when}`.trim(),
+    });
+  };
+
+  const handleCheckInScan = (rawCode, method = "QR") => {
+    const code = String(rawCode ?? "").trim();
+    if (!code) {
+      setScanNotice({
+        tone: "error",
+        text: "Vui lòng nhập mã lịch hẹn hoặc quét mã QR.",
+      });
       return;
     }
 
     setLookupLoading(true);
     axios
-      .get(`${APPOINTMENT_API}/${lookupAppointmentId.trim()}`)
-      .then(async (res) => {
-        const app = res.data;
-        if (!app) {
-          alert("Không tìm thấy thông tin lịch hẹn này!");
-          return;
-        }
-
-        let assignedRoomId = "";
-
-        if (app.scheduleId) {
-          try {
-            const schedRes = await axios.get(
-              `${SCHEDULE_API}/${app.scheduleId}`,
-            );
-            if (schedRes.data && schedRes.data.roomId) {
-              assignedRoomId = schedRes.data.roomId;
-            }
-          } catch (e) {
-            console.error("Không tìm thấy phòng từ ca trực:", e);
-          }
-        }
-
-        const doc = doctors.find((d) => String(d.id) === String(app.doctorId));
-        if (doc) {
-          const docSpecId =
-            doc.specialtyId || doc.departmentId || doc.specialty?.id;
-          if (docSpecId) setSelectedSpecialtyId(docSpecId);
-
-          if (!assignedRoomId) {
-            const matched = rooms.find(
-              (r) =>
-                (r.specialtyId ||
-                  r.departmentId ||
-                  r.machuyenkhoa ||
-                  r.specialty?.id) === docSpecId,
-            );
-            if (matched) assignedRoomId = matched.id;
-          }
-        }
-
-        setFormData((prev) => ({
-          ...prev,
-          patientId: app.patientId,
-          doctorId: app.doctorId || "",
-          roomId: assignedRoomId || prev.roomId,
-          appointmentId: app.id,
-          receptionType: "HenTruoc",
-          initialSymptoms: app.reason || "Khám theo lịch hẹn",
-        }));
-
-        alert(`Đã tìm thấy lịch hẹn ${app.id} (Bệnh nhân: ${app.patientId})`);
+      .post(`${CHECKIN_API}/scan`, {
+        code,
+        employeeId: formData.employeeId,
+        method,
       })
+      .then((res) => applyCheckInResult(res.data))
       .catch((err) => {
         console.error(err);
-        alert("Lỗi tra cứu: Không tìm thấy mã lịch hẹn " + lookupAppointmentId);
+        setScanNotice({
+          tone: "error",
+          text:
+            err.response?.data?.message ||
+            "Lỗi tra cứu: không tìm thấy mã lịch hẹn " + code,
+        });
       })
       .finally(() => setLookupLoading(false));
+  };
+
+  const handleLookupAppointment = () => {
+    handleCheckInScan(lookupAppointmentId, "MANUAL");
   };
 
   // 7. Xử lý chuyển đổi loại tiếp đón
@@ -230,6 +236,7 @@ function ReceptionPage() {
   const handleResetForm = () => {
     setLookupAppointmentId("");
     setSelectedSpecialtyId("");
+    setScanNotice(null);
     setFormData({
       patientId: "",
       employeeId: "NV001",
@@ -340,8 +347,36 @@ function ReceptionPage() {
             >
               {lookupLoading ? "Đang tìm..." : "Tìm kiếm"}
             </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setScanOpen(true)}
+              disabled={lookupLoading}
+            >
+              📷 Quét QR
+            </button>
           </div>
+          <p className="lookup-hint">
+            Nhập mã lịch hẹn (ví dụ LH003) hoặc bấm “Quét QR” để quét phiếu
+            hẹn bằng webcam — không cần nhớ mã.
+          </p>
         </div>
+
+        {scanNotice && (
+          <div
+            className={`scan-notice scan-notice-${scanNotice.tone}`}
+            role="status"
+          >
+            <span>{scanNotice.text}</span>
+            <button
+              type="button"
+              aria-label="Đóng thông báo"
+              onClick={() => setScanNotice(null)}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmitReception}>
           {/* DÒNG 1: MÃ BỆNH NHÂN & LOẠI TIẾP ĐÓN */}
@@ -798,6 +833,17 @@ function ReceptionPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODAL QUÉT QR BẰNG WEBCAM */}
+      {scanOpen && (
+        <QrCheckInScanner
+          onClose={() => setScanOpen(false)}
+          onDecoded={(decodedText) => {
+            setScanOpen(false);
+            handleCheckInScan(decodedText, "QR");
+          }}
+        />
       )}
     </div>
   );

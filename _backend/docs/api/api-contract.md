@@ -264,3 +264,58 @@ The reception requires employee, room, and doctor IDs.
 Existing databases must apply
 `docs/database/migrations/20261002_add_walk_in_patient_fields.sql` before
 starting the updated backend.
+
+## Check-in (QR quét tại quầy)
+
+- `POST /api/checkin/scan`
+- `GET  /api/checkin/logs?date=YYYY-MM-DD`
+- `GET  /api/checkin/logs/appointment/{appointmentId}`
+
+`POST /api/checkin/scan` accepts `{ code, employeeId, method }` where `code` is
+the appointment ID on the patient's QR (`LH003`). Quét / nhập **mọi trường hợp**
+đều được ghi vết vào bảng `lichsucheckin` với `KETQUA`:
+
+| KETQUA | Ý nghĩa | HTTP result |
+| --- | --- | --- |
+| `ThanhCong` | Lịch hẹn hợp lệ, chưa tiếp đón | `ok: true` |
+| `DaCheckIn` | Lịch đã ở trạng thái `DaDen` (đã tiếp đón) | `ok: true`, `alreadyCheckedIn: true` |
+| `DaHuy` | Lịch hẹn đã bị huỷ | `ok: false` |
+| `KhongTimThay` | Mã không khớp lịch hẹn nào | `ok: false` |
+
+Khi `ok: true`, response kèm sẵn dữ liệu để đổ vào form tiếp đón:
+`appointmentId`, `appointmentDate`, `appointmentTime`, `reason`, `patientId`,
+`patientName`, `patientPhone`, `doctorId`, `doctorName`, `roomId` (lấy từ ca
+trực) — nhờ vậy quầy không cần gọi thêm `/api/doctors` hay
+`/api/doctor-schedules` để tìm phòng.
+
+`POST /api/receptions` giờ **chặn** tiếp đón cho lịch hẹn `DaHuy` (HTTP 400), và
+tự gắn `MATIEPDON` của lượt tiếp đón vào các dòng `lichsucheckin` chưa gắn của
+cùng lịch hẹn.
+
+Existing databases must apply
+`docs/database/migrations/20261010_add_checkin_log.sql` before starting the
+updated backend.
+
+## Billing
+
+- `GET    /api/billing/unpaid`
+- `GET    /api/billing/invoices/{id}` (kèm `details`)
+- `PUT    /api/billing/invoices/{id}/payment`
+- `POST   /api/invoices` (lập hóa đơn cho bệnh án)
+- `GET    /api/invoices/{id}` (alias)
+- `PUT    /api/invoices/{id}/payment` (alias)
+
+`POST /api/invoices` accepts `{ medicalRecordId, staffId }` and computes the
+total on the server (BR-053: examination fee + services + medicines). One
+invoice per medical record (BR-051); new invoices are `ChuaThanhToan`
+(BR-052) with medicine prices snapshotted at creation (BR-054).
+
+`PUT .../payment` accepts `{ method, amountGiven }`. `method` is one of
+`CASH | BANK_TRANSFER | CARD` (BR-058, stored as `TienMat | ChuyenKhoan |
+The`). Only `ChuaThanhToan` invoices can be paid (BR-056); `amountGiven` must
+cover the total (BR-057, change = amountGiven - total). Success sets the
+invoice to `DaThanhToan` with `paidAt` (BR-059). Rule violations return HTTP
+400 `{ "message": "BR-0xx: ..." }`.
+
+Invoice statuses stored in DB: `ChuaThanhToan` / `DaThanhToan` (docs
+statuses `UNPAID` / `PAID`).

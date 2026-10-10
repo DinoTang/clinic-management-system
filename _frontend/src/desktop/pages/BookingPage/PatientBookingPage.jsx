@@ -1,7 +1,9 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
 import { getLocalDateString } from "../../../utils/date.js";
+import { downloadTicketPdf } from "../../../utils/appointmentTicketPdf.js";
 import "../../styles/booking.css";
 import "../../styles/desktop-schedule.css";
 
@@ -35,6 +37,8 @@ function PatientBookingPage() {
 
   const [bookingSuccessResult, setBookingSuccessResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const ticketRef = useRef(null);
 
   // Tải danh mục khoa & bác sĩ ban đầu
   useEffect(() => {
@@ -147,6 +151,24 @@ function PatientBookingPage() {
         alert(err.response?.data?.message || "Lỗi khi đặt lịch khám!");
         setLoading(false);
       });
+  };
+
+  // Tải phiếu hẹn vừa đặt lịch thành file PDF để lưu lại hoặc in.
+  const handleDownloadPdf = async () => {
+    if (!bookingSuccessResult?.id) return;
+
+    setExportingPdf(true);
+    try {
+      await downloadTicketPdf(
+        ticketRef.current,
+        `PhieuHen_${bookingSuccessResult.id}.pdf`,
+      );
+    } catch (err) {
+      console.error("Lỗi tạo file PDF phiếu hẹn:", err);
+      alert("Không tạo được file PDF phiếu hẹn: " + (err?.message || err));
+    } finally {
+      setExportingPdf(false);
+    }
   };
 
   return (
@@ -442,12 +464,28 @@ function PatientBookingPage() {
               đây:
             </p>
 
-            <div className="ticket-container">
+            <div className="ticket-container" ref={ticketRef}>
               <div className="ticket-header">
                 <span style={{ fontWeight: 600, color: "#64748b" }}>
                   MÃ LỊCH HẸN
                 </span>
                 <span className="ticket-id">{bookingSuccessResult.id}</span>
+              </div>
+
+              <div className="ticket-qr">
+                <QRCodeCanvas
+                  value={bookingSuccessResult.id}
+                  size={168}
+                  level="M"
+                  marginSize={2}
+                  bgColor="#ffffff"
+                  fgColor="#1565c0"
+                  title={`Mã QR lịch hẹn ${bookingSuccessResult.id}`}
+                />
+                <p>
+                  Đưa mã QR này cho nhân viên quét tại quầy tiếp đón để
+                  check-in, không cần đọc mã lịch hẹn.
+                </p>
               </div>
 
               <div className="ticket-row">
@@ -494,6 +532,13 @@ function PatientBookingPage() {
             </div>
 
             <div className="button-row" style={{ justifyContent: "center" }}>
+              <button
+                className="btn-secondary"
+                onClick={handleDownloadPdf}
+                disabled={exportingPdf}
+              >
+                {exportingPdf ? "Đang tạo PDF..." : "📄 Tải Phiếu Hẹn (PDF)"}
+              </button>
               <button
                 className="btn-primary"
                 onClick={() => {
