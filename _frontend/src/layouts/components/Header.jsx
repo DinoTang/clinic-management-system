@@ -3,7 +3,6 @@ import {ListSquare, Search, User, Shield} from "@boxicons/react";
 import { Link } from "react-router-dom";
 import IconApp from "../../assets/IconApp.png";
 import Default from "../../assets/default.jpg";
-import Clock from "./Clock.jsx";
 import {useAuth } from "../../context/AuthContext.jsx";
 import UserMenuPopup from "./UserMenuPopup.jsx";
 
@@ -20,7 +19,6 @@ function Header() {
 					<img src={IconApp} className="h-[2.3rem] md:h-[4rem]" />
 					<p className="hidden md:block text-red-line text-[1.5rem] text-center md:text-[3rem] italic font-bold text-blue-500 ">CLINIC</p>
 				</Link>
-				<Clock className="hidden lg:block"/>
 			</div>
 
 			<div className="flex flex-row gap-4 justify-end">
@@ -31,7 +29,7 @@ function Header() {
 						<span className="tooltip">Tìm kiếm</span>
 					</button>
 				</form>
-				<div className="tooltip-container relative md:h-[3rem] md:w-[3rem] flex items-center justify-center cursor-pointer">
+				<div className="md:hidden tooltip-container relative md:h-[3rem] md:w-[3rem] flex items-center justify-center cursor-pointer">
 					<ListSquare className="text-lg"/>
 					<span className="tooltip">Menu</span>
 				</div>
@@ -49,10 +47,10 @@ function Header() {
 				</div>
 
 				{isAuthenticated &&
-				<div className="tooltip-container relative md:h-[3rem] md:w-[3rem] flex items-center justify-center cursor-pointer">
+				<Link to="/m-staffs" className="tooltip-container relative md:h-[3rem] md:w-[3rem] flex items-center justify-center cursor-pointer">
 					<Shield className="text-lg"/>
 					<span className="tooltip">Công việc</span>
-				</div>
+				</Link>
 				}
 
 			</div>
