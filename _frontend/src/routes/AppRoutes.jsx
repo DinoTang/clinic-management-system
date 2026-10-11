@@ -31,6 +31,7 @@ function AppRoutes() {
 
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/mobile/*" element={<PatientMobileApp />} />
             <Route path="/desktop/*" element={<DesktopApp />} />
             <Route path="/*" element={<PatientMobileApp />} />
         </Routes>

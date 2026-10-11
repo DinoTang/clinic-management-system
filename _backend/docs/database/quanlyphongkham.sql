@@ -385,7 +385,7 @@ CREATE TABLE `nguoidung` (
   `EMAIL` varchar(100) DEFAULT NULL,
   `SODIENTHOAI` varchar(10) DEFAULT NULL,
   -- `VAITRO` enum('ADMIN','DOCTOR','STAFF','PATIENT') NOT NULL,
-  `VAITRO` tinyint(1) NOT NULL,  
+  `VAITRO` tinyint(1) NOT NULL,
   `TRANGTHAI` tinyint(1) NOT NULL DEFAULT 1,
   `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0,
   `NGAYTAO` timestamp NOT NULL DEFAULT current_timestamp(),
