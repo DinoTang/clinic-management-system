@@ -25,3 +25,50 @@ body {
   text-rendering: optimizeLegibility;
   overscroll-behavior: none;
 }
+
+.tooltip{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: black;
+    color: white;
+    padding: 0.2rem 0.3rem;
+    font-size: 0.7rem;
+    border-radius: 0.5rem ;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    transform: translateY(100%);
+    white-space: nowrap;
+    z-index: 1;
+}
+.tooltip-container{
+    position: relative;
+    cursor: pointer;
+}
+.tooltip-container:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.text-red-line {
+  text-shadow:
+      1px 1px 1px red,
+      -1px -1px 1px red,
+      1px -1px 1px red,
+      -1px 1px 1px red;
+}
+@keyframes slide-down {
+    0% {
+        opacity: 0;
+        transform: translate(0, -100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+.slide-down {
+    animation: slide-down 0.6s ease-out backwards;
+}
