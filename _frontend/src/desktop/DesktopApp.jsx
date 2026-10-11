@@ -5,9 +5,31 @@ import StaffLoginPage from "./pages/AuthPage/StaffLoginPage";
 import ReceptionPage from "./pages/ReceptionPage/ReceptionPage";
 import DesktopSchedulePage from "./pages/SchedulePage/DesktopSchedulePage";
 import DoctorExaminationPage from "./pages/ExaminationPage/DoctorExaminationPage";
+import AdminWorkspace from "./pages/AdminPage/AdminWorkspace.jsx";
+import { normalizeRole, ROLE_CONFIG } from "./roles.js";
 import "./styles/desktop-index.css";
 import "./styles/desktop-schedule.css";
 import "./styles/reception.css";
+
+function readStaffSession() {
+  try {
+    const session = JSON.parse(
+      sessionStorage.getItem("clinic-staff-session") || "null",
+    );
+    const role = normalizeRole(session?.role);
+    if (!role || !ROLE_CONFIG[role]) return null;
+    if (session.mode === "database" && !session.token) return null;
+    if (!["database", "demo"].includes(session.mode)) return null;
+    const savedSession = { ...session, role };
+    if (savedSession.mode === "database") {
+      axios.defaults.headers.common.Authorization = `Bearer ${savedSession.token}`;
+    }
+    return savedSession;
+  } catch (error) {
+    console.error("Không thể đọc phiên nhân viên đã lưu.", error);
+    return null;
+  }
+}
 
 function App() {
   const hostname = window.location.hostname;
@@ -16,35 +38,43 @@ function App() {
     hostname === "127.0.0.1" ||
     hostname === "[::1]";
 
-  const [currentPage, setCurrentPage] = useState("reception"); // Mặc định mở trang Tiếp đón
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const session = JSON.parse(
-      sessionStorage.getItem("clinic-staff-session") || "null",
-    );
-    if (session?.mode === "database" && session.token) {
-      axios.defaults.headers.common.Authorization = `Bearer ${session.token}`;
-    }
-    return Boolean(session?.mode === "demo" || session?.token);
-  });
+  const [session, setSession] = useState(readStaffSession);
+  const [currentPage, setCurrentPage] = useState(() =>
+    session?.role === "ADMIN"
+      ? "admin"
+      : session?.role === "DOCTOR"
+        ? "schedule"
+        : "reception",
+  );
 
-  const handleLoginSuccess = (session) => {
-    sessionStorage.setItem("clinic-staff-session", JSON.stringify(session));
-    if (session.mode === "database") {
-      axios.defaults.headers.common.Authorization = `Bearer ${session.token}`;
+  const handleLoginSuccess = (nextSession) => {
+    const role = normalizeRole(nextSession.role);
+    if (!role || !ROLE_CONFIG[role]) return;
+
+    const authenticatedSession = { ...nextSession, role };
+    sessionStorage.setItem(
+      "clinic-staff-session",
+      JSON.stringify(authenticatedSession),
+    );
+    if (authenticatedSession.mode === "database") {
+      axios.defaults.headers.common.Authorization = `Bearer ${authenticatedSession.token}`;
     } else {
       delete axios.defaults.headers.common.Authorization;
     }
-    setIsAuthenticated(true);
+    setSession(authenticatedSession);
+    setCurrentPage(
+      role === "ADMIN" ? "admin" : role === "DOCTOR" ? "schedule" : "reception",
+    );
   };
 
   const handleLogout = () => {
     sessionStorage.removeItem("clinic-staff-session");
     delete axios.defaults.headers.common.Authorization;
-    setIsAuthenticated(false);
+    setSession(null);
     setCurrentPage("reception");
   };
 
-  if (!isAuthenticated) {
+  if (!session) {
     return (
       <StaffLoginPage
         onLoginSuccess={handleLoginSuccess}
@@ -53,106 +83,45 @@ function App() {
     );
   }
 
+  const roleConfig = ROLE_CONFIG[session.role];
+
+  if (session.role === "ADMIN") {
+    return (
+      <div className="desktop-app-root">
+        <AdminWorkspace onLogout={handleLogout} />
+      </div>
+    );
+  }
+
   return (
     <div className="desktop-app-root">
-      <nav
-        style={{
-          display: "flex",
-          gap: "12px",
-          padding: "12px 24px",
-          background: "#ffffff",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-        }}
-      >
-        {demoLogin && (
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              color: "#245d87",
-              background: "#e7f3fc",
-              fontSize: "13px",
-              fontWeight: 600,
-            }}
+      <nav className="desktop-workspace-nav" aria-label="Khu vực làm việc">
+        <div className="desktop-workspace-links">
+          {roleConfig.pages.map((page) => (
+            <button
+              aria-current={currentPage === page.id ? "page" : undefined}
+              className={`desktop-workspace-button${currentPage === page.id ? " is-active" : ""}`}
+              key={page.id}
+              onClick={() => setCurrentPage(page.id)}
+              type="button"
+            >
+              {page.label}
+            </button>
+          ))}
+        </div>
+        <div className="desktop-workspace-account">
+          <span className="desktop-role-label">{roleConfig.label}</span>
+          {session.mode === "demo" && (
+            <span className="desktop-demo-label">Đăng nhập tạm</span>
+          )}
+          <button
+            className="desktop-workspace-button desktop-logout-button"
+            onClick={handleLogout}
+            type="button"
           >
-            Đăng nhập demo · Các chức năng vẫn kết nối backend
-          </span>
-        )}
-        <button
-          onClick={() => setCurrentPage("reception")}
-          style={{
-            padding: "8px 16px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 600,
-            background: currentPage === "reception" ? "#1976d2" : "#f1f5f9",
-            color: currentPage === "reception" ? "#ffffff" : "#475569",
-          }}
-        >
-          📋 Tiếp Đón & Hàng Đợi (Lễ Tân)
-        </button>
-
-        <button
-          onClick={() => setCurrentPage("booking")}
-          style={{
-            padding: "8px 16px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 600,
-            background: currentPage === "booking" ? "#1976d2" : "#f1f5f9",
-            color: currentPage === "booking" ? "#ffffff" : "#475569",
-          }}
-        >
-          🏥 Đặt Lịch Khám (Bệnh Nhân)
-        </button>
-
-        <button
-          onClick={() => setCurrentPage("schedule")}
-          style={{
-            padding: "8px 16px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 600,
-            background: currentPage === "schedule" ? "#1976d2" : "#f1f5f9",
-            color: currentPage === "schedule" ? "#ffffff" : "#475569",
-          }}
-        >
-          👨‍⚕️ Quản Lý Lịch Trực (Bác Sĩ / Admin)
-        </button>
-
-        <button
-          onClick={() => setCurrentPage("examination")}
-          style={{
-            padding: "8px 16px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 600,
-            background: currentPage === "examination" ? "#1976d2" : "#f1f5f9",
-            color: currentPage === "examination" ? "#ffffff" : "#475569",
-          }}
-        >
-          🩺 Khám Bệnh (Bác Sĩ)
-        </button>
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: "8px 16px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: 600,
-            color: "#475569",
-            background: "#f1f5f9",
-          }}
-        >
-          Đăng xuất
-        </button>
+            Đăng xuất
+          </button>
+        </div>
       </nav>
 
       {currentPage === "reception" && <ReceptionPage />}

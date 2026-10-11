@@ -17,11 +17,65 @@ const mimeTypes = {
   ".webp": "image/webp",
 };
 
+function proxyApiRequest(request, response) {
+  const headers = { ...request.headers, host: "127.0.0.1:8080" };
+  delete headers.origin;
+  delete headers.connection;
+
+  const proxyRequest = http.request(
+    {
+      hostname: "127.0.0.1",
+      port: 8080,
+      path: request.url,
+      method: request.method,
+      headers,
+    },
+    (proxyResponse) => {
+      const responseHeaders = { ...proxyResponse.headers };
+      delete responseHeaders.connection;
+      delete responseHeaders["keep-alive"];
+      delete responseHeaders["proxy-authenticate"];
+      delete responseHeaders["proxy-authorization"];
+      delete responseHeaders.te;
+      delete responseHeaders.trailer;
+      delete responseHeaders.upgrade;
+      response.writeHead(proxyResponse.statusCode || 502, responseHeaders);
+      proxyResponse.pipe(response);
+    },
+  );
+
+  proxyRequest.on("error", (error) => {
+    console.error("Unable to reach the clinic backend:", error.message);
+    if (response.headersSent) {
+      response.destroy(error);
+      return;
+    }
+    response.writeHead(502, {
+      "Content-Type": "application/json; charset=utf-8",
+    });
+    response.end(
+      JSON.stringify({
+        message: "Không thể kết nối backend tại localhost:8080.",
+      }),
+    );
+  });
+
+  request.on("aborted", () => proxyRequest.destroy());
+  response.on("close", () => {
+    if (!response.writableEnded) proxyRequest.destroy();
+  });
+  request.pipe(proxyRequest);
+}
+
 function serveFrontend(mode) {
   const distPath = path.resolve(__dirname, "../dist");
   const preferredPort = mode === "desktop" ? 5173 : 0;
   const server = http.createServer((request, response) => {
     const requestPath = new URL(request.url, "http://localhost").pathname;
+    if (requestPath === "/api" || requestPath.startsWith("/api/")) {
+      proxyApiRequest(request, response);
+      return;
+    }
     let relativePath;
 
     try {

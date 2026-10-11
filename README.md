@@ -33,6 +33,23 @@ Installers are written to `_frontend/release/` and
 they do not create an Android APK. Release files and `node_modules` are generated
 locally and must not be committed.
 
+## Desktop workspaces and login
+
+The desktop app has separate workspaces for administrators, doctors, and staff.
+On localhost and in the Electron app, choose a temporary role to preview the
+corresponding workspace without logging in. The Admin preview contains sample
+data for the dashboard, accounts, patients, doctors, specialties, rooms,
+schedules, appointments, medicines, services, invoices, and reports. Admin
+preview edits remain in frontend memory and are not saved to the database.
+Temporary role selection does not authenticate or authorize API requests.
+
+Use **Đăng nhập bằng tài khoản thật** to authenticate through the backend and
+open the workspace for the role returned by the account. For this option and
+backend features to work in the packaged app, the Spring backend must be
+running at `localhost:8080` and connected to the configured database. The
+Windows installer packages the desktop frontend; it does not start the backend
+or database as services.
+
 # Screenshot giao diện
 
 **Trang đăng nhập (login)**
