@@ -52,50 +52,48 @@ or database as services.
 
 # Screenshot giao diện
 
-**Trang đăng nhập (login)**
+---
 
-Đăng nhập desktop
-![Màn hình desktop](./imgs/login/login_desktop.png)
+## Trang chủ (Home)
 
-Đăng nhập mobile
-![Màn hình mobile](./imgs/login/login_mobile.png)
+### Desktop
+![Màn hình trang chủ desktop](./imgs/home/home_desktop.png)
 
+### Mobile
+![Màn hình trang chủ mobile](./imgs/home/home_mobile.png)
 
-**Trang đăng ký (register)**
+---
 
-Đăng ký desktop
-![Màn hình desktop](./imgs/register/register_desktop.png)
+## Quản lý nhân viên
 
-Đăng ký mobile
-![Màn hình mobile](./imgs/register/register_mobile.png)
+### 1. Danh sách nhân viên
 
-**Trang chủ (home)**
+#### Desktop
+![Trang quản lý nhân viên desktop](./imgs/mstaff/staff_desktop.png)
 
-![Màn hình desktop](./imgs/home/home_desktop.png)
+#### Mobile
+![Trang quản lý nhân viên mobile](./imgs/mstaff/staff_mobile.png)
 
-![Màn hình mobile](./imgs/home/home_mobile.png)
+### 2. Xem thông tin nhân viên
 
-**Quản lý nhân viên**
-Trang quản lý desktop
-![Màn hình desktop](./imgs/mstaff/staff_desktop.png)
+#### Desktop
+![Trang xem thông tin nhân viên desktop](./imgs/mstaff/staff_view_desktop.png)
 
-Trang quản lý mobile
-![Màn hình mobile](./imgs/mstaff/staff_mobile.png)
+#### Mobile
+![Trang xem thông tin nhân viên mobile](./imgs/mstaff/staff_view_mobile.png)
 
-Trang xem desktop
-![Màn hình desktop](./imgs/mstaff/staff_view_desktop.png)
+### 3. Chỉnh sửa thông tin nhân viên
 
-Trang xem mobile
-![Màn hình mobile](./imgs/mstaff/staff_view_mobile.png)
+#### Desktop
+![Trang chỉnh sửa nhân viên desktop](./imgs/mstaff/staff_eit_desktop.png)
 
-Trang chỉnh sửa desktop
-![Màn hình mobile](./imgs/mstaff/staff_eit_desktop.png)
+#### Mobile
+![Trang chỉnh sửa nhân viên mobile](./imgs/mstaff/staff_eit_mobile.png)
 
-Trang chỉnh sửa mobile
-![Màn hình mobile](./imgs/mstaff/staff_eit_mobile.png)
+### 4. Xóa nhân viên
 
-Trang xóa desktop
-![Màn hình mobile](./imgs/mstaff/staff_delete_desktop.png)
+#### Desktop
+![Trang xóa nhân viên desktop](./imgs/mstaff/staff_delete_desktop.png)
 
-Trang xóa mobile
-![Màn hình mobile](./imgs/mstaff/staff_delete_mobile.png)
+#### Mobile
+![Trang xóa nhân viên mobile](./imgs/mstaff/staff_delete_mobile.png)
