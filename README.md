@@ -54,18 +54,19 @@ or database as services.
 
 **Trang đăng nhập (login)**
 
+Đăng nhập desktop
 ![Màn hình desktop](./imgs/login/login_desktop.png)
 
+Đăng nhập mobile
 ![Màn hình mobile](./imgs/login/login_mobile.png)
 
-![Màn hình desktop dành cho bệnh nhân](./imgs/login/login_1_desktop.png)
-
-![Màn hình mobile dành cho bệnh nhân](./imgs/login/login_1_mobile.png)
 
 **Trang đăng ký (register)**
 
+Đăng ký desktop
 ![Màn hình desktop](./imgs/register/register_desktop.png)
 
+Đăng ký mobile
 ![Màn hình mobile](./imgs/register/register_mobile.png)
 
 **Trang chủ (home)**

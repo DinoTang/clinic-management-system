@@ -31,11 +31,22 @@ function Form() {
 	        showConfirmButton: true,
 		    });
 
-		    navigate("/");
-			// if (data.user.role === 0) navigate("/patient");
-			// else if (data.user.role === 1) navigate("/staff");
-			// else if (data.user.role === 2) navigate("/doctor");
-			// else if (data.user.role === 3) navigate("/admin");
+			if(data.user.status=="Đã khóa"){
+				Swal.fire({
+				    icon: "error",
+				    title: "Đăng nhập từ chối",
+				    text: `Tài khoản ${data.user.username} đã bị khóa`,
+				    timer: 5000,
+		        showConfirmButton: true,
+			    });
+			    return;
+			}
+			
+			if (data.user.role =="Nhà phát triển") navigate("/");			
+			else if (data.user.role =="Quản trị viên") navigate("/");
+			else if (data.user.role =="Nhân viên") navigate("/");
+			else if (data.user.role =="Bác sĩ") navigate("/");
+			else if (data.user.role == "Bệnh nhân") navigate("/");
 
         } catch (error) {
         	setError(error);
