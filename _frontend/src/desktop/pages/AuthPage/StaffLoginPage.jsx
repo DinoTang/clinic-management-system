@@ -87,7 +87,7 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:8080/api/auth/login",
+        "/api/auth/login",
         { username, password },
       );
       const role = String(data?.user?.role ?? "")

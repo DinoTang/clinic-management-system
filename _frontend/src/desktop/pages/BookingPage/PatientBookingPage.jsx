@@ -5,10 +5,10 @@ import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/booking.css";
 import "../../styles/desktop-schedule.css";
 
-const SPECIALTY_API = "http://localhost:8080/api/specialties";
-const DOCTOR_API = "http://localhost:8080/api/doctors";
-const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
-const APPOINTMENT_API = "http://localhost:8080/api/appointments";
+const SPECIALTY_API = "/api/specialties";
+const DOCTOR_API = "/api/doctors";
+const SCHEDULE_API = "/api/doctor-schedules";
+const APPOINTMENT_API = "/api/appointments";
 
 function PatientBookingPage() {
   const [step, setStep] = useState(1);

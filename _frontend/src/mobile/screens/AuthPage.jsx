@@ -124,7 +124,7 @@ function AuthPage({ onLoginSuccess }) {
 
     try {
       if (isRegistering) {
-        await axios.post("http://localhost:8080/api/auth/patient/register", {
+        await axios.post("/api/auth/patient/register", {
           fullName: registration.fullName,
           birthDate: registration.birthDate,
           gender: registration.gender,
@@ -138,7 +138,7 @@ function AuthPage({ onLoginSuccess }) {
         setMessage("Đăng ký thành công. Hãy nhập mật khẩu để đăng nhập.");
       } else {
         const { data } = await axios.post(
-          "http://localhost:8080/api/auth/patient/login",
+          "/api/auth/patient/login",
           {
             phone: loginPhone,
             password: loginPassword,

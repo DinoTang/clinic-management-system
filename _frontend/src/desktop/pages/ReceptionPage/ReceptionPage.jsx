@@ -5,13 +5,13 @@ import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/reception.css";
 import "../../styles/desktop-schedule.css";
 
-const RECEPTION_API = "http://localhost:8080/api/receptions";
-const APPOINTMENT_API = "http://localhost:8080/api/appointments";
-const ROOM_API = "http://localhost:8080/api/rooms";
-const DOCTOR_API = "http://localhost:8080/api/doctors";
-const PATIENT_API = "http://localhost:8080/api/patients";
-const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
-const SPECIALTY_API = "http://localhost:8080/api/specialties";
+const RECEPTION_API = "/api/receptions";
+const APPOINTMENT_API = "/api/appointments";
+const ROOM_API = "/api/rooms";
+const DOCTOR_API = "/api/doctors";
+const PATIENT_API = "/api/patients";
+const SCHEDULE_API = "/api/doctor-schedules";
+const SPECIALTY_API = "/api/specialties";
 
 function ReceptionPage() {
   const today = getLocalDateString();
@@ -82,7 +82,7 @@ function ReceptionPage() {
           "Chưa có API chuyên khoa riêng, thử lấy từ /api/departments...",
         );
         axios
-          .get("http://localhost:8080/api/departments")
+          .get("/api/departments")
           .then((res) => setSpecialties(getCollectionData(res.data)))
           .catch(console.error);
       });

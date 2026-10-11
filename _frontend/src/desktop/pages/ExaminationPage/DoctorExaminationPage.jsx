@@ -5,7 +5,7 @@ import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/desktop-schedule.css";
 import "../../styles/examination.css";
 
-const API_BASE = "http://localhost:8080";
+const API_BASE = "";
 const RECEPTION_API = `${API_BASE}/api/receptions`;
 const PATIENT_API = `${API_BASE}/api/patients`;
 const DOCTOR_API = `${API_BASE}/api/doctors`;

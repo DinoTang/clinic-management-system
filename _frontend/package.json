@@ -12,6 +12,7 @@
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "mobile:web": "vite --host 0.0.0.0",
     "electron:dev": "concurrently -k \"vite --host localhost\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:dev:mobile": "concurrently -k \"vite --host localhost\" \"wait-on http://localhost:5173 && electron electron/main-mobile.cjs\"",
     "build": "vite build",

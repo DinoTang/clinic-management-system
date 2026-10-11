@@ -1,8 +1,10 @@
 import { useState } from "react";
 import "./PatientMobileApp.css";
+import "./PatientWorkspace.css";
 import Avatar from "./components/Avatar";
 import AuthPage from "./screens/AuthPage";
 import PatientHomeScreen from "./screens/PatientHomeScreen";
+import PatientWorkspace from "./screens/PatientWorkspace";
 
 const navigation = [
   { id: "home", label: "Trang chủ", icon: "home" },
@@ -10,55 +12,6 @@ const navigation = [
   { id: "records", label: "Hồ sơ", icon: "records" },
   { id: "profile", label: "Cá nhân", icon: "user" },
 ];
-
-const sectionContent = {
-  appointments: {
-    title: "Lịch khám",
-    description: "Theo dõi lịch hẹn và đặt lịch khám mới.",
-    icon: "calendar",
-    items: [
-      ["Lịch khám sắp tới", "14/10/2026 · 09:30", "Đã xác nhận"],
-      ["Lịch sử khám", "Các lần khám trước sẽ được lưu tại đây."],
-    ],
-  },
-  records: {
-    title: "Hồ sơ bệnh án",
-    description: "Thông tin khám và điều trị của bạn.",
-    icon: "records",
-    items: [
-      ["Hồ sơ khám", "Kết quả khám sẽ hiển thị sau khi hoàn tất."],
-      ["Đơn thuốc", "Xem hướng dẫn dùng thuốc được bác sĩ kê."],
-      ["Hóa đơn", "Theo dõi chi phí và trạng thái thanh toán."],
-    ],
-  },
-  profile: {
-    title: "Thông tin cá nhân",
-    description: "Quản lý thông tin tài khoản bệnh nhân.",
-    icon: "user",
-    items: [
-      ["Nguyễn Văn An", "Bệnh nhân"],
-      ["Thông tin liên hệ", "Cập nhật số điện thoại và thông tin cá nhân."],
-    ],
-  },
-  notifications: {
-    title: "Thông báo",
-    description: "Nhắc nhở lịch khám và cập nhật từ phòng khám.",
-    icon: "bell",
-    items: [["Nhắc lịch tái khám", "Đừng quên lịch hẹn sắp tới của bạn."]],
-  },
-  prescription: {
-    title: "Đơn thuốc",
-    description: "Hướng dẫn sử dụng thuốc theo chỉ định của bác sĩ.",
-    icon: "pill",
-    items: [["Đơn thuốc gần đây", "Đơn thuốc sẽ hiển thị sau khi bác sĩ hoàn tất khám."]],
-  },
-  invoices: {
-    title: "Hóa đơn",
-    description: "Xem hóa đơn và trạng thái thanh toán.",
-    icon: "invoice",
-    items: [["Hóa đơn khám bệnh", "Hóa đơn sẽ hiển thị sau khi hoàn tất khám."]],
-  },
-};
 
 function Icon({ name, size = 24, filled = false }) {
   const paths = {
@@ -87,6 +40,7 @@ function Icon({ name, size = 24, filled = false }) {
       </>
     ),
     chevron: <path d="m9 18 6-6-6-6" />,
+    back: <path d="m15 18-6-6 6-6" />,
     clock: (
       <>
         <circle cx="12" cy="12" r="9" />
@@ -135,6 +89,15 @@ function Icon({ name, size = 24, filled = false }) {
         <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
       </>
     ),
+    plus: <path d="M12 5v14m-7-7h14" />,
+    check: <path d="m5 12 4 4L19 6" />,
+    close: <path d="m18 6-12 12M6 6l12 12" />,
+    chat: (
+      <>
+        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z" />
+        <path d="M8 12h8M8 8h5" />
+      </>
+    ),
   };
 
   return (
@@ -154,74 +117,66 @@ function Icon({ name, size = 24, filled = false }) {
   );
 }
 
-function SectionPage({ page, Icon, onNavigate, onLogout }) {
-  const content = sectionContent[page];
+function readPatientSession() {
+  const savedSession =
+    sessionStorage.getItem("clinic-patient-session") ||
+    localStorage.getItem("clinic-patient-session");
 
-  return (
-    <section className="patient-section">
-      <div className="section-page-heading">
-        <span className="section-page-icon">
-          <Icon name={content.icon} size={28} />
-        </span>
-        <div>
-          <h1>{content.title}</h1>
-          <p>{content.description}</p>
-        </div>
-      </div>
-      <div className="section-page-list">
-        {content.items.map(([title, description, status]) => (
-          <article className="section-page-card" key={title}>
-            <div>
-              <strong>{title}</strong>
-              <p>{description}</p>
-            </div>
-            {status && <span className="appointment-status">{status}</span>}
-            <Icon name="chevron" size={20} />
-          </article>
-        ))}
-      </div>
-      <button
-        className="section-home-link"
-        onClick={() => onNavigate("home")}
-        type="button"
-      >
-        <Icon name="home" size={18} /> Về trang chủ
-      </button>
-      {page === "profile" && (
-        <button
-          className="patient-logout-button"
-          onClick={onLogout}
-          type="button"
-        >
-          <Icon name="logout" size={19} />
-          Đăng xuất
-        </button>
-      )}
-    </section>
-  );
+  if (!savedSession) return null;
+
+  try {
+    return JSON.parse(savedSession).patient ?? null;
+  } catch (error) {
+    console.error("Không thể đọc phiên bệnh nhân đã lưu.", error);
+    return null;
+  }
 }
 
 function App() {
-  const [patientProfile, setPatientProfile] = useState(() => {
-    const savedSession =
-      sessionStorage.getItem("clinic-patient-session") ||
-      localStorage.getItem("clinic-patient-session");
-
-    return savedSession ? JSON.parse(savedSession).patient : null;
-  });
+  const [patientProfile, setPatientProfile] = useState(readPatientSession);
   const [currentPage, setCurrentPage] = useState(() =>
     patientProfile ? "home" : "auth",
   );
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  const [appointments, setAppointments] = useState([
+    {
+      id: "LH20261014001",
+      specialty: "Nội khoa",
+      doctor: "BS. Trần Minh Tuấn",
+      date: "2026-10-14",
+      time: "09:30",
+      reason: "Khám định kỳ",
+      symptoms: "Mệt mỏi nhẹ",
+      status: "CONFIRMED",
+      room: "Phòng khám 1",
+    },
+  ]);
+  const [profileDetails, setProfileDetails] = useState({
+    fullName: patientProfile?.fullName || "Nguyễn Văn An",
+    birthDate: "",
+    gender: "Nam",
+    phone: "",
+    email: "",
+    address: "",
+    medicalHistory: "",
+  });
+  const [toast, setToast] = useState("");
+
+  const showToast = (message) => {
+    setToast(message);
+    window.setTimeout(() => setToast(""), 3200);
+  };
 
   const handleLoginSuccess = (profile) => {
     setPatientProfile(profile);
+    setProfileDetails((current) => ({
+      ...current,
+      fullName: profile?.fullName || current.fullName,
+    }));
     setCurrentPage("home");
   };
 
-  const requestLogout = () => {
-    setShowLogoutConfirmation(true);
-  };
+  const requestLogout = () => setShowLogoutConfirmation(true);
 
   const confirmLogout = () => {
     localStorage.removeItem("clinic-patient-session");
@@ -231,17 +186,29 @@ function App() {
     setCurrentPage("auth");
   };
 
+  const [notificationsRead, setNotificationsRead] = useState(false);
+  const unreadNotifications = notificationsRead ? 0 : 1;
+
   if (currentPage === "auth") {
     return <AuthPage onLoginSuccess={handleLoginSuccess} />;
   }
+
+  const visibleTab =
+    ["home", "appointments", "records", "profile"].includes(currentPage)
+      ? currentPage
+      : currentPage === "booking"
+        ? "appointments"
+        : currentPage === "notifications" || currentPage === "assistant"
+          ? "home"
+          : "records";
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <div className="patient-greeting">
           <span>Xin chào,</span>
-          <h1>{patientProfile?.fullName || "Bệnh nhân"}</h1>
-          <p>{patientProfile?.role || "Bệnh nhân"}</p>
+          <h1>{profileDetails.fullName || "Bệnh nhân"}</h1>
+          <p>Bệnh nhân</p>
         </div>
         <button
           aria-label="Thông báo"
@@ -250,7 +217,7 @@ function App() {
           type="button"
         >
           <Icon name="bell" size={23} />
-          <span className="notification-dot" />
+          {unreadNotifications > 0 && <span className="notification-dot" />}
         </button>
         <button
           aria-label="Thông tin cá nhân"
@@ -258,7 +225,7 @@ function App() {
           onClick={() => setCurrentPage("profile")}
           type="button"
         >
-          <Avatar gender={patientProfile.gender} />
+          <Avatar gender={patientProfile?.gender} />
         </button>
       </header>
 
@@ -270,10 +237,17 @@ function App() {
             doctorGender="MALE"
           />
         ) : (
-          <SectionPage
+          <PatientWorkspace
             page={currentPage}
-            Icon={Icon}
             onNavigate={setCurrentPage}
+            Icon={Icon}
+            appointments={appointments}
+            setAppointments={setAppointments}
+            profile={profileDetails}
+            setProfile={setProfileDetails}
+            showToast={showToast}
+            notificationsRead={notificationsRead}
+            onMarkNotificationsRead={() => setNotificationsRead(true)}
             onLogout={requestLogout}
           />
         )}
@@ -282,8 +256,8 @@ function App() {
       <nav className="bottom-nav" aria-label="Điều hướng chính">
         {navigation.map((item) => (
           <button
-            aria-current={currentPage === item.id ? "page" : undefined}
-            className={`bottom-nav-item${currentPage === item.id ? " is-active" : ""}`}
+            aria-current={visibleTab === item.id ? "page" : undefined}
+            className={`bottom-nav-item${visibleTab === item.id ? " is-active" : ""}`}
             key={item.id}
             onClick={() => setCurrentPage(item.id)}
             type="button"
@@ -292,13 +266,21 @@ function App() {
               <Icon
                 name={item.icon}
                 size={25}
-                filled={currentPage === item.id}
+                filled={visibleTab === item.id}
               />
             </span>
             <span>{item.label}</span>
           </button>
         ))}
       </nav>
+
+      {toast && (
+        <div className="patient-toast" role="status">
+          <Icon name="check" size={19} />
+          {toast}
+        </div>
+      )}
+
       {showLogoutConfirmation && (
         <div
           className="logout-dialog-backdrop"
