@@ -128,6 +128,7 @@ async function launchClinicApp({ mode, app = electronApp }) {
       },
     });
 
+    allowCameraForLocalApp(window);
     window.on("page-title-updated", (event) => event.preventDefault());
     window.loadURL(appUrl.toString());
   };
@@ -144,6 +145,48 @@ async function launchClinicApp({ mode, app = electronApp }) {
     frontendServer?.server?.close();
     if (process.platform !== "darwin") app.quit();
   });
+}
+
+function isLocalOrigin(value) {
+  if (!value) return false;
+  try {
+    const { hostname } = new URL(value);
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "[::1]"
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Cho phép dùng webcam (quét mã QR lịch hẹn) khi trang đang chạy từ máy cục bộ.
+ * Các quyền khác giữ nguyên hành vi mặc định của Electron.
+ */
+function allowCameraForLocalApp(window) {
+  const { session } = window.webContents;
+
+  session.setPermissionRequestHandler(
+    (webContents, permission, callback, details) => {
+      if (permission !== "media") {
+        callback(true);
+        return;
+      }
+      const origin = details?.requestingUrl || webContents?.getURL() || "";
+      callback(isLocalOrigin(origin));
+    },
+  );
+
+  session.setPermissionCheckHandler(
+    (webContents, permission, requestingOrigin) => {
+      if (permission !== "media") return true;
+      return (
+        isLocalOrigin(requestingOrigin) || isLocalOrigin(webContents?.getURL())
+      );
+    },
+  );
 }
 
 function startClinicApp(options) {

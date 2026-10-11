@@ -1,4 +1,4 @@
-package com.clinic.management._specialty;
+package com.clinic.management._specialty.controllers;
 
 import com.clinic.management.common.enums.SpecialtyStatus;
 import com.clinic.management._specialty.dtos.ProfileCreateRequest;

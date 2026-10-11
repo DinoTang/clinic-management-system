@@ -192,3 +192,125 @@
   color: #1e40af;
   margin: 10px 0;
 }
+
+/* Gợi ý dưới ô tra cứu lịch hẹn */
+.lookup-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Thông báo kết quả quét QR / tra cứu lịch hẹn */
+.scan-notice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.scan-notice button {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.scan-notice-success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.scan-notice-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.scan-notice-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Hộp thoại quét QR bằng webcam */
+.qr-scan-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 420px;
+  max-width: 92vw;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.qr-scan-card h3 {
+  margin: 0 0 6px;
+  color: #1e3a8a;
+}
+
+.qr-scan-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.qr-scan-frame {
+  min-height: 240px;
+  background: #0f172a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/*
+ * html5-qrcode đo clientWidth của khung này TRƯỚC khi chèn thẻ video rồi gán
+ * làm bề rộng video. Nếu khung bị co về 0 (ví dụ do nằm trong flex container
+ * mà chưa có nội dung) thì video sẽ rộng 0px và không hiển thị hình ảnh.
+ * Vì vậy khung phải là block có bề rộng đầy đủ.
+ */
+#checkin-qr-reader {
+  width: 100%;
+}
+
+#checkin-qr-reader video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.qr-scan-status {
+  margin: 0;
+  padding: 20px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.qr-scan-error {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.qr-scan-camera {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.qr-scan-card .btn {
+  margin-top: 16px;
+}
