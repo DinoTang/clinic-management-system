@@ -56,3 +56,28 @@ locally and must not be committed.
 ![Màn hình desktop](./imgs/home/home_desktop.png)
 
 ![Màn hình mobile](./imgs/home/home_mobile.png)
+
+**Quản lý nhân viên**
+Trang quản lý desktop
+![Màn hình desktop](./imgs/mstaff/staff_desktop.png)
+
+Trang quản lý mobile
+![Màn hình mobile](./imgs/mstaff/staff_mobile.png)
+
+Trang xem desktop
+![Màn hình desktop](./imgs/mstaff/staff_view_desktop.png)
+
+Trang xem mobile
+![Màn hình mobile](./imgs/mstaff/staff_view_mobile.png)
+
+Trang chỉnh sửa desktop
+![Màn hình mobile](./imgs/mstaff/staff_eit_desktop.png)
+
+Trang chỉnh sửa mobile
+![Màn hình mobile](./imgs/mstaff/staff_eit_mobile.png)
+
+Trang xóa desktop
+![Màn hình mobile](./imgs/mstaff/staff_delete_desktop.png)
+
+Trang xóa mobile
+![Màn hình mobile](./imgs/mstaff/staff_delete_mobile.png)

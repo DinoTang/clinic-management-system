@@ -4,7 +4,7 @@ import Clock from "./Clock.jsx";
 function Navbar({className}) {
     return (
         <nav className={className}>
-        	<Clock className="!p-2 italic text-gray-500"/>
+        	<Clock className="hidden lg:block !p-2 italic text-gray-500"/>
             <NavLink to="/" className="flex flex-row gap-4  !p-3 cursor-pointer hover:bg-blue-500 hover:text-white font-bold  rounded">
             	Trang chủ
 	        </NavLink>

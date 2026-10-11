@@ -5,11 +5,13 @@ import IconApp from "../../assets/IconApp.png";
 import Default from "../../assets/default.jpg";
 import {useAuth } from "../../context/AuthContext.jsx";
 import UserMenuPopup from "./UserMenuPopup.jsx";
+import MenuPopup from "./MenuPopup.jsx";
 
 function Header() {
-
+	const [showMenuPopup, setShowMenuPopup] = useState(false);
 	const [showUserMenuPopup, setShowUserMenuPopup] = useState(false);
 	const {isAuthenticated, user} = useAuth();
+
 	return (
 		<>
 		<div className="!p-1 md:!p-3 flex flex-row gap-2 h-[4rem] w-full justify-between items-center border-b-1 border-gray-300">
@@ -29,7 +31,9 @@ function Header() {
 						<span className="tooltip">Tìm kiếm</span>
 					</button>
 				</form>
-				<div className="md:hidden tooltip-container relative md:h-[3rem] md:w-[3rem] flex items-center justify-center cursor-pointer">
+				<div
+					onClick={()=>setShowMenuPopup(!showMenuPopup)}
+					className="lg:hidden tooltip-container relative md:h-[3rem] md:w-[3rem] flex items-center justify-center cursor-pointer">
 					<ListSquare className="text-lg"/>
 					<span className="tooltip">Menu</span>
 				</div>
@@ -43,7 +47,12 @@ function Header() {
 						: <User className="text-lg"/>
 					}
 					<span className="tooltip">Tài khoản</span>
-					{showUserMenuPopup && <UserMenuPopup user={user}/>}
+					{showUserMenuPopup && 
+						<UserMenuPopup
+							user={user}
+							onClose={()=>setShowUserMenuPopup(false)}
+						/>
+					}
 				</div>
 
 				{isAuthenticated &&
@@ -52,7 +61,11 @@ function Header() {
 					<span className="tooltip">Công việc</span>
 				</Link>
 				}
-
+				{showMenuPopup && (
+					<MenuPopup
+						onClose={()=>setShowMenuPopup(false)}
+					/>
+				)}
 			</div>
 		</div>		
 		</>

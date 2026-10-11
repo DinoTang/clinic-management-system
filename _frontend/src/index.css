@@ -72,3 +72,18 @@ body {
 .slide-down {
     animation: slide-down 0.6s ease-out backwards;
 }
+
+@keyframes slide-left-to-right {
+    0% {
+        opacity: 0;
+        transform: translate(-100%, 0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+.slide-left-to-right{
+    animation: slide-left-to-right 0.6s ease-out backwards;
+}
