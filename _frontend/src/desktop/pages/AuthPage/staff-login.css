@@ -359,6 +359,80 @@
   text-align: center;
 }
 
+.staff-demo-roles {
+  display: grid;
+  gap: 12px;
+}
+
+.staff-demo-role {
+  display: flex;
+  min-height: 80px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #dce7f1;
+  border-radius: 15px;
+  color: #327db8;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.staff-demo-role:hover {
+  transform: translateY(-1px);
+  border-color: #8fc0e8;
+  box-shadow: 0 8px 20px rgba(38, 106, 165, 0.1);
+}
+
+.staff-demo-role-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 13px;
+  color: #267fc7;
+  background: #edf6fe;
+}
+
+.staff-demo-role-copy {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+}
+
+.staff-demo-role-copy strong {
+  color: #1d456a;
+  font-size: 14px;
+}
+
+.staff-demo-role-copy span {
+  color: #7b8fa3;
+  font-size: 12px;
+}
+
+.staff-login-mode-toggle {
+  display: block;
+  margin: 18px auto 0;
+  padding: 6px 4px;
+  border: 0;
+  color: #267fc7;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.staff-login-mode-toggle:hover {
+  color: #146fc1;
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
   .staff-login-page {
     padding: 24px;

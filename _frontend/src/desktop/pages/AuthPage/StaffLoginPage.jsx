@@ -1,19 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
 import appIcon from "../../../assets/IconApp.png";
+import { normalizeRole } from "../../roles.js";
 import "./staff-login.css";
-
-const staffRoles = new Set([
-  "ADMIN",
-  "DOCTOR",
-  "STAFF",
-  "QUẢN TRỊ VIÊN",
-  "BÁC SĨ",
-  "NHÂN VIÊN",
-  "1",
-  "2",
-  "3",
-]);
 
 function Icon({ name, size = 22 }) {
   const paths = {
@@ -48,6 +37,26 @@ function Icon({ name, size = 22 }) {
         <path d="m9 12 2 2 4-4" />
       </>
     ),
+    doctor: (
+      <>
+        <path d="M12 3v5m-4-5h8" />
+        <circle cx="12" cy="14" r="7" />
+        <path d="M9 14h6m-3-3v6" />
+      </>
+    ),
+    staff: (
+      <>
+        <circle cx="9" cy="8" r="3.5" />
+        <path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20z" />
+        <path d="M16 5a3.5 3.5 0 0 1 0 6.8M18 14a6.3 6.3 0 0 1 3.5 5.7" />
+      </>
+    ),
+    admin: (
+      <>
+        <path d="M12 3 20 7v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" />
+        <path d="m9 12 2 2 4-4" />
+      </>
+    ),
   };
 
   return (
@@ -71,6 +80,7 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showDatabaseLogin, setShowDatabaseLogin] = useState(false);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,29 +89,21 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
     setMessage("");
     setIsSubmitting(true);
 
-    if (demoLogin) {
-      onLoginSuccess({ mode: "demo" });
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
       const { data } = await axios.post(
         "/api/auth/login",
         { username, password },
       );
-      const role = String(data?.user?.role ?? "")
-        .trim()
-        .toLocaleUpperCase("vi");
+      const role = normalizeRole(data?.user?.role);
 
-      if (!data?.token || !staffRoles.has(role)) {
+      if (!data?.token || !role) {
         setMessage(
           "Tài khoản này không có quyền truy cập hệ thống nhân viên y tế.",
         );
         return;
       }
 
-      onLoginSuccess({ mode: "database", token: data.token });
+      onLoginSuccess({ mode: "database", token: data.token, role });
     } catch (error) {
       const serverMessage =
         error.response?.data?.message || error.response?.data?.error;
@@ -139,7 +141,7 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
             <span className="staff-brand-shield">
               <Icon name="shield" size={19} />
             </span>
-            <span>Truy cập an toàn dành cho nhân viên y tế</span>
+            <span>Truy cập dành cho đội ngũ y tế</span>
           </div>
         </section>
 
@@ -154,104 +156,183 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
 
             <div className="staff-login-heading">
               <span className="staff-login-kicker">XIN CHÀO</span>
-              <h2>Đăng nhập hệ thống</h2>
-              <p>Sử dụng tài khoản nội bộ để tiếp tục làm việc.</p>
+              <h2>
+                {demoLogin && !showDatabaseLogin
+                  ? "Chọn khu vực làm việc"
+                  : "Đăng nhập hệ thống"}
+              </h2>
+              <p>
+                {demoLogin && !showDatabaseLogin
+                  ? "Chọn vai trò để vào giao diện tương ứng."
+                  : "Sử dụng tài khoản nội bộ để tiếp tục làm việc."}
+              </p>
             </div>
 
-            <form className="staff-login-form" onSubmit={handleSubmit}>
-              <label className="staff-input-label" htmlFor="staff-username">
-                Tên đăng nhập
-              </label>
-              <div className="staff-input-wrap">
-                <span className="staff-input-icon">
-                  <Icon name="user" />
-                </span>
-                <input
-                  autoComplete="username"
-                  id="staff-username"
-                  maxLength={20}
-                  minLength={demoLogin ? undefined : 5}
-                  name="username"
-                  onChange={(event) => setUsername(event.target.value)}
-                  placeholder="Nhập tên đăng nhập"
-                  required
-                  value={username}
-                />
-              </div>
-
-              <div className="staff-password-label-row">
-                <label className="staff-input-label" htmlFor="staff-password">
-                  Mật khẩu
-                </label>
+            {demoLogin && !showDatabaseLogin ? (
+              <div className="staff-demo-roles">
                 <button
-                  className="staff-forgot-button"
+                  className="staff-demo-role"
                   onClick={() =>
-                    setMessage(
-                      "Vui lòng liên hệ quản trị viên để được hỗ trợ đặt lại mật khẩu.",
-                    )
+                    onLoginSuccess({ mode: "demo", role: "DOCTOR" })
                   }
                   type="button"
                 >
-                  Quên mật khẩu?
+                  <span className="staff-demo-role-icon">
+                    <Icon name="doctor" size={25} />
+                  </span>
+                  <span className="staff-demo-role-copy">
+                    <strong>Bác sĩ</strong>
+                    <span>Lịch trực và khám bệnh</span>
+                  </span>
+                  <Icon name="arrow" size={20} />
                 </button>
-              </div>
-              <div className="staff-input-wrap">
-                <span className="staff-input-icon">
-                  <Icon name="lock" />
-                </span>
-                <input
-                  autoComplete="current-password"
-                  id="staff-password"
-                  maxLength={20}
-                  minLength={demoLogin ? undefined : 8}
-                  name="password"
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Nhập mật khẩu"
-                  required
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                />
                 <button
-                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                  aria-pressed={showPassword}
-                  className="staff-password-toggle"
-                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="staff-demo-role"
+                  onClick={() =>
+                    onLoginSuccess({ mode: "demo", role: "STAFF" })
+                  }
                   type="button"
                 >
-                  <Icon name={showPassword ? "eyeOff" : "eye"} size={20} />
+                  <span className="staff-demo-role-icon">
+                    <Icon name="staff" size={25} />
+                  </span>
+                  <span className="staff-demo-role-copy">
+                    <strong>Nhân viên</strong>
+                    <span>Tiếp đón và đặt lịch bệnh nhân</span>
+                  </span>
+                  <Icon name="arrow" size={20} />
+                </button>
+                <button
+                  className="staff-demo-role"
+                  onClick={() =>
+                    onLoginSuccess({ mode: "demo", role: "ADMIN" })
+                  }
+                  type="button"
+                >
+                  <span className="staff-demo-role-icon">
+                    <Icon name="admin" size={25} />
+                  </span>
+                  <span className="staff-demo-role-copy">
+                    <strong>Quản trị viên</strong>
+                    <span>Quản lý và theo dõi toàn hệ thống</span>
+                  </span>
+                  <Icon name="arrow" size={20} />
                 </button>
               </div>
+            ) : (
+              <form className="staff-login-form" onSubmit={handleSubmit}>
+                <label className="staff-input-label" htmlFor="staff-username">
+                  Tên đăng nhập
+                </label>
+                <div className="staff-input-wrap">
+                  <span className="staff-input-icon">
+                    <Icon name="user" />
+                  </span>
+                  <input
+                    autoComplete="username"
+                    id="staff-username"
+                    maxLength={20}
+                    minLength={5}
+                    name="username"
+                    onChange={(event) => setUsername(event.target.value)}
+                    placeholder="Nhập tên đăng nhập"
+                    required
+                    value={username}
+                  />
+                </div>
 
-              {message && (
-                <p className="staff-login-message" role="alert">
-                  {message}
-                </p>
-              )}
+                <div className="staff-password-label-row">
+                  <label className="staff-input-label" htmlFor="staff-password">
+                    Mật khẩu
+                  </label>
+                  <button
+                    className="staff-forgot-button"
+                    onClick={() =>
+                      setMessage(
+                        "Vui lòng liên hệ quản trị viên để được hỗ trợ đặt lại mật khẩu.",
+                      )
+                    }
+                    type="button"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
+                <div className="staff-input-wrap">
+                  <span className="staff-input-icon">
+                    <Icon name="lock" />
+                  </span>
+                  <input
+                    autoComplete="current-password"
+                    id="staff-password"
+                    maxLength={20}
+                    minLength={8}
+                    name="password"
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Nhập mật khẩu"
+                    required
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                  />
+                  <button
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    aria-pressed={showPassword}
+                    className="staff-password-toggle"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    type="button"
+                  >
+                    <Icon name={showPassword ? "eyeOff" : "eye"} size={20} />
+                  </button>
+                </div>
 
+                {message && (
+                  <p className="staff-login-message" role="alert">
+                    {message}
+                  </p>
+                )}
+
+                <button
+                  className="staff-login-submit"
+                  disabled={isSubmitting}
+                  type="submit"
+                >
+                  <span>{isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}</span>
+                  {!isSubmitting && <Icon name="arrow" size={20} />}
+                </button>
+              </form>
+            )}
+
+            {demoLogin && (
               <button
-                className="staff-login-submit"
-                disabled={isSubmitting}
-                type="submit"
+                className="staff-login-mode-toggle"
+                onClick={() => {
+                  setMessage("");
+                  setShowDatabaseLogin((show) => !show);
+                }}
+                type="button"
               >
-                <span>{isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}</span>
-                {!isSubmitting && <Icon name="arrow" size={20} />}
+                {showDatabaseLogin
+                  ? "Quay lại đăng nhập tạm"
+                  : "Đăng nhập bằng tài khoản thật"}
               </button>
-            </form>
+            )}
 
             <p className="staff-login-note">
               <Icon name="shield" size={17} />
-              <span>Hệ thống dành cho nhân viên y tế</span>
+              <span>Hệ thống dành cho đội ngũ y tế</span>
             </p>
-            {demoLogin && (
+            {demoLogin && !showDatabaseLogin && (
               <p className="staff-demo-notice">
-                Chế độ thử giao diện: nhập thông tin bất kỳ để tiếp tục. Các
-                chức năng khác vẫn kết nối backend.
+                Đăng nhập tạm chỉ mở giao diện theo vai trò. Các màn bác sĩ và
+                nhân viên vẫn gọi backend; workspace Admin dùng dữ liệu mẫu và
+                chưa lưu vào database.
               </p>
             )}
-            <p className="staff-account-note">
-              Tài khoản được cấp bởi quản trị viên. Không hỗ trợ đăng ký công
-              khai.
-            </p>
+            {!demoLogin && (
+              <p className="staff-account-note">
+                Tài khoản được cấp bởi quản trị viên. Không hỗ trợ đăng ký công
+                khai.
+              </p>
+            )}
           </div>
         </section>
       </div>
