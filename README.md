@@ -85,10 +85,10 @@ or database as services.
 ### 3. Chỉnh sửa thông tin nhân viên
 
 #### Desktop
-![Trang chỉnh sửa nhân viên desktop](./imgs/mstaff/staff_eit_desktop.png)
+![Trang chỉnh sửa nhân viên desktop](./imgs/mstaff/staff_edit_desktop.png)
 
 #### Mobile
-![Trang chỉnh sửa nhân viên mobile](./imgs/mstaff/staff_eit_mobile.png)
+![Trang chỉnh sửa nhân viên mobile](./imgs/mstaff/staff_edit_mobile.png)
 
 ### 4. Xóa nhân viên
 

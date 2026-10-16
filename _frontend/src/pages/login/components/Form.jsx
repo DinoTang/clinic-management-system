@@ -43,10 +43,9 @@ function Form() {
 			}
 			
 			if (data.user.role =="Nhà phát triển") navigate("/");			
-			else if (data.user.role =="Quản trị viên") navigate("/");
-			else if (data.user.role =="Nhân viên") navigate("/");
-			else if (data.user.role =="Bác sĩ") navigate("/");
-			else if (data.user.role == "Bệnh nhân") navigate("/");
+			else if (data.user.role =="Quản trị viên") navigate("/admin");
+			else if (data.user.role =="Nhân viên") navigate("/staff");
+			else if (data.user.role =="Bác sĩ") navigate("/doctor");
 
         } catch (error) {
         	setError(error);
@@ -72,7 +71,7 @@ function Form() {
 		<>
 		<form
 			onSubmit={handleLogin}
-			className="flex flex-col gap-4 !p-8 w-full">
+			className="flex flex-col gap-4 !p-[5rem] w-full">
 			<div className="flex flex-col gap-2 ">
 				<p className="text-s font-bold text-blue-500">XIN CHÀO</p>
 				<p className="text-3xl font-bold text-blue-800">Đăng nhập hệ thống</p>
@@ -82,7 +81,7 @@ function Form() {
 				<div className={`flex flex-col gap-2 text-blue-900 font-bold ${error?.username && "text-red-500"}`}>					<label htmlFor="username">
 						Tên đăng nhập
 					</label>
-					<div className="flex flex-row border rounded gap-2 !p-2">
+					<div className="flex flex-row border border-gray-400 rounded-[1rem] gap-2 !p-4">
 						<User />
 						<input
 							id="username"
@@ -104,7 +103,7 @@ function Form() {
 					<label htmlFor="password">
 						Mật khẩu
 					</label>
-					<div className="flex flex-row border rounded gap-2 !p-2">
+					<div className="flex flex-row border border-gray-400 rounded-[1rem] gap-2 !p-4">
 						<Lock />
 						<input
 							id="password"
@@ -127,16 +126,10 @@ function Form() {
 			</div>
 
 			<div className="flex gap-4 flex-col">
-				<button type="submit" className="flex flex-row gap-2 !p-3 border rounded font-bold bg-blue-500 text-white justify-center">
+				<button type="submit" className="flex flex-row gap-2 !p-3 border rounded-[1rem] font-bold bg-blue-500 text-white justify-center">
 					{loading ? "Đang đăng nhập..." : "Đăng nhập"}
 					<ArrowRightStroke />
 				</button>
-				<p className="text-center">-----hoặc-----</p>
-				<Link to="/register" className="flex flex-row gap-2 !p-3 border rounded font-bold bg-green-500 text-white justify-center cursor-pointer">
-					Đăng ký
-					<UserPlus />
-				</Link>
-
 			</div>
 		</form>
 		</>
