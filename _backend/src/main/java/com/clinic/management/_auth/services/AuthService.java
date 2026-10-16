@@ -63,20 +63,26 @@ public class AuthService implements IAuth{
 			throw new RuntimeException("Tên tài khoản hoặc mật khẩu không chính xác");
 		}
 		String token = jwtService.generateToken(request.getUsername());
-		return new LoginResponse(
-			token,
-			user
-		);
+		return createLoginResponse(token, user);
 	}
 
 	@Override
 	public LoginResponse me(String token){
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
 	    User user = userQueryService.findByUsername(username);
-		return new LoginResponse(
-			token,
-			user
-		);
+		return createLoginResponse(token, user);
+	}
+
+	private LoginResponse createLoginResponse(String token, User user) {
+		LoginResponse response = new LoginResponse(token, user);
+		if (user.getRole() == Role.PATIENT) {
+			String patientId = patientRepository.findByUserId(user.getId())
+					.map(Patient::getId)
+					.orElseThrow(() -> new IllegalStateException(
+							"Không tìm thấy hồ sơ bệnh nhân cho tài khoản này"));
+			response.setPatientId(patientId);
+		}
+		return response;
 	}
 
     @Transactional
@@ -140,6 +146,6 @@ public class AuthService implements IAuth{
         }
 
         String token = jwtService.generateToken(user.getUsername());
-        return new LoginResponse(token, user);
+        return createLoginResponse(token, user);
     }
 }
