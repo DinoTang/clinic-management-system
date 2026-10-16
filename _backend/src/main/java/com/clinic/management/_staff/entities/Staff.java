@@ -38,17 +38,4 @@ public class Staff {
         this.startAt=LocalDate.now();
         this.deleted=false;
     }
-
-    // Getter and Setter 
-    public String getId() {return id;}
-    public void setId(String id) {this.id = id;}
-
-    public User getUser() {return user;}
-    public void setUser(User user) {this.user = user;}
-
-    public LocalDate getStartAt() {return startAt;}
-    public void setStartAt(LocalDate startAt) {this.startAt = startAt;}
-
-    public boolean getDeleted() {return deleted;}
-    public void setDeleted(boolean deleted) {this.deleted = deleted;}
 }

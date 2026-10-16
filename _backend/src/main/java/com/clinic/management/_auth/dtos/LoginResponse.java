@@ -1,7 +1,9 @@
 package com.clinic.management._auth.dtos;
 
 import com.clinic.management._user.entities.User;
+import lombok.Data;
 
+@Data
 public class LoginResponse {
     private String token;
     private String type = "Bearer";
@@ -13,17 +15,4 @@ public class LoginResponse {
         this.token = token;
         this.user = user;
     }
-
-    public String getToken(){return token;}
-    public void setToken(String token){this.token=token;}
-
-    public String getType(){return type;}
-    public void setType(String type){this.type=type;}
-
-    public User getUser(){return user;}
-    public void setUser(User id){this.user =user;}
-
-    public String getPatientId(){return patientId;}
-    public void setPatientId(String patientId){this.patientId=patientId;}
-
 }

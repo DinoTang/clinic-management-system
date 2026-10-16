@@ -3,7 +3,9 @@ package com.clinic.management._specialty.dtos;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Data;
 
+@Data
 public class ProfileUpdateRequest {
 
     private String name;
@@ -22,12 +24,4 @@ public class ProfileUpdateRequest {
         this.standardFee = standardFee;
     }
 
-    public String getName() {return name;}
-    public void setName(String name) {this.name = name;}
-
-    public String getDescription() {return description;}
-    public void setDescription(String description) {this.description = description;}
-
-    public BigDecimal getStandardFee() {return standardFee;}
-    public void setStandardFee(BigDecimal standardFee) {this.standardFee = standardFee;}
 }

@@ -3,7 +3,9 @@ package com.clinic.management._prescription;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "DONTHUOC")
 public class Prescription {
@@ -37,54 +39,6 @@ public class Prescription {
         this.prescriptionDate = prescriptionDate;
         this.advice = advice;
         this.deleted = deleted;
-        this.details = details;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getMedicalRecordId() {
-        return medicalRecordId;
-    }
-
-    public void setMedicalRecordId(String medicalRecordId) {
-        this.medicalRecordId = medicalRecordId;
-    }
-
-    public LocalDate getPrescriptionDate() {
-        return prescriptionDate;
-    }
-
-    public void setPrescriptionDate(LocalDate prescriptionDate) {
-        this.prescriptionDate = prescriptionDate;
-    }
-
-    public String getAdvice() {
-        return advice;
-    }
-
-    public void setAdvice(String advice) {
-        this.advice = advice;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public List<PrescriptionDetail> getDetails() {
-        return details;
-    }
-
-    public void setDetails(List<PrescriptionDetail> details) {
         this.details = details;
     }
 }

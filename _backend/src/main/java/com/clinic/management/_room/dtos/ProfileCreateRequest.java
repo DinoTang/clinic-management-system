@@ -2,7 +2,9 @@ package com.clinic.management._room.dtos;
 
 import com.clinic.management.common.enums.RoomStatus;
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 public class ProfileCreateRequest {
 
     private String specialtyId;
@@ -22,17 +24,5 @@ public class ProfileCreateRequest {
         this.roomName = roomName;
         this.floor = floor;
     }
-
-    public String getSpecialtyId() {return specialtyId;}
-    public void setSpecialtyId(String specialtyId) {this.specialtyId = specialtyId;}
-
-    public String getRoomNumber() {return roomNumber;}
-    public void setRoomNumber(String roomNumber) {this.roomNumber = roomNumber;}
-
-    public String getRoomName() {return roomName;}
-    public void setRoomName(String roomName) {this.roomName = roomName;}
-
-    public String getFloor() {return floor;}
-    public void setFloor(String floor) {this.floor = floor;}
 
 }

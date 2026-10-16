@@ -5,11 +5,13 @@ import Paginate from "../../layouts/components/Paginate.jsx";
 
 function MStaff() {
 	const [data, setData] = useState([]);
+	const [page, setPage] = useState(0);
+	const [size, setSize] = useState(10);
 	const [loading, setLoading] = useState(true);
 
-	async function fetchStaffs() {
+	async function fetchStaffs(page, size) {
 		try{
-			const data = await getAll();
+			const data = await getAll(page, size);
 			setData(data);
 		}
 		catch (error){
@@ -20,9 +22,9 @@ function MStaff() {
 		}
 	}
 	useEffect(()=>{
-		fetchStaffs();
-	},[]);
-	console.log(data);
+		fetchStaffs(page, size);
+	},[page]);
+
 	if (loading) {
         return <p>Đang tải...</p>;
     }
@@ -30,7 +32,7 @@ function MStaff() {
 	return (
 		<>
 			<Table staffs={data.content} fetchStaffs={fetchStaffs}/>
-			<Paginate data={data} />
+			<Paginate data={data} setPage={setPage} page={page} />
 		</>
     );
 }

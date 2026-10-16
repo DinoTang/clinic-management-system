@@ -1,7 +1,7 @@
 const API_URL = "http://localhost:8080/api/staffs";
 
-export async function getAll() {
-	const response = await fetch(API_URL);
+export async function getAll(page, size) {
+	const response = await fetch(`${API_URL}?page=${page}&size=${size}`);
 	if(!response.ok)
 		throw new Error("Kết nối be that bai");
 	return response.json();

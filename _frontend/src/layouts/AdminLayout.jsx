@@ -7,7 +7,7 @@ function AdminLayout() {
 		<>
 			<Header/>
 			<div className="flex flex-row">
-				<Navbar className="w-fit text-nowrap border-r-1 border-b-1"/>
+				<Navbar className="hidden lg:block w-fit text-nowrap border-r-1 border-b-1"/>
 				<main className="w-full">
 	                <Outlet />
 	            </main>

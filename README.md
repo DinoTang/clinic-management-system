@@ -52,24 +52,48 @@ or database as services.
 
 # Screenshot giao diện
 
-**Trang đăng nhập (login)**
+---
 
-![Màn hình desktop](./imgs/login/login_desktop.png)
+## Trang chủ (Home)
 
-![Màn hình mobile](./imgs/login/login_mobile.png)
+### Desktop
+![Màn hình trang chủ desktop](./imgs/home/home_desktop.png)
 
-![Màn hình desktop dành cho bệnh nhân](./imgs/login/login_1_desktop.png)
+### Mobile
+![Màn hình trang chủ mobile](./imgs/home/home_mobile.png)
 
-![Màn hình mobile dành cho bệnh nhân](./imgs/login/login_1_mobile.png)
+---
 
-**Trang đăng ký (register)**
+## Quản lý nhân viên
 
-![Màn hình desktop](./imgs/register/register_desktop.png)
+### 1. Danh sách nhân viên
 
-![Màn hình mobile](./imgs/register/register_mobile.png)
+#### Desktop
+![Trang quản lý nhân viên desktop](./imgs/mstaff/staff_desktop.png)
 
-**Trang chủ (home)**
+#### Mobile
+![Trang quản lý nhân viên mobile](./imgs/mstaff/staff_mobile.png)
 
-![Màn hình desktop](./imgs/home/home_desktop.png)
+### 2. Xem thông tin nhân viên
 
-![Màn hình mobile](./imgs/home/home_mobile.png)
+#### Desktop
+![Trang xem thông tin nhân viên desktop](./imgs/mstaff/staff_view_desktop.png)
+
+#### Mobile
+![Trang xem thông tin nhân viên mobile](./imgs/mstaff/staff_view_mobile.png)
+
+### 3. Chỉnh sửa thông tin nhân viên
+
+#### Desktop
+![Trang chỉnh sửa nhân viên desktop](./imgs/mstaff/staff_edit_desktop.png)
+
+#### Mobile
+![Trang chỉnh sửa nhân viên mobile](./imgs/mstaff/staff_edit_mobile.png)
+
+### 4. Xóa nhân viên
+
+#### Desktop
+![Trang xóa nhân viên desktop](./imgs/mstaff/staff_delete_desktop.png)
+
+#### Mobile
+![Trang xóa nhân viên mobile](./imgs/mstaff/staff_delete_mobile.png)

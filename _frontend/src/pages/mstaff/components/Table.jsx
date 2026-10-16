@@ -10,6 +10,7 @@ function Table({staffs, fetchStaffs}) {
 	const [showDeletePopup, setShowDeletePopup] = useState(null);
 	return (
 		<>
+		<div className="overflow-x-scroll">
         <table className="w-full text-center">
             <thead>
             	<tr>
@@ -32,7 +33,7 @@ function Table({staffs, fetchStaffs}) {
             		<td className="!p-3 border">{staff.user.phone}</td>
             		<td className={`!p-3 border border-black ${staff.user.status ? "text-red-500" : "text-green-500"} `}>{staff.user.status}</td>
             		<td className="border">
-            			<div className="flex flex-row gap-4 justify-center">
+            			<div className="flex flex-col md:flex-row gap-4 justify-center items-center">
             				<p
             					onClick={()=>setShowViewPopup(staff)}
             					className="tooltip-container">
@@ -67,6 +68,7 @@ function Table({staffs, fetchStaffs}) {
         	))}
 	        </tbody>
         </table>
+	    </div>
         {showViewPopup && 
         	<ViewPopup
         		staff={showViewPopup}

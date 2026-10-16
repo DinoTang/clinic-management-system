@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --color-b-brand: rgba(18, 76, 132, 0.92);
+  --color-t-brand: rgba(227, 242, 255, 0.92);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -71,4 +76,34 @@ body {
 }
 .slide-down {
     animation: slide-down 0.6s ease-out backwards;
+}
+
+@keyframes slide-left-to-right {
+    0% {
+        opacity: 0;
+        transform: translate(-100%, 0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+.slide-left-to-right{
+    animation: slide-left-to-right 0.6s ease-out backwards;
+}
+
+.bg-brand{
+background:
+  linear-gradient(
+    180deg,
+    rgba(239, 248, 255, 0.16) 0%,
+    rgba(227, 242, 255, 0.02) 21%,
+    rgba(18, 76, 132, 0.92) 100%
+  ),
+  linear-gradient(
+    90deg,
+    rgba(231, 244, 255, 0.34),
+    transparent 86%
+  );
 }

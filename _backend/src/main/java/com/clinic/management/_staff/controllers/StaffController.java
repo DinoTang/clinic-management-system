@@ -56,7 +56,7 @@ public class StaffController {
     @GetMapping
     public ResponseEntity<Page<Staff>> findAll(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "1") int size
+        @RequestParam(defaultValue = "10") int size
     ) {
         Page<Staff> staffs = staffQueryService.findAll(page, size);
 
