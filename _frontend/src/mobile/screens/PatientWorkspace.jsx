@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PatientBookingPage from "../../desktop/pages/BookingPage/PatientBookingPage.jsx";
 import "../PatientWorkspace.css";
 
 const specialties = [
@@ -274,6 +275,35 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
 }
 
 function BookingPage({ onNavigate, setAppointments, Icon, showToast, profile }) {
+  if (profile?.useDemoBooking) {
+    return (
+      <DemoBookingPage
+        Icon={Icon}
+        onNavigate={onNavigate}
+        profile={profile}
+        setAppointments={setAppointments}
+        showToast={showToast}
+      />
+    );
+  }
+
+  if (!profile?.patientId) {
+    return (
+      <p className="booking-profile-error" role="alert">
+        Không tìm thấy mã bệnh nhân trong phiên đăng nhập. Vui lòng đăng xuất
+        và đăng nhập lại trước khi đặt lịch.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mobile-booking-host">
+      <PatientBookingPage isMobile patientProfile={profile} />
+    </div>
+  );
+}
+
+function DemoBookingPage({ onNavigate, setAppointments, Icon, showToast, profile }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     specialty: specialties[0],

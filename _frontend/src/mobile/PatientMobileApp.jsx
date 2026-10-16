@@ -1,4 +1,5 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import "./PatientMobileApp.css";
 import "./PatientWorkspace.css";
 import Avatar from "./components/Avatar";
@@ -125,7 +126,10 @@ function readPatientSession() {
   if (!savedSession) return null;
 
   try {
-    return JSON.parse(savedSession).patient ?? null;
+    const session = JSON.parse(savedSession);
+    return session.patient
+      ? { ...session.patient, token: session.token }
+      : null;
   } catch (error) {
     console.error("Không thể đọc phiên bệnh nhân đã lưu.", error);
     return null;
@@ -153,25 +157,46 @@ function App() {
   ]);
   const [profileDetails, setProfileDetails] = useState({
     fullName: patientProfile?.fullName || "Nguyễn Văn An",
+    patientId: patientProfile?.patientId || "",
     birthDate: "",
-    gender: "Nam",
-    phone: "",
-    email: "",
+    gender: patientProfile?.gender || "Nam",
+    phone: patientProfile?.phone || "",
+    email: patientProfile?.email || "",
     address: "",
     medicalHistory: "",
   });
   const [toast, setToast] = useState("");
+
+  useEffect(() => {
+    if (patientProfile?.token) {
+      axios.defaults.headers.common.Authorization = `Bearer ${patientProfile.token}`;
+    } else {
+      delete axios.defaults.headers.common.Authorization;
+    }
+
+    return () => {
+      delete axios.defaults.headers.common.Authorization;
+    };
+  }, [patientProfile?.token]);
 
   const showToast = (message) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 3200);
   };
 
-  const handleLoginSuccess = (profile) => {
+  const handleLoginSuccess = (session) => {
+    const profile = {
+      ...session.patient,
+      token: session.token,
+    };
     setPatientProfile(profile);
     setProfileDetails((current) => ({
       ...current,
       fullName: profile?.fullName || current.fullName,
+      patientId: profile?.patientId || current.patientId,
+      gender: profile?.gender || current.gender,
+      phone: profile?.phone || current.phone,
+      email: profile?.email || current.email,
     }));
     setCurrentPage("home");
   };
@@ -181,6 +206,7 @@ function App() {
   const confirmLogout = () => {
     localStorage.removeItem("clinic-patient-session");
     sessionStorage.removeItem("clinic-patient-session");
+    delete axios.defaults.headers.common.Authorization;
     setShowLogoutConfirmation(false);
     setPatientProfile(null);
     setCurrentPage("auth");

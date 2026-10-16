@@ -6,6 +6,7 @@ public class LoginResponse {
     private String token;
     private String type = "Bearer";
     private User user;
+    private String patientId;
 
     public LoginResponse(){}
     public LoginResponse(String token, User user) {
@@ -21,5 +22,8 @@ public class LoginResponse {
 
     public User getUser(){return user;}
     public void setUser(User id){this.user =user;}
+
+    public String getPatientId(){return patientId;}
+    public void setPatientId(String patientId){this.patientId=patientId;}
 
 }
