@@ -1,15 +1,13 @@
 import axios from "axios";
-import { useState } from "react";
-import PatientBookingPage from "./pages/BookingPage/PatientBookingPage";
+import { Navigate, useNavigate } from "react-router-dom";
 import StaffLoginPage from "./pages/AuthPage/StaffLoginPage";
-import ReceptionPage from "./pages/ReceptionPage/ReceptionPage";
-import DesktopSchedulePage from "./pages/SchedulePage/DesktopSchedulePage";
-import DoctorExaminationPage from "./pages/ExaminationPage/DoctorExaminationPage";
-import AdminWorkspace from "./pages/AdminPage/AdminWorkspace.jsx";
 import { normalizeRole, ROLE_CONFIG } from "./roles.js";
-import "./styles/desktop-index.css";
-import "./styles/desktop-schedule.css";
-import "./styles/reception.css";
+
+const ROLE_PATHS = {
+  ADMIN: "/admin",
+  DOCTOR: "/doctor",
+  STAFF: "/staff",
+};
 
 function readStaffSession() {
   try {
@@ -32,20 +30,14 @@ function readStaffSession() {
 }
 
 function App() {
+  const navigate = useNavigate();
   const hostname = window.location.hostname;
   const demoLogin =
     hostname === "localhost" ||
     hostname === "127.0.0.1" ||
     hostname === "[::1]";
 
-  const [session, setSession] = useState(readStaffSession);
-  const [currentPage, setCurrentPage] = useState(() =>
-    session?.role === "ADMIN"
-      ? "admin"
-      : session?.role === "DOCTOR"
-        ? "schedule"
-        : "reception",
-  );
+  const session = readStaffSession();
 
   const handleLoginSuccess = (nextSession) => {
     const role = normalizeRole(nextSession.role);
@@ -61,75 +53,14 @@ function App() {
     } else {
       delete axios.defaults.headers.common.Authorization;
     }
-    setSession(authenticatedSession);
-    setCurrentPage(
-      role === "ADMIN" ? "admin" : role === "DOCTOR" ? "schedule" : "reception",
-    );
+    navigate(ROLE_PATHS[role]);
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("clinic-staff-session");
-    delete axios.defaults.headers.common.Authorization;
-    setSession(null);
-    setCurrentPage("reception");
-  };
-
-  if (!session) {
-    return (
-      <StaffLoginPage
-        onLoginSuccess={handleLoginSuccess}
-        demoLogin={demoLogin}
-      />
-    );
+  if (session) {
+    return <Navigate replace to={ROLE_PATHS[session.role]} />;
   }
 
-  const roleConfig = ROLE_CONFIG[session.role];
-
-  if (session.role === "ADMIN") {
-    return (
-      <div className="desktop-app-root">
-        <AdminWorkspace onLogout={handleLogout} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="desktop-app-root">
-      <nav className="desktop-workspace-nav" aria-label="Khu vực làm việc">
-        <div className="desktop-workspace-links">
-          {roleConfig.pages.map((page) => (
-            <button
-              aria-current={currentPage === page.id ? "page" : undefined}
-              className={`desktop-workspace-button${currentPage === page.id ? " is-active" : ""}`}
-              key={page.id}
-              onClick={() => setCurrentPage(page.id)}
-              type="button"
-            >
-              {page.label}
-            </button>
-          ))}
-        </div>
-        <div className="desktop-workspace-account">
-          <span className="desktop-role-label">{roleConfig.label}</span>
-          {session.mode === "demo" && (
-            <span className="desktop-demo-label">Đăng nhập tạm</span>
-          )}
-          <button
-            className="desktop-workspace-button desktop-logout-button"
-            onClick={handleLogout}
-            type="button"
-          >
-            Đăng xuất
-          </button>
-        </div>
-      </nav>
-
-      {currentPage === "reception" && <ReceptionPage />}
-      {currentPage === "booking" && <PatientBookingPage />}
-      {currentPage === "schedule" && <DesktopSchedulePage />}
-      {currentPage === "examination" && <DoctorExaminationPage />}
-    </div>
-  );
+  return <StaffLoginPage onLoginSuccess={handleLoginSuccess} demoLogin={demoLogin} />;
 }
 
 export default App;
