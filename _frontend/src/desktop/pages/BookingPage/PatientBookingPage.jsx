@@ -12,7 +12,7 @@ const DOCTOR_API = "/api/doctors";
 const SCHEDULE_API = "/api/doctor-schedules";
 const APPOINTMENT_API = "/api/appointments";
 
-function PatientBookingPage() {
+function PatientBookingPage({ patientProfile = null, isMobile = false }) {
   const [step, setStep] = useState(1);
 
   // Danh mục dữ liệu
@@ -29,9 +29,9 @@ function PatientBookingPage() {
     examinationDate: today,
     selectedSchedule: null,
     // Thông tin cá nhân
-    patientId: "BN001", // Nếu đã đăng nhập có thể truyền sẵn, hoặc nhập tay
-    patientName: "",
-    phoneNumber: "",
+    patientId: patientProfile?.patientId || "BN001",
+    patientName: patientProfile?.fullName || "",
+    phoneNumber: patientProfile?.phone || "",
     reason: "",
   });
 
@@ -172,7 +172,7 @@ function PatientBookingPage() {
   };
 
   return (
-    <div className="booking-wrapper">
+    <div className={`booking-wrapper${isMobile ? " mobile-booking-wrapper" : ""}`}>
       <div className="booking-card">
         {/* Header */}
         <div className="booking-header">
@@ -548,9 +548,9 @@ function PatientBookingPage() {
                     doctorId: "",
                     examinationDate: today,
                     selectedSchedule: null,
-                    patientId: "BN001",
-                    patientName: "",
-                    phoneNumber: "",
+                    patientId: patientProfile?.patientId || "BN001",
+                    patientName: patientProfile?.fullName || "",
+                    phoneNumber: patientProfile?.phone || "",
                     reason: "",
                   });
                   setBookingSuccessResult(null);

@@ -2,6 +2,46 @@
   padding-top: 24px;
 }
 
+.mobile-booking-host {
+  width: 100%;
+}
+
+.mobile-booking-host .booking-wrapper {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.mobile-booking-host .booking-card {
+  max-width: none;
+  padding: 20px 16px;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(186, 215, 233, 0.3);
+}
+
+.mobile-booking-host .booking-header h1 {
+  font-size: 21px;
+}
+
+.mobile-booking-host .step-item {
+  padding-right: 3px;
+  padding-left: 3px;
+}
+
+.mobile-booking-host .step-label {
+  font-size: 11px;
+  text-align: center;
+}
+
+.booking-profile-error {
+  padding: 16px;
+  border: 1px solid #f3d4d4;
+  border-radius: 14px;
+  color: #9b3030;
+  background: #fff7f7;
+  line-height: 1.5;
+}
+
 .workspace-heading {
   display: flex;
   align-items: center;

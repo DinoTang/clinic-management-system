@@ -146,10 +146,14 @@ function AuthPage({ onLoginSuccess }) {
         );
 
         const patient = {
+          patientId: data.patientId,
           fullName: data.user.fullName,
           role: data.user.role,
+          phone: data.user.phone,
+          email: data.user.email,
         };
-        const session = JSON.stringify({ token: data.token, patient });
+        const authSession = { token: data.token, patient };
+        const session = JSON.stringify(authSession);
 
         if (rememberLogin) {
           localStorage.setItem("clinic-patient-session", session);
@@ -159,7 +163,7 @@ function AuthPage({ onLoginSuccess }) {
           localStorage.removeItem("clinic-patient-session");
         }
 
-        onLoginSuccess(patient);
+        onLoginSuccess(authSession);
       }
     } catch (error) {
       const responseData = error.response?.data;
