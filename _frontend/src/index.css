@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --color-b-brand: rgba(18, 76, 132, 0.92);
+  --color-t-brand: rgba(227, 242, 255, 0.92);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

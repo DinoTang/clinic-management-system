@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { User, Lock, Eye, ArrowRightStroke, UserPlus } from "@boxicons/react";
+import { User, Lock, Eye, ArrowRightStroke, UserPlus, CheckShield } from "@boxicons/react";
 import Swal from "sweetalert2";
 import { login as loginApi } from "../../../services/auth/authService.js";
 
@@ -71,7 +71,7 @@ function Form() {
 		<>
 		<form
 			onSubmit={handleLogin}
-			className="flex flex-col gap-4 !p-[5rem] w-full">
+			className="flex flex-col gap-4 !p-[2rem] lg:!p-[4rem] w-full">
 			<div className="flex flex-col gap-2 ">
 				<p className="text-s font-bold text-blue-500">XIN CHÀO</p>
 				<p className="text-3xl font-bold text-blue-800">Đăng nhập hệ thống</p>
@@ -130,6 +130,11 @@ function Form() {
 					{loading ? "Đang đăng nhập..." : "Đăng nhập"}
 					<ArrowRightStroke />
 				</button>
+			</div>
+
+			<div className="lg:hidden flex flex-row gap-4 !p-[3rem] text-black items-center justify-center text-sm">
+			    <CheckShield className="w-[1rem] h-[1rem] text-blue-500"/>
+				<p className="text-s">Hệ thống dành cho đội ngũ y tế</p>
 			</div>
 		</form>
 		</>
