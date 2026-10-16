@@ -102,7 +102,7 @@ public class BillingService {
         }
 
         Staff staff = staffRepository.findById(request.getStaffId())
-                .filter(s -> !s.getDeleted())
+                .filter(s -> !s.isDeleted())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy nhân viên: " + request.getStaffId()));
 

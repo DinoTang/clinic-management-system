@@ -4,7 +4,9 @@ import com.clinic.management._doctor.entities.Doctor;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "LICHTRUCBACSI")
 public class DoctorSchedule {
@@ -51,78 +53,6 @@ public class DoctorSchedule {
         this.endTime = endTime;
         this.maxPatients = maxPatients;
         this.status = status;
-        this.deleted = deleted;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Doctor getDoctor() {
-        return doctor;
-    }
-
-    public void setDoctor(Doctor doctor) {
-        this.doctor = doctor;
-    }
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
-
-    public LocalDate getExaminationDate() {
-        return examinationDate;
-    }
-
-    public void setExaminationDate(LocalDate examinationDate) {
-        this.examinationDate = examinationDate;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getMaxPatients() {
-        return maxPatients;
-    }
-
-    public void setMaxPatients(Integer maxPatients) {
-        this.maxPatients = maxPatients;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
     }
 }

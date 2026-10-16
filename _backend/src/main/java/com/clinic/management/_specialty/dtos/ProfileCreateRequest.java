@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Data;
 
+@Data
 public class ProfileCreateRequest {
 
     @NotBlank(message="Tên chuyên khoa không được để trống")
@@ -25,13 +27,4 @@ public class ProfileCreateRequest {
         this.description = description;
         this.standardFee = standardFee;
     }
-
-    public String getName() {return name;}
-    public void setName(String name) {this.name = name;}
-
-    public String getDescription() {return description;}
-    public void setDescription(String description) {this.description = description;}
-
-    public BigDecimal getStandardFee() {return standardFee;}
-    public void setStandardFee(BigDecimal standardFee) {this.standardFee = standardFee;}
 }

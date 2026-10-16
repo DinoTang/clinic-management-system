@@ -4,8 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import lombok.Data;
 
-
+@Data
 public class ProfileCreateRequest {
 
     @NotBlank(message="Mã tài khoản không được để trống")
@@ -36,22 +37,4 @@ public class ProfileCreateRequest {
         this.examinationFee = examinationFee;
     }
 
-
-    public String getUserId() {return userId;}
-    public void setUserId(String userId) {this.userId = userId;}
-
-    public String getSpecialtyId() {return specialtyId;}
-    public void setSpecialtyId(String specialtyId) {this.specialtyId = specialtyId;}
-
-    public String getAcademicDegree() {return academicDegree;}
-    public void setAcademicDegree(String academicDegree) {this.academicDegree = academicDegree;}
-
-    public int getExperienceYears() {return experienceYears;}
-    public void setExperienceYears(int experienceYears) {this.experienceYears = experienceYears;}
-
-    public String getBio() {return bio;}
-    public void setBio(String bio) {this.bio = bio;}
-
-    public BigDecimal getExaminationFee() {return examinationFee;}
-    public void setExaminationFee(BigDecimal examinationFee) {this.examinationFee = examinationFee;}
 }
