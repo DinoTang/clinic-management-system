@@ -5,7 +5,9 @@ import com.clinic.management._user.entities.User;
 import com.clinic.management._user.interfaces.IUserGenerator;
 import com.clinic.management._user.interfaces.IUserRegistration;
 import com.clinic.management._user.repositories.UserRepository;
+import com.clinic.management._auth.dtos.GoogleUserInfo;
 import com.clinic.management._auth.dtos.RegisterRequest;
+import java.util.Map;
 
 @Service
 public class UserRegistrationService implements IUserRegistration {
@@ -21,7 +23,7 @@ public class UserRegistrationService implements IUserRegistration {
     }
 
     @Override
-    public User add(RegisterRequest request){
+    public User createByLocal(RegisterRequest request){
         if(userRepository.existsByEmail(request.getEmail())){
             throw new RuntimeException("Email đã tồn tại, hãy dùng email khác");
         }
@@ -44,6 +46,30 @@ public class UserRegistrationService implements IUserRegistration {
             request.getPhone()
         );
         user.setId(userGeneratorService.generateId());
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User createByGoogle(GoogleUserInfo googleUser){
+        String sub = googleUser.googleId();
+        String email = googleUser.email();
+        String fullName = googleUser.fullName();
+
+        if(userRepository.existsByGoogleId(sub))
+            throw new RuntimeException("Email đã được đăng ký, hãy dùng email khác");
+
+        if(userRepository.existsByEmail(email)){
+            User user = userRepository.findByEmail(email);
+            user.setGoogleId(sub);
+            return userRepository.save(user);
+        }
+
+        User user = new User();
+        user.setId(userGeneratorService.generateId());
+        user.setGoogleId(sub);
+        user.setEmail(email);
+        user.setUsername(email);
+        user.setFullName(fullName);
         return userRepository.save(user);
     }
 }
