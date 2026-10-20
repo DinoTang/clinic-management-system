@@ -50,50 +50,60 @@ running at `localhost:8080` and connected to the configured database. The
 Windows installer packages the desktop frontend; it does not start the backend
 or database as services.
 
-# Screenshot giao diện
+## Đăng nhập bằng Google OAuth2 (Google)
 
----
+### 1. Yêu cầu trước khi chạy
 
-## Trang chủ (Home)
+Đảm bảo máy tính đã cài đặt và cấu hình:
 
-### Desktop
-![Màn hình trang chủ desktop](./imgs/home/home_desktop.png)
+- Java JDK tương thích với phiên bản Java của dự án.
+- Maven hoặc Maven Wrapper có sẵn trong dự án.
+- MySQL đang hoạt động và cơ sở dữ liệu đã được cấu hình.
+- Tài khoản Google.
+- Thông tin xác thực Google OAuth2 được tạo trên Google Cloud Console.
 
-### Mobile
-![Màn hình trang chủ mobile](./imgs/home/home_mobile.png)
+### 2. Cấu hình Google OAuth2
 
----
+1. Truy cập [Google Cloud Console](https://console.cloud.google.com/).
+2. Tạo một dự án mới hoặc chọn dự án hiện có.
+3. Cấu hình màn hình đồng ý OAuth (OAuth consent screen).
+4. Tạo OAuth Client ID với loại ứng dụng **Web application**.
+5. Thêm URI chuyển hướng được ủy quyền (Authorized redirect URI):
 
-## Quản lý nhân viên
+   ```text
+   http://localhost:8080/login/oauth2/code/google
+   ```
 
-### 1. Danh sách nhân viên
+6. Sao chép **Client ID** và **Client Secret** để sử dụng trong ứng dụng.
 
-#### Desktop
-![Trang quản lý nhân viên desktop](./imgs/mstaff/staff_desktop.png)
+### 3. Cấu hình thông tin xác thực
 
-#### Mobile
-![Trang quản lý nhân viên mobile](./imgs/mstaff/staff_mobile.png)
+Tạo file `application.properties` tương tự `example.application.properties` Dán thông tin `GOOLE_CLIENT_ID` và `GOOLE_CLIENT_SECRET`:
 
-### 2. Xem thông tin nhân viên
+```properties
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
+spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
+```
 
-#### Desktop
-![Trang xem thông tin nhân viên desktop](./imgs/mstaff/staff_view_desktop.png)
+### 4. Kiểm tra chức năng đăng nhập Google
 
-#### Mobile
-![Trang xem thông tin nhân viên mobile](./imgs/mstaff/staff_view_mobile.png)
+1. Mở trình duyệt và truy cập đường dẫn:
 
-### 3. Chỉnh sửa thông tin nhân viên
+   ```text
+   http://localhost:8080/oauth2/authorization/google
+   ```
 
-#### Desktop
-![Trang chỉnh sửa nhân viên desktop](./imgs/mstaff/staff_edit_desktop.png)
+2. Chọn tài khoản Google và hoàn tất quá trình xác thực.
+3. Google chuyển hướng về callback mặc định của Spring Security:
 
-#### Mobile
-![Trang chỉnh sửa nhân viên mobile](./imgs/mstaff/staff_edit_mobile.png)
+   ```text
+   http://localhost:8080/login/oauth2/code/google
+   ```
 
-### 4. Xóa nhân viên
+4. Sau khi xác thực thành công, Spring Security chuyển hướng đến endpoint xử lý đăng nhập thành công đã cấu hình:
 
-#### Desktop
-![Trang xóa nhân viên desktop](./imgs/mstaff/staff_delete_desktop.png)
+   ```text
+   http://localhost:8080/api/auth/oauth-success
+   ```
 
-#### Mobile
-![Trang xóa nhân viên mobile](./imgs/mstaff/staff_delete_mobile.png)
+5. Ứng dụng lấy thông tin người dùng từ Google, kiểm tra tài khoản trong cơ sở dữ liệu và tạo JWT nếu đăng nhập thành công.
