@@ -16,9 +16,9 @@ function Login() {
 			</div>
 
 		</div>
-		<div className="flex items-center bg-b-brand lg:bg-t-brand lg:h-screen justify-center">
+		<div className="flex items-center bg-b-brand lg:bg-t-brand !p-[1rem] justify-center">
 			<div className="flex flex-row rounded-[1rem] bg-white w-full lg:w-9/10 items-start justify-between shadow-xl/30 rounded-[2rem] overflow-hidden">
-				<div className="w-1/2 h-[38rem] hidden lg:block">
+				<div className="w-1/2 h-[44rem] hidden lg:block">
 					<Background/>
 				</div>
 

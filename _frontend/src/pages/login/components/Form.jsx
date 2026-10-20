@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { User, Lock, Eye, ArrowRightStroke, UserPlus, CheckShield } from "@boxicons/react";
+import {
+	User,
+	Lock,
+	Eye,
+	ArrowRightStroke,
+	UserPlus,
+	CheckShield,
+} from "@boxicons/react";
 import Swal from "sweetalert2";
 import { login as loginApi } from "../../../services/auth/authService.js";
+import IconGG from "../../../assets/Icon_gg.png";
 
 function Form() {
 	const [username, setUsername] = useState("");
@@ -129,6 +137,15 @@ function Form() {
 				<button type="submit" className="flex flex-row gap-2 !p-3 border rounded-[1rem] font-bold bg-blue-500 text-white justify-center">
 					{loading ? "Đang đăng nhập..." : "Đăng nhập"}
 					<ArrowRightStroke />
+				</button>
+			</div>
+
+			<div className="text-center">--- Hoặc ---</div>
+
+			<div className="flex gap-4 flex-col">
+				<button type="submit" className="flex flex-row items-center gap-2 !p-3 border rounded-[1rem] font-bold justify-center cursor-pointer">
+					<img src={IconGG} className="w-[2rem] h-[2rem]"/>
+					{loading ? "Đang đăng nhập..." : "Đăng nhập với Google"}
 				</button>
 			</div>
 

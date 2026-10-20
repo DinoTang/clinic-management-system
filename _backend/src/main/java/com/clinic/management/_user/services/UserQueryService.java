@@ -28,6 +28,14 @@ public class UserQueryService implements IUserQuery {
     }
 
     @Override
+    public User findByGoogleId(String googleId){
+        User user = userRepository.findByGoogleId(googleId);
+        if(user == null)
+            throw new RuntimeException("Không tìm thấy người dùng");
+        return user;
+    }
+
+    @Override
     public User findByEmail(String email) {
         User user =userRepository.findByEmail(email);
         if(user == null)
@@ -70,6 +78,11 @@ public class UserQueryService implements IUserQuery {
     @Override
     public boolean existsByPhone(String phone){
         return userRepository.existsByPhone(phone);
+    }
+
+    @Override
+    public boolean existsByGoogleId(String googleId){
+        return userRepository.existsByGoogleId(googleId);
     }
 
 }

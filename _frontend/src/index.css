@@ -107,3 +107,20 @@ background:
     transparent 86%
   );
 }
+
+.is-blue{
+      color: #3283d4;
+  background: #edf5fe;
+}
+.is-green{
+      color: #299a76;
+  background: #eaf8f2;
+}
+.is-violet{
+  color: #8166c2;
+  background: #f2effb;
+}
+.is-amber {
+  color: #c48927;
+  background: #fff6e8;
+}

@@ -1,16 +1,18 @@
-import Header from "./components/Header.jsx";
-import Navbar from "./components/Navbar.jsx";
+import Sidebar from "./components/Sidebar.jsx";
+import HeaderAdmin from "./components/HeaderAdmin.jsx";
 import { Outlet } from "react-router-dom";
 
 function AdminLayout() {
 	return (
 		<>
-			<Header/>
 			<div className="flex flex-row">
-				<Navbar className="hidden lg:block w-fit text-nowrap border-r-1 border-b-1"/>
-				<main className="w-full">
-	                <Outlet />
-	            </main>
+				<Sidebar/>
+				<div className="flex bg-white flex-col w-full">
+					<HeaderAdmin className="bg-white"/>
+					<main className="!p-[3rem]">
+		                <Outlet />
+		            </main>
+				</div>
 	        </div>
 		</>
 		);

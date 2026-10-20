@@ -9,8 +9,10 @@ public interface IUserQuery {
     User findByEmail(String email);
     User findById(String userId);
     User findByPhone(String phone);
+    User findByGoogleId(String googleId);
     Page<User> findAll(int page, int size);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);
+    boolean existsByGoogleId(String googleId);
 }

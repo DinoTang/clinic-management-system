@@ -3,7 +3,6 @@ package com.clinic.management._user.entities;
 import com.clinic.management.common.enums.Role;
 import com.clinic.management.common.enums.UserStatus;
 import jakarta.persistence.*;
-
 import lombok.Data;
 
 @Entity
@@ -12,10 +11,10 @@ import lombok.Data;
 public class User {
 
     @Id
-    @Column(name = "MANGUOIDUNG")
+    @Column(name = "MANGUOIDUNG", nullable = false)
     private String id;
 
-    @Column(name = "TENDANGNHAP")
+    @Column(name = "TENDANGNHAP", unique = true)
     private String username;
 
     @Column(name = "MATKHAU")
@@ -24,35 +23,39 @@ public class User {
     @Column(name = "HOTEN")
     private String fullName;
 
-    @Column(name = "EMAIL")
+    @Column(name = "EMAIL", unique=true)
     private String email;
 
     @Column(name = "SODIENTHOAI")
     private String phone;
 
-    @Column(name = "VAITRO", columnDefinition = "bit")
-    private Role role;
+    @Column(name = "GOOGLE_ID", unique = true)
+    private String googleId;
 
-    @Column(name = "TRANGTHAI", columnDefinition = "bit")
-    private UserStatus status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "VAITRO", length = 20, nullable = false)
+    private Role role = Role.PATIENT;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TRANGTHAI", length = 20, nullable = false)
+    private UserStatus status = UserStatus.ACTIVE;
+    
     @Column(name = "TRANGTHAIXOA")
-    private Boolean deleted;
+    private Boolean deleted = false;
 
-    public User(){}
+    public User() {}
+
     public User(
         String username,
         String password,
         String fullName,
         String email,
-        String phone){
+        String phone
+    ) {
         this.username = username;
-        this.password=password;
-        this.fullName=fullName;
-        this.email=email;
-        this.phone=phone;
-        this.role=Role.PATIENT;
-        this.status=UserStatus.ACTIVE;
-        this.deleted=false;
+        this.password = password;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
     }
 }

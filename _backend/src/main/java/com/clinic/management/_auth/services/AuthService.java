@@ -35,7 +35,7 @@ public class AuthService implements IAuth{
 	}
 
 	@Override
-	public LoginResponse register(RegisterRequest request){
+	public LoginResponse registerLocal(RegisterRequest request){
 
 		if(userQueryService.existsByUsername(request.getUsername())){
 			throw new RuntimeException("Tên tài khoản đã tồn tại. Vui lòng thử tên khác");
@@ -45,16 +45,40 @@ public class AuthService implements IAuth{
 			throw new RuntimeException("Email đã tồn tại. Vui lòng thử email khác");
 		}
 
-		User user = userRegistrationService.add(request);
+		User user = userRegistrationService.createByLocal(request);
 		LoginRequest loginRequest = new LoginRequest(
 			request.getUsername(),
 			request.getPassword()
 		);
-		return this.login(loginRequest);
+		return this.loginLocal(loginRequest);
 	}
 
 	@Override
-	public LoginResponse login(LoginRequest request){
+	public LoginResponse registerGoogle(GoogleUserInfo googleUser){
+        String sub = googleUser.googleId();;
+        
+		if(userQueryService.existsByGoogleId(sub)){
+			return this.loginGoogle(sub);
+		}
+
+		User user = userRegistrationService.createByGoogle(googleUser);
+		return this.loginGoogle(sub);
+	}
+
+
+	@Override
+	public LoginResponse loginGoogle(String googleId){
+		if(!userQueryService.existsByGoogleId(googleId))
+			throw new RuntimeException("Email không tồn tại trong hệ thống");
+
+		User user = userQueryService.findByGoogleId(googleId);
+
+		String token = jwtService.generateToken(user.getUsername());
+		return new LoginResponse(token, user);
+	}
+
+	@Override
+	public LoginResponse loginLocal(LoginRequest request){
 		User user = userQueryService.findByUsername(request.getUsername());
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -63,14 +87,14 @@ public class AuthService implements IAuth{
 			throw new RuntimeException("Tên tài khoản hoặc mật khẩu không chính xác");
 		}
 		String token = jwtService.generateToken(request.getUsername());
-		return createLoginResponse(token, user);
+		return new LoginResponse(token, user);
 	}
 
 	@Override
 	public LoginResponse me(String token){
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
 	    User user = userQueryService.findByUsername(username);
-		return createLoginResponse(token, user);
+		return new LoginResponse(token, user);
 	}
 
 	private LoginResponse createLoginResponse(String token, User user) {
@@ -97,7 +121,7 @@ public class AuthService implements IAuth{
 
         // Service này đã kiểm tra username, email, số điện thoại trùng
         // và mã hóa mật khẩu trước khi lưu tài khoản.
-        User user = userRegistrationService.add(userRequest);
+        User user = userRegistrationService.createByLocal(userRequest);
 
         String maxPatientId = patientRepository.findMaxPatientId();
         int nextPatientNumber = maxPatientId == null
@@ -119,7 +143,7 @@ public class AuthService implements IAuth{
         patientRepository.save(patient);
 
         // Đăng ký xong trả token luôn; username trong token là số điện thoại.
-        return login(new LoginRequest(request.getPhone(), request.getPassword()));
+        return loginLocal(new LoginRequest(request.getPhone(), request.getPassword()));
     }
 
     private String normalizePatientGender(String gender) {
