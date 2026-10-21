@@ -19,8 +19,8 @@ function Admin() {
 			<Card />
 			<ChartPanel/>
 			<ListPanel/>
-			<TablePanel/>
-			<LoadingPanel/>
+			{/*<TablePanel/>*/}
+			{/*<LoadingPanel/>*/}
 		</div>
 		</>
 		);

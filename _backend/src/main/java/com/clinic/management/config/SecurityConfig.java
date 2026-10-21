@@ -18,12 +18,23 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers(
+                    "/api/auth/login",
+                    "/api/auth/register",
+                    "/oauth2/**",
+                    "/login/**"
+                ).permitAll()
                 .anyRequest().permitAll()
             )
             .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("/api/auth/oauth-success", true)
+                // .defaultSuccessUrl("/api/auth/oauth-success", true)
+                .successHandler((request, response, authentication) -> {
+                        response.sendRedirect(
+                            "http://localhost:5173/oauth/callback"
+                        );
+                    })
             );
+
         return http.build();
     }
 

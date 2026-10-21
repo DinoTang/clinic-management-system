@@ -19,6 +19,16 @@ export async function login(username, password) {
     return data;
 }
 
+export async function loginGoogle() {
+    const response = await fetch(`${API_URL}/oauth-success`);
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw data;
+    }
+    return data;
+}
+
 export async function register({username, password, email, fullName, phone}) {
     const response = await fetch(`${API_URL}/register`,{
         method: "POST",
