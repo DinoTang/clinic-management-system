@@ -33,6 +33,14 @@ public class BillingController {
         return billingService.listUnpaid();
     }
 
+    @GetMapping({"/billing/invoices", "/invoices"})
+    public List<Invoice> listInvoices(@RequestParam(required = false) String status) {
+        if (status != null && !status.isBlank()) {
+            return invoiceRepository.findByPaymentStatusAndDeletedFalseOrderByCreatedAtDesc(status);
+        }
+        return invoiceRepository.findByDeletedFalseOrderByCreatedAtDesc();
+    }
+
     @GetMapping({"/billing/invoices/{id}", "/invoices/{id}"})
     public ResponseEntity<Invoice> getInvoice(@PathVariable String id) {
         return billingService.findById(id)

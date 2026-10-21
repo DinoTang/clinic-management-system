@@ -12,6 +12,7 @@ import AdminWorkspace from "./pages/AdminPage/AdminWorkspace.jsx";
 import PatientBookingPage from "./pages/BookingPage/PatientBookingPage.jsx";
 import DoctorExaminationPage from "./pages/ExaminationPage/DoctorExaminationPage.jsx";
 import ReceptionPage from "./pages/ReceptionPage/ReceptionPage.jsx";
+import BillingPage from "./pages/BillingPage/BillingPage.jsx";
 import DesktopSchedulePage from "./pages/SchedulePage/DesktopSchedulePage.jsx";
 import "./styles/desktop-index.css";
 
@@ -98,6 +99,7 @@ function StaffRoleRoutes() {
       <Route element={<RoleWorkspaceLayout basePath="/staff" role="STAFF" />}>
         <Route index element={<Navigate replace to="reception" />} />
         <Route path="reception" element={<ReceptionPage />} />
+        <Route path="billing" element={<BillingPage />} />
         <Route path="booking" element={<PatientBookingPage />} />
         <Route path="*" element={<Navigate replace to="/staff/reception" />} />
       </Route>

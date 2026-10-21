@@ -11,6 +11,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, String> {
 
     List<Invoice> findByPaymentStatusAndDeletedFalseOrderByCreatedAtDesc(String paymentStatus);
 
+    List<Invoice> findByDeletedFalseOrderByCreatedAtDesc();
+
     boolean existsByMedicalRecordIdAndDeletedFalse(String medicalRecordId);
 
     @Query(value = "SELECT MAHOADON FROM hoadon WHERE MAHOADON REGEXP '^HD[0-9]+$' " +
