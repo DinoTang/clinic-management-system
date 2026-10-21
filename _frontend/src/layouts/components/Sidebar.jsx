@@ -26,7 +26,7 @@ function Sidebar({ className }) {
     {
       title: "DANH MỤC & NHÂN SỰ",
       items: [
-        { path: "/roles", label: "Tài khoản & phân quyền", icon: <Group /> },
+        { path: "/accounts", label: "Tài khoản & phân quyền", icon: <Group /> },
         { path: "/patients", label: "Bệnh nhân", icon: <User /> },
         { path: "/doctors", label: "Bác sĩ", icon: <HeartPlus /> },
         { path: "/specialties", label: "Chuyên khoa", icon: <PlusShield /> },
@@ -54,7 +54,7 @@ function Sidebar({ className }) {
   const baseNavItemClass = "flex w-full !min-h-[2.4rem] items-center !gap-[0.6rem] !px-[0.6rem] !py-[0.5rem] border-0 rounded-[0.7rem] text-[0.75rem] text-left transition-colors duration-[140ms] ease-in-out";
 
   return (
-    <div className={`sticky top-0 flex w-fit h-screen shrink-0 flex-col border-r border-gray-200 bg-white ${className || ''}`}>
+    <div className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-gray-200 bg-white ${className || ''}`}>
         <div className="flex h-[4.5rem] shrink-0 items-center gap-[0.9rem] !px-[1.3rem] border-b border-[#f0f1f3]">
             <div className="grid w-[2.45rem] h-[2.45rem] shrink-0 place-items-center rounded-[0.8rem] text-white bg-gradient-to-br from-[#4098e6] to-[#1766b9] shadow-[0_5px_12px_rgba(40,120,208,0.19)]">
                 <PlusShield />
