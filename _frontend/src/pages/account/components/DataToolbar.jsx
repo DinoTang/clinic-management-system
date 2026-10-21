@@ -36,9 +36,6 @@ function DataToolbar({
         </select>
       </label>
 
-      <span className="ml-auto whitespace-nowrap text-[0.75rem] text-[#8490a0]">
-        {count} bản ghi
-      </span>
     </div>
   );
 }

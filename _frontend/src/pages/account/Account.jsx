@@ -1,9 +1,36 @@
+import { useState, useEffect, useCallback } from "react";
 import AccountWelcome from "./components/AccountWelcome";
 import DataToolbar from "./components/DataToolbar";
 import AccountTable from "./components/AccountTable";
-import TableFooter from "./components/TableFooter";
+import {getAll} from "../../services/user/userService.js";
+import Paginate from "../../layouts/components/Paginate.jsx";
 
 function Account({ className = "" }) {
+  const [data, setData] = useState([]);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAccounts = useCallback(async (currentPage = page, currentSize = size) => {
+    setLoading(true);
+
+    try {
+      const result = await getAll(currentPage, currentSize);
+      setData(result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, size]);
+
+  useEffect(()=>{
+    fetchAccounts(page, size);
+  },[page]);
+
+  if (loading) {
+        return <p>Đang tải...</p>;
+    }
 
   return (
     <div className={`flex flex-col gap-[1.25rem] ${className}`}>
@@ -13,9 +40,10 @@ function Account({ className = "" }) {
         <DataToolbar />
 
         <div className="!mt-[1rem]">
-          <AccountTable />
+          <AccountTable accounts={data.content} fetchAccounts={fetchAccounts} />
         </div>
-		<TableFooter />
+          <Paginate data={data} setPage={setPage} page={page} />
+
       </div>
     </div>
 
