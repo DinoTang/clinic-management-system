@@ -3,6 +3,7 @@ export const ROLE_CONFIG = {
     label: "Nhân viên",
     pages: [
       { id: "reception", label: "Tiếp đón & hàng đợi" },
+      { id: "billing", label: "Thu ngân & Viện phí" },
       { id: "booking", label: "Đặt lịch bệnh nhân" },
     ],
   },
