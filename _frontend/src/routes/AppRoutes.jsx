@@ -3,6 +3,7 @@ import { lazy } from "react";
 import LoginPage from "../pages/login/Login.jsx";
 import AdminPage from "../pages/admin/Admin.jsx";
 import GoogleCallback from "../pages/callback/GoogleCallback";
+import Account from "../pages/account/Account";
 import AdminLayout from "../layouts/AdminLayout.jsx";
 import {
     AdminRoleRoutes,
@@ -26,6 +27,7 @@ function AppRoutes() {
 
             <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminPage/>} />
+                <Route path="/accounts" element={<Account/>} />
             </Route>
 
             <Route path="/a" element={<AdminRoleRoutes />} />            
