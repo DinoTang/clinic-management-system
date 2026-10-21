@@ -4,10 +4,15 @@ import com.clinic.management.common.enums.Role;
 import com.clinic.management.common.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDateTime;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "NGUOIDUNG")
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -42,6 +47,14 @@ public class User {
     
     @Column(name = "TRANGTHAIXOA")
     private Boolean deleted = false;
+
+    @CreatedDate
+    @Column(name = "NGAYTAO")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate 
+    @Column(name = "NGAYCAPNHAT")
+    private LocalDateTime updatedAt;
 
     public User() {}
 

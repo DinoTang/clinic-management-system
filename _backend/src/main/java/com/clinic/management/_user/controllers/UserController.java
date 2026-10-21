@@ -1,8 +1,7 @@
 package com.clinic.management._user.controllers;
 
 import com.clinic.management.common.enums.Role;
-import com.clinic.management.common.enums.UserStatus;
-import com.clinic.management._user.dtos.ProfileUpdateRequest;
+import com.clinic.management._user.dtos.*;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._user.services.UserUpdateService;
 import com.clinic.management._user.services.UserQueryService;
@@ -65,19 +64,18 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/update-status/{userId}")
+    @PutMapping("/update-status")
     public ResponseEntity<User> updateStatus(
-        @PathVariable String userId,
-        @RequestBody UserStatus request){
-        User user = userUpdateService.updateStatus(userId, request);
+        @RequestBody UpdateStatusRequest request){
+        User user = userUpdateService.updateStatus(request.getUserId(), request.getStatus());
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/update-role/{userId}")
+    @PutMapping("/update-role")
     public ResponseEntity<User> updateRole(
-        @PathVariable String userId,
-        @RequestBody Role request){
-        User user = userUpdateService.updateRole(userId, request);
+        @RequestBody String userId,
+        @RequestBody Role role){
+        User user = userUpdateService.updateRole(userId, role);
         return ResponseEntity.ok(user);
     }
 

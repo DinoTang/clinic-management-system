@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { X } from "@boxicons/react";
 
-function EditModal({ account, onClose, onSubmit }) {
+function EditModal({ account, onClose, fetchAccounts }) {
 	useEffect(()=>{
 		function handleKeyDown(e){
 			if(e.key==="Escape"){
@@ -146,11 +146,6 @@ function EditModal({ account, onClose, onSubmit }) {
                 )}
               </label>
             ))}
-          </div>
-
-          {/* Note */}
-          <div className="!mt-[1.25rem] rounded-[0.5rem] bg-[#f8fafc] !px-[0.875rem] !py-[0.75rem] text-[0.75rem] leading-[1.5] text-[#8490a0]">
-            Bản ghi này chỉ được thêm/cập nhật trong dữ liệu demo của giao diện.
           </div>
 
           {/* Actions */}

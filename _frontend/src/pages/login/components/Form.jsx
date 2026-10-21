@@ -12,6 +12,7 @@ import {
 import Swal from "sweetalert2";
 import { login as loginApi } from "../../../services/auth/authService.js";
 import ButtonLoginGoogle from "./ButtonLoginGoogle";
+import {USER_STATUS, USER_ROLE} from "../../../enums/index.js";
 
 function Form() {
 	const [username, setUsername] = useState("");
@@ -39,7 +40,7 @@ function Form() {
 	        showConfirmButton: true,
 		    });
 
-			if(data.user.status=="Đã khóa"){
+			if(data.user.status==USER_STATUS.LOCKED){
 				Swal.fire({
 				    icon: "error",
 				    title: "Đăng nhập từ chối",
@@ -47,13 +48,15 @@ function Form() {
 				    timer: 5000,
 		        showConfirmButton: true,
 			    });
+			    navigate("/");
 			    return;
 			}
 			
-			if (data.user.role =="Nhà phát triển") navigate("/");			
-			else if (data.user.role =="Quản trị viên") navigate("/admin");
-			else if (data.user.role =="Nhân viên") navigate("/staff");
-			else if (data.user.role =="Bác sĩ") navigate("/doctor");
+			if (data.user.role ==USER_ROLE.DEV) navigate("/");			
+			else if (data.user.role ==USER_ROLE.ADMIN) navigate("/admin");
+			else if (data.user.role ==USER_ROLE.STAFF) navigate("/staff");
+			else if (data.user.role ==USER_ROLE.DOCTOR) navigate("/doctor");
+			else if (data.user.role ==USER_ROLE.PATIEN) navigate("/patient");
 
         } catch (error) {
         	setError(error);
