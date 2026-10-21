@@ -6,7 +6,7 @@ import {
 
 } from '@boxicons/react';
 
-function Card({className}) {
+function StatPanel({className}) {
 
 	const groupCards = [
 		{
@@ -57,4 +57,4 @@ function Card({className}) {
 		);
 }
 
-export default Card;
+export default StatPanel;

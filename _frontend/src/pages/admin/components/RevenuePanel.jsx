@@ -1,5 +1,5 @@
 import RevenueChart from "./RevenueChart";
-function ChartPanel({className}){
+function RevenuePanel({className}){
 	return (
 	<>
 	<section className={` ${className} shadow-xl rounded-xl border border-gray-200 bg-white !p-6`}>
@@ -37,4 +37,4 @@ function ChartPanel({className}){
 	</>
 	);
 }
-export default ChartPanel;
+export default RevenuePanel;

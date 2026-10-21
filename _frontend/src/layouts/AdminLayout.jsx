@@ -9,7 +9,7 @@ function AdminLayout() {
 				<Sidebar/>
 				<div className="flex bg-white flex-col w-full">
 					<HeaderAdmin className="bg-white"/>
-					<main className="!p-[3rem]">
+					<main className="!p-[1.4rem]">
 		                <Outlet />
 		            </main>
 				</div>
