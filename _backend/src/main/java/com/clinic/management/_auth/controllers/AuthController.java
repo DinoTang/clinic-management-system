@@ -50,7 +50,7 @@ public class AuthController {
     }
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponse> login(
+	public ResponseEntity<LoginResponse> loginLocal(
 		@Valid
 		@RequestBody LoginRequest request){
 		LoginResponse result = authService.loginLocal(request);
@@ -77,7 +77,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<LoginResponse> register(
+	public ResponseEntity<LoginResponse> registerLocal(
 		@Valid
 		@RequestBody RegisterRequest request){
 		LoginResponse result = authService.registerLocal(request);

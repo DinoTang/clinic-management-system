@@ -11,7 +11,7 @@ import {
 } from "@boxicons/react";
 import Swal from "sweetalert2";
 import { login as loginApi } from "../../../services/auth/authService.js";
-import IconGG from "../../../assets/Icon_gg.png";
+import ButtonLoginGoogle from "./ButtonLoginGoogle";
 
 function Form() {
 	const [username, setUsername] = useState("");
@@ -143,10 +143,7 @@ function Form() {
 			<div className="text-center">--- Hoặc ---</div>
 
 			<div className="flex gap-4 flex-col">
-				<button type="submit" className="flex flex-row items-center gap-2 !p-3 border rounded-[1rem] font-bold justify-center cursor-pointer">
-					<img src={IconGG} className="w-[2rem] h-[2rem]"/>
-					{loading ? "Đang đăng nhập..." : "Đăng nhập với Google"}
-				</button>
+				<ButtonLoginGoogle/>
 			</div>
 
 			<div className="lg:hidden flex flex-row gap-4 !p-[3rem] text-black items-center justify-center text-sm">

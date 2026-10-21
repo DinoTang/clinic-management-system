@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { lazy } from "react";
 import LoginPage from "../pages/login/Login.jsx";
 import AdminPage from "../pages/admin/Admin.jsx";
+import GoogleCallback from "../pages/callback/GoogleCallback";
 import AdminLayout from "../layouts/AdminLayout.jsx";
 import {
     AdminRoleRoutes,
@@ -21,6 +22,7 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<LoginPage />} />
+            <Route path="/oauth/callback" element={<GoogleCallback />} />
 
             <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminPage/>} />
