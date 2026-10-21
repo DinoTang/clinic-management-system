@@ -255,7 +255,7 @@ public class BillingService {
     private String normalizeMethod(String method) {
         if (method == null || method.isBlank()) {
             throw new IllegalArgumentException(
-                    "BR-058: Phương thức thanh toán không được để trống. Chỉ chấp nhận CASH, BANK_TRANSFER, CARD.");
+                    "BR-058: Phương thức thanh toán không được để trống. Chỉ chấp nhận CASH, BANK_TRANSFER, VNPAY, MOMO, CARD.");
         }
         switch (method.trim().toUpperCase()) {
             case "CASH":
@@ -264,13 +264,17 @@ public class BillingService {
             case "BANK_TRANSFER":
             case "CHUYENKHOAN":
                 return "ChuyenKhoan";
+            case "VNPAY":
+                return "VNPAY";
+            case "MOMO":
+                return "MOMO";
             case "CARD":
             case "THE":
                 return "The";
             default:
                 throw new IllegalArgumentException(
                         "BR-058: Phương thức thanh toán không hợp lệ: " + method
-                                + ". Chỉ chấp nhận CASH, BANK_TRANSFER, CARD.");
+                                + ". Chỉ chấp nhận CASH, BANK_TRANSFER, VNPAY, MOMO, CARD.");
         }
     }
 

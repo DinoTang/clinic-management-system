@@ -1,0 +1,807 @@
+/* =========================================================
+   GIAO DIỆN THU NGÂN & THANH TOÁN VIỆN PHÍ (BILLING PAGE)
+   Phong cách chuẩn Clinic Management / MediGo Desktop
+   ========================================================= */
+
+.billing-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f4f7fb;
+  min-height: calc(100vh - 60px);
+  box-sizing: border-box;
+}
+
+/* 2 Cột chính */
+.billing-left {
+  flex: 1.1;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-right {
+  flex: 1.5;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+}
+
+.panel-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+/* Thanh lọc và tìm kiếm hóa đơn */
+.billing-filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.billing-tab-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.billing-tab-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.billing-tab-btn .badge-count {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.billing-tab-btn.active .badge-count {
+  background: #ffffff;
+  color: #2563eb;
+}
+
+/* Hộp tìm kiếm và Lập hóa đơn nhanh */
+.billing-search-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.billing-search-input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.billing-search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.quick-invoice-box {
+  background: #eff6ff;
+  border: 1px dashed #93c5fd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.quick-invoice-box label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e40af;
+  white-space: nowrap;
+}
+
+.quick-invoice-box .input-wrap {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+/* Danh sách hóa đơn */
+.invoice-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.invoice-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.invoice-card:hover {
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+}
+
+.invoice-card.is-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+}
+
+.invoice-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.invoice-id {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e3a8a;
+}
+
+.invoice-time {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.invoice-card-body {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.invoice-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 6px;
+}
+
+.invoice-total {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+/* Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-badge.unpaid {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Bàn thu ngân (Right Panel) */
+.checkout-patient-banner {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-patient-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.checkout-patient-meta {
+  font-size: 12px;
+  opacity: 0.9;
+  display: flex;
+  gap: 14px;
+}
+
+.checkout-invoice-tag {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-align: right;
+  font-size: 12px;
+}
+
+.checkout-invoice-tag b {
+  font-size: 14px;
+  display: block;
+}
+
+/* Bảng chi tiết mục thu */
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.breakdown-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: left;
+}
+
+.breakdown-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.item-type-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.item-type-tag.phikham {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.item-type-tag.dichvu {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.item-type-tag.thuoc {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+/* Tổng tiền Bar */
+.grand-total-bar {
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grand-total-bar .label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.grand-total-bar .amount {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f766e;
+}
+
+/* Chọn phương thức thanh toán */
+.payment-methods-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.payment-method-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.payment-method-card:hover {
+  border-color: #93c5fd;
+  transform: translateY(-2px);
+}
+
+.payment-method-card.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.payment-method-card.vnpay.active {
+  border-color: #005baa;
+  background: #f0f7ff;
+}
+
+.payment-method-card.momo.active {
+  border-color: #a50064;
+  background: #fdf2f8;
+}
+
+.payment-method-card .icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.payment-method-card .method-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Panel chi tiết từng phương thức thanh toán */
+.payment-detail-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+/* Tiền mặt */
+.cash-calculator {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cash-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cash-row label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.cash-input {
+  width: 200px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: right;
+  color: #1e3a8a;
+  outline: none;
+}
+
+.cash-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.quick-amount-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: #334155;
+  font-weight: 500;
+}
+
+.chip-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.change-amount-badge {
+  font-size: 16px;
+  font-weight: 800;
+  color: #10b981;
+}
+
+.change-amount-badge.insufficient {
+  color: #ef4444;
+}
+
+/* Thẻ thanh toán VNPay */
+.vnpay-payment-card {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.vnpay-qr-wrap {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vnpay-qr-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #005baa;
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+
+.vnpay-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #1e3a8a;
+}
+
+.vnpay-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 16px;
+  color: #005baa;
+}
+
+.vnpay-header-logo span {
+  color: #e11b22;
+}
+
+/* Thẻ thanh toán MoMo */
+.momo-payment-card {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+  border: 1px solid #fbcfe8;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.momo-qr-wrap {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.momo-qr-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a50064;
+  margin-top: 6px;
+}
+
+.momo-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #831843;
+}
+
+.momo-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 16px;
+  color: #a50064;
+}
+
+/* Nút thanh toán */
+.btn-pay-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-pay-submit:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btn-pay-submit:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Empty state */
+.empty-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-placeholder svg {
+  width: 56px;
+  height: 56px;
+  stroke: #cbd5e1;
+}
+
+/* =========================================================
+   MODAL IN BIÊN LAI / HÓA ĐƠN THU TIỀN (PRINT RECEIPT)
+   ========================================================= */
+
+.receipt-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.receipt-modal-card {
+  background: #ffffff;
+  border-radius: 14px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.receipt-header {
+  padding: 20px 24px 14px 24px;
+  border-bottom: 2px dashed #cbd5e1;
+  text-align: center;
+}
+
+.receipt-clinic-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e3a8a;
+  text-transform: uppercase;
+}
+
+.receipt-clinic-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.receipt-title {
+  margin: 12px 0 4px 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.receipt-code {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+}
+
+.receipt-body {
+  padding: 16px 24px;
+}
+
+.receipt-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  font-size: 13px;
+  color: #334155;
+  margin-bottom: 14px;
+}
+
+.receipt-meta-grid b {
+  color: #1e293b;
+}
+
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 14px 0;
+}
+
+.receipt-table th {
+  background: #f1f5f9;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 8px 10px;
+  text-align: left;
+  color: #334155;
+}
+
+.receipt-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.receipt-total-section {
+  border-top: 2px dashed #cbd5e1;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.receipt-total-row.grand {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f766e;
+}
+
+.receipt-stamp-box {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.receipt-paid-seal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid #10b981;
+  border-radius: 8px;
+  padding: 6px 16px;
+  color: #059669;
+  font-weight: 800;
+  font-size: 13px;
+  transform: rotate(-5deg);
+}
+
+.receipt-footer-actions {
+  padding: 14px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 14px 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Định dạng khi in (Print Styles) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-modal-card,
+  .receipt-modal-card * {
+    visibility: visible;
+  }
+  .receipt-modal-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+  }
+  .receipt-footer-actions {
+    display: none !important;
+  }
+}

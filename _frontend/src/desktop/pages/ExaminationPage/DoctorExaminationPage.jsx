@@ -133,40 +133,159 @@ function DoctorExaminationPage() {
 
   /* ================= HÀNH ĐỘNG DỮ LIỆU ================= */
 
-  const loadQueue = (silent = false) => {
-    if (!doctorId) return;
-    /* setState được đẩy vào microtask để không chạy đồng bộ trong useEffect */
-    queueMicrotask(() => {
-      setLoadingQueue(true);
-      axios
-        .get(`${RECEPTION_API}/queue/doctor/${doctorId}`, {
-          params: { date: examDate },
-        })
-        .then((res) => {
-          const list = Array.isArray(res.data) ? res.data : [];
-          setQueue(list);
-          if (!silent && list.length === 0) {
-            notify(
-              "info",
-              "Không có lượt khám nào của bác sĩ trong ngày này.",
-            );
-          }
-          setSelected((prev) => {
-            if (!prev) return prev;
-            const fresh = list.find((item) => item.id === prev.id);
-            return fresh ? { ...prev, ...fresh } : prev;
-          });
-        })
-        .catch((err) => {
-          if (!silent) {
-            notify(
-              "error",
-              `Không tải được hàng đợi: ${extractError(err, "kiểm tra backend")}`,
-            );
-          }
-        })
-        .finally(() => setLoadingQueue(false));
-    });
+  const loadQueue = async (silent = false) => {
+    if (!doctorId) return [];
+    setLoadingQueue(true);
+    try {
+      const res = await axios.get(`${RECEPTION_API}/queue/doctor/${doctorId}`, {
+        params: { date: examDate },
+      });
+      const list = Array.isArray(res.data) ? res.data : [];
+      setQueue(list);
+      setSelected((prev) => {
+        if (!prev) return prev;
+        const fresh = list.find((item) => item.id === prev.id);
+        return fresh ? { ...prev, ...fresh } : prev;
+      });
+
+      if (!silent) {
+        if (list.length === 0) {
+          notify(
+            "info",
+            "Đã làm mới: Không có lượt khám nào của bác sĩ trong ngày này.",
+          );
+        } else {
+          const choKham = list.filter((i) => i.queueStatus === "ChoKham").length;
+          const dangKham = list.filter((i) => i.queueStatus === "DangKham").length;
+          notify(
+            "success",
+            `Đã làm mới danh sách hàng đợi (${list.length} lượt: ${choKham} chờ, ${dangKham} đang khám).`,
+          );
+        }
+      }
+      return list;
+    } catch (err) {
+      if (!silent) {
+        notify(
+          "error",
+          `Không tải được hàng đợi: ${extractError(err, "kiểm tra backend")}`,
+        );
+      }
+      return [];
+    } finally {
+      setLoadingQueue(false);
+    }
+  };
+
+  /** Làm mới toàn diện: Bác sĩ, Hàng đợi, Thông tin bệnh nhân đang chọn, Danh mục thuốc & dịch vụ */
+  const handleRefresh = async () => {
+    if (!doctorId) {
+      notify("warn", "Vui lòng chọn bác sĩ trước khi làm mới.");
+      return;
+    }
+    setLoadingQueue(true);
+    try {
+      // 1. Tải lại danh sách bác sĩ
+      try {
+        const docRes = await axios.get(DOCTOR_API, { params: { page: 0, size: 100 } });
+        const docList = getCollectionData(docRes.data);
+        if (Array.isArray(docList) && docList.length > 0) {
+          setDoctors(docList);
+        }
+      } catch {
+        /* giữ danh sách cũ */
+      }
+
+      // 2. Tải lại danh mục thuốc & dịch vụ mới nhất
+      try {
+        const [medRes, svcRes] = await Promise.all([
+          axios.get(MEDICINE_API),
+          axios.get(SERVICE_CATALOG_API),
+        ]);
+        const mList = getCollectionData(medRes.data);
+        if (Array.isArray(mList) && mList.length > 0) {
+          setMedicines(
+            mList.map((m) => ({
+              id: m.id || m.medicineId,
+              name: m.name || m.medicineName || m.tenThuoc || m.id,
+              unit: m.unit || m.donViTinh || "Lần",
+              price: Number(m.price ?? m.unitPrice ?? m.dongia) || 0,
+              stock: m.stock ?? m.quantity ?? m.soLuongTon ?? null,
+            })),
+          );
+          setMedicineSource("api");
+        }
+        const sList = getCollectionData(svcRes.data);
+        if (Array.isArray(sList) && sList.length > 0) {
+          setServices(
+            sList.map((s) => ({
+              id: s.id || s.serviceId,
+              name: s.name || s.serviceName || s.tenDichVu || s.id,
+              price: Number(s.price ?? s.unitPrice ?? s.dongia) || 0,
+            })),
+          );
+          setServiceSource("api");
+        }
+      } catch {
+        /* giữ danh mục cũ */
+      }
+
+      // 3. Tải lại hàng đợi
+      const qRes = await axios.get(`${RECEPTION_API}/queue/doctor/${doctorId}`, {
+        params: { date: examDate },
+      });
+      const list = Array.isArray(qRes.data) ? qRes.data : [];
+      setQueue(list);
+
+      // 4. Nếu đang có bệnh nhân được chọn, cập nhật thông tin mới nhất
+      if (selected) {
+        const fresh = list.find((item) => item.id === selected.id);
+        if (fresh) {
+          setSelected((prev) => ({ ...prev, ...fresh }));
+        }
+        try {
+          const pRes = await axios.get(`${PATIENT_API}/${selected.patientId}`);
+          setPatient(pRes.data);
+          loadPatientHistory(selected.patientId, selected.id);
+        } catch {
+          /* giữ thông tin cũ */
+        }
+      }
+
+      // 5. Thông báo kết quả rõ ràng
+      const count = list.length;
+      if (count === 0) {
+        notify("info", "Đã làm mới: Không có lượt khám nào của bác sĩ trong ngày này.");
+      } else {
+        const choKham = list.filter((i) => i.queueStatus === "ChoKham").length;
+        const dangKham = list.filter((i) => i.queueStatus === "DangKham").length;
+        const daKham = list.filter((i) => i.queueStatus === "DaKham").length;
+        notify(
+          "success",
+          `Đã làm mới dữ liệu trang khám (${count} lượt: ${choKham} chờ, ${dangKham} đang khám, ${daKham} đã khám).`,
+        );
+      }
+    } catch (err) {
+      notify(
+        "error",
+        `Không thể làm mới dữ liệu: ${extractError(err, "kiểm tra backend")}`,
+      );
+    } finally {
+      setLoadingQueue(false);
+    }
+  };
+
+  /** Đóng / hủy chọn hồ sơ bệnh nhân hiện tại */
+  const handleCloseExamination = () => {
+    setSelected(null);
+    setPatient(null);
+    setHistory([]);
+    setExam(EMPTY_EXAM);
+    setVitals(EMPTY_VITALS);
+    setMedicalRecordId("");
+    setMedLines([{ medicineId: "", quantity: 1, dosage: "", unitPrice: 0 }]);
+    setSvcLines([{ serviceId: "", quantity: 1, unitPrice: 0 }]);
+    notify("info", "Đã đóng hồ sơ khám hiện tại.");
   };
 
   const loadPatientHistory = (patientId, currentReceptionId) => {
@@ -526,6 +645,18 @@ function DoctorExaminationPage() {
       warnings.push("Chỉ định dịch vụ chưa gửi lên server (chưa có bệnh án).");
     }
 
+    /* 3b. Tự động lập hóa đơn viện phí chuyển sang quầy thu ngân */
+    if (recordId) {
+      try {
+        await axios.post("/api/invoices", {
+          medicalRecordId: recordId,
+          staffId: selected.employeeId || "NV001",
+        });
+      } catch (err) {
+        console.warn("Chưa thể tự động lập hóa đơn:", err);
+      }
+    }
+
     /* 4. Chuyển trạng thái hàng đợi (BR-038: chỉ từ DANG KHAM) */
     try {
       if (selected.queueStatus === "DangKham") {
@@ -790,8 +921,9 @@ function DoctorExaminationPage() {
           </button>
           <button
             className="exam-btn-outline"
-            onClick={() => loadQueue()}
+            onClick={handleRefresh}
             disabled={!doctorId || loadingQueue}
+            title="Làm mới hàng đợi khám, danh mục thuốc & dịch vụ"
           >
             {loadingQueue ? "Đang tải..." : "🔄 Làm mới"}
           </button>
@@ -953,10 +1085,36 @@ function DoctorExaminationPage() {
 
         {/* ---------- CỘT 2: HỒ SƠ + KHÁM LÂM SÀNG ---------- */}
         <section className="exam-panel">
-          <h2 className="exam-panel-title">
-            🩺 Hồ sơ & khám lâm sàng
+          <h2
+            className="exam-panel-title"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>
+              🩺 Hồ sơ & khám lâm sàng
+              {selected && (
+                <span className="title-count">{selected.id}</span>
+              )}
+            </span>
             {selected && (
-              <span className="title-count">{selected.id}</span>
+              <button
+                type="button"
+                className="exam-btn-outline"
+                style={{
+                  fontSize: "12px",
+                  padding: "4px 10px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+                onClick={handleCloseExamination}
+                title="Đóng / Hủy chọn hồ sơ khám hiện tại"
+              >
+                ✕ Đóng hồ sơ
+              </button>
             )}
           </h2>
 
@@ -1501,6 +1659,20 @@ function DoctorExaminationPage() {
                     disabled={!examEditable}
                   >
                     💾 Lưu nháp
+                  </button>
+                  <button
+                    type="button"
+                    className="exam-btn-outline"
+                    onClick={() => {
+                      if (selected) {
+                        selectReception(selected);
+                        notify("info", "Đã làm mới lại dữ liệu phiếu khám.");
+                      }
+                    }}
+                    disabled={!examEditable}
+                    title="Làm mới lại phiếu khám theo dữ liệu ban đầu"
+                  >
+                    🔄 Làm mới phiếu
                   </button>
                   <button
                     type="button"
