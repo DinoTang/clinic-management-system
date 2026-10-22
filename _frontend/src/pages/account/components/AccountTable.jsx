@@ -1,12 +1,14 @@
-import { Edit, Hashtag } from "@boxicons/react";
+import { Edit, Hashtag, Shield } from "@boxicons/react";
 import EditModal from "./EditModal";
 import LockedModal from "./LockedModal";
+import EditRoleModal from "./EditRoleModal";
 import { useState } from "react";
 import {USER_STATUS, USER_ROLE} from "../../../enums/index.js";
 
 function AccountTable({ accounts, fetchAccounts }) {
 	const [showEditModal, setShowEditModal] = useState(null);
-	const [showLockedModal, setShowLockedModal] = useState(null);
+  const [showLockedModal, setShowLockedModal] = useState(null);
+	const [showEditRoleModal, setShowEditRoleModal] = useState(null);
   return (
   	<>
     <div className="min-w-0 overflow-x-auto rounded-[0.5rem]">
@@ -99,12 +101,21 @@ function AccountTable({ accounts, fetchAccounts }) {
                   <button
                     type="button"
                     title="Chỉnh sửa"
-                    aria-label={`Chỉnh sửa ${account.name}`}
                     onClick={() => setShowEditModal(account)}
                     className="flex cursor-pointer h-[2rem] w-[2rem] items-center justify-center rounded-[0.375rem] text-[#667085] transition-colors hover:bg-[#edf5fd] hover:text-[#2878d0]"
                   >
                     <Edit className="h-[1.0625rem] w-[1.0625rem]" />
                   </button>
+
+                  <button
+                    type="button"
+                    title="Vai trò"
+                    onClick={() => setShowEditRoleModal(account)}
+                    className="flex cursor-pointer h-[2rem] w-[2rem] items-center justify-center rounded-[0.375rem] text-[#667085] transition-colors hover:bg-[#edf5fd] hover:text-[#2878d0]"
+                  >
+                    <Shield className="h-[1.0625rem] w-[1.0625rem]"/>
+                  </button>
+
 
                   {account.role!="Nhà phát triển" &&  (
 	                  <button
@@ -130,16 +141,23 @@ function AccountTable({ accounts, fetchAccounts }) {
     {showEditModal && (
     	<EditModal
     		account={showEditModal}
-    		onClose={()=>setShowEditModal()}
+    		onClose={()=>setShowEditModal(null)}
         	fetchAccounts={fetchAccounts}
     	/>
     )}
     {showLockedModal && (
     	<LockedModal
     		account={showLockedModal}
-    		onClose={()=>setShowLockedModal()}
+    		onClose={()=>setShowLockedModal(null)}
         	fetchAccounts={fetchAccounts}
     	/>
+    )}
+    {showEditRoleModal && (
+      <EditRoleModal
+        account={showEditRoleModal}
+        onClose={()=>setShowEditRoleModal(null)}
+          fetchAccounts={fetchAccounts}
+      />
     )}
     </>
   );

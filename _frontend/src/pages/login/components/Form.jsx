@@ -52,7 +52,7 @@ function Form() {
 			    return;
 			}
 			
-			if (data.user.role ==USER_ROLE.DEV) navigate("/");			
+			if (data.user.role ==USER_ROLE.DEV) navigate("/admin");			
 			else if (data.user.role ==USER_ROLE.ADMIN) navigate("/admin");
 			else if (data.user.role ==USER_ROLE.STAFF) navigate("/staff");
 			else if (data.user.role ==USER_ROLE.DOCTOR) navigate("/doctor");

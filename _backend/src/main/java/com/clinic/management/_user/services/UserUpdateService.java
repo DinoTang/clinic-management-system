@@ -1,14 +1,13 @@
 package com.clinic.management._user.services;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.clinic.management.common.enums.Role;
-import com.clinic.management.common.enums.UserStatus;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._user.interfaces.IUserGenerator;
 import com.clinic.management._user.interfaces.IUserQuery;
 import com.clinic.management._user.interfaces.IUserUpdate;
 import com.clinic.management._user.repositories.UserRepository;
-import com.clinic.management._user.dtos.ProfileUpdateRequest;
+import com.clinic.management._user.dtos.*;
 
 @Service
 public class UserUpdateService implements IUserUpdate {
@@ -28,7 +27,7 @@ public class UserUpdateService implements IUserUpdate {
     }
 
     @Override
-    public User updateProfile(String userId, ProfileUpdateRequest request){
+    public User updateProfile(ProfileUpdateRequest request){
         if(userRepository.existsByEmail(request.getEmail())){
             throw new RuntimeException("Email đã tồn tại, hãy dùng email khác");
         }
@@ -40,12 +39,9 @@ public class UserUpdateService implements IUserUpdate {
         if(userRepository.existsByUsername(request.getUsername())){
             throw new RuntimeException("Tên đăng nhập đã tồn tại, hãy dùng tên khác");
         }
-        
-        User user = userQueryService.findById(userId);
-        String hashedPassword = userGeneratorService.hashPassword(request.getPassword());
+        User user = userQueryService.findById(request.getUserId());
 
         user.setUsername(request.getUsername());
-        user.setPassword(hashedPassword);
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
@@ -53,24 +49,43 @@ public class UserUpdateService implements IUserUpdate {
     }
 
     @Override
-    public User updateStatus(String userId, UserStatus status){
-        User user = userQueryService.findById(userId);
-        user.setStatus(status);
+    public  User updatePassword(UpdatePasswordRequest request){
+        if(!userRepository.existsById(request.getUserId())){
+            throw new RuntimeException("Tài khoản không tồn tại");
+        }
+
+        User user = userQueryService.findById(request.getUserId());
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        boolean isPassword = encoder.matches(request.getPassword(), user.getPassword());
+        if(!isPassword){
+            throw new RuntimeException("Mật khẩu không trùng khớp");
+        }
+
+        String hashedPassword = userGeneratorService.hashPassword(request.getPassword());
+        user.setPassword(hashedPassword);
         return userRepository.save(user);
     }
 
     @Override
-    public User updateRole(String userId, Role role){
-        User user = userQueryService.findById(userId);
-        user.setRole(role);
+    public User updateStatus(UpdateStatusRequest request){
+        if(!userRepository.existsById(request.getUserId())){
+            throw new RuntimeException("Tài khoản không tồn tại");
+        }
+
+        User user = userQueryService.findById(request.getUserId());
+        user.setStatus(request.getStatus());
         return userRepository.save(user);
     }
 
     @Override
-    public User restoreById(String userId) {
-        if(!userRepository.existsById(userId))
-            throw new RuntimeException("Không tìm thấy người dùng");
-        User user =userRepository.restoreById(userId);
-        return user;
+    public User updateRole(UpdateRoleRequest request){
+        if(!userRepository.existsById(request.getUserId())){
+            throw new RuntimeException("Tài khoản không tồn tại");
+        }
+        User user = userQueryService.findById(request.getUserId());
+        user.setRole(request.getRole());
+        return userRepository.save(user);
     }
+
 }

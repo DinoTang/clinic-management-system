@@ -1,5 +1,6 @@
 package com.clinic.management._user.dtos;
 
+import com.clinic.management.common.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -9,13 +10,12 @@ import lombok.Data;
 @Data
 public class ProfileUpdateRequest{
 
+    @NotBlank(message="Mã tài khoản không được để trống")
+    private String userId;
+
     @NotBlank(message="Tên đăng nhập không được để trống")
     @Size(min=5, max=20, message="Tên đăng nhập từ 2 đến 20 ký tự")
     private String username;
-
-    @NotBlank(message="Mật khẩu không được để trống")
-    @Size(min=8, max=20, message="Mật khẩu từ 8 đến 20 ký tự")
-    private String password;
 
     @NotBlank(message="Họ tên không được để trống")
     @Size(min=5, max=20, message="Họ tên từ 2 đến 50 ký tự")
@@ -34,14 +34,14 @@ public class ProfileUpdateRequest{
     
 	public ProfileUpdateRequest(){}
 	public ProfileUpdateRequest(
+		String userId,
 		String username,
-		String password,
 		String fullName,
 		String email,
 		String phone
 	){
+		this.userId=userId;
 		this.username=username;
-		this.password=password;
 		this.fullName=fullName;
 		this.email=email;
 		this.phone=phone;
