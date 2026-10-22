@@ -56,7 +56,7 @@ function Form() {
 			else if (data.user.role ==USER_ROLE.ADMIN) navigate("/admin");
 			else if (data.user.role ==USER_ROLE.STAFF) navigate("/staff");
 			else if (data.user.role ==USER_ROLE.DOCTOR) navigate("/doctor");
-			else if (data.user.role ==USER_ROLE.PATIEN) navigate("/patient");
+			else if (data.user.role ==USER_ROLE.PATIENT) navigate("/patient");
 
         } catch (error) {
         	setError(error);
