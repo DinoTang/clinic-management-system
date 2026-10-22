@@ -5,4 +5,5 @@ import com.clinic.management._user.entities.User;
 public interface IUserDelete {
     User softDeleteById(String userId);
     User hardDeleteById(String userId);
+    User restoreById(String userId);
 }

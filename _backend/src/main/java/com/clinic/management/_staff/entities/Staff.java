@@ -19,7 +19,8 @@ public class Staff {
     @JoinColumn(name = "MANGUOIDUNG", referencedColumnName = "MANGUOIDUNG") 
     private User user;
 
-    @Column(name = "VITRI", columnDefinition = "bit")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "VITRI", length = 20, nullable = false)
     private StaffPosition position;
 
     @Column(name = "NGAYVAOLAM")

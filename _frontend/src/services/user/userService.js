@@ -1,7 +1,7 @@
 const API_URL = "http://localhost:8080/api/users";
 
-export async function updateProfile(userId, request) {
-	const response = await fetch(`${API_URL}/update-profile/${userId}`,{
+export async function updateProfile(request) {
+	const response = await fetch(`${API_URL}/update-profile`,{
 		method: "PUT",
 		headers: {
 			"Content-Type": "application/json",
@@ -28,10 +28,22 @@ export async function updateStatus(request){
 		headers: {
 			"Content-Type":"application/json",
 		},
-		body: JSON.stringify({
-			"userId":request.userId,
-			"status": request.status
-		}),
+		body: JSON.stringify(request),
+ 	});
+
+	const data = await response.json();
+	if(!response.ok)
+		throw data;
+	return data;
+}
+
+export async function updateRole(request){
+	const response = await fetch(`${API_URL}/update-role`,{
+		method: "PUT",
+		headers: {
+			"Content-Type":"application/json",
+		},
+		body: JSON.stringify(request),
  	});
 
 	const data = await response.json();

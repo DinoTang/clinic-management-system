@@ -22,7 +22,7 @@ function LockedModal({ account, onClose, fetchAccounts }) {
 	async function handleUpdateStatus(status){
 		try{
 			const data = await updateStatus({
-				userId:account.id,
+				userId: account.id,
 				status: status
 			});
 			await fetchAccounts();
@@ -36,10 +36,11 @@ function LockedModal({ account, onClose, fetchAccounts }) {
 			onClose();
 		}
 		catch(error){
-	    	setError(error);
+    	setError(error);
 			Swal.fire({
 			    icon: "error",
 			    title: "Cập nhật thất bại",
+			    text: error.message,
 			    timer: 2000,
 	        showConfirmButton: true,
 		    });

@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
@@ -56,26 +57,27 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/update-profile/{userId}")
+    @PutMapping("/update-profile")
     public ResponseEntity<User> updateProfile(
-        @PathVariable String userId,
+        @Valid
         @RequestBody ProfileUpdateRequest request){
-        User user = userUpdateService.updateProfile(userId, request);
+        User user = userUpdateService.updateProfile(request);
         return ResponseEntity.ok(user);
     }
 
     @PutMapping("/update-status")
     public ResponseEntity<User> updateStatus(
+        @Valid
         @RequestBody UpdateStatusRequest request){
-        User user = userUpdateService.updateStatus(request.getUserId(), request.getStatus());
+        User user = userUpdateService.updateStatus(request);
         return ResponseEntity.ok(user);
     }
 
     @PutMapping("/update-role")
     public ResponseEntity<User> updateRole(
-        @RequestBody String userId,
-        @RequestBody Role role){
-        User user = userUpdateService.updateRole(userId, role);
+        @Valid
+        @RequestBody UpdateRoleRequest request){
+        User user = userUpdateService.updateRole(request);
         return ResponseEntity.ok(user);
     }
 
@@ -83,7 +85,7 @@ public class UserController {
     public ResponseEntity<User> restoreById(
         @PathVariable String userId
     ){
-        User user = userUpdateService.restoreById(userId);
+        User user = userDeleteService.restoreById(userId);
         return ResponseEntity.ok(user);
     }
 

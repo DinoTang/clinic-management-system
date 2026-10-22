@@ -1,7 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { X } from "@boxicons/react";
+import {updateProfile} from "../../../services/user/userService";
+import {USER_STATUS} from "../../../enums/index.js";
+import Swal from "sweetalert2";
+import {USER_ROLE} from "../../../enums/index.js";
 
 function EditModal({ account, onClose, fetchAccounts }) {
+  const [request, setRequest] = useState({
+    userId : account.id,
+    username: account.username,
+    fullName: account.fullName,
+    email: account.email,
+    phone: account.phone,
+    role: account.role
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
 	useEffect(()=>{
 		function handleKeyDown(e){
 			if(e.key==="Escape"){
@@ -14,62 +29,35 @@ function EditModal({ account, onClose, fetchAccounts }) {
         };
 	}, [onClose]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  async function handleUpdateProfile(request){
+    try{
+      const data = await updateProfile(request);
+      await fetchAccounts();
+      Swal.fire({
+          icon: "success",
+          title: "Cập nhật thành công",
+          timer: 2000,
+          showConfirmButton: true,
+        });
 
-    const formData = new FormData(event.currentTarget);
-    onSubmit?.(Object.fromEntries(formData.entries()));
-  };
-
-
-  const fields = [
-    {
-      name: "fullName",
-      label: "Họ và tên",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "username",
-      label: "Tên đăng nhập",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "role",
-      label: "Vai trò",
-      type: "select",
-      required: true,
-      options: [
-        { value: "ADMIN", label: "Quản trị viên" },
-        { value: "DOCTOR", label: "Bác sĩ" },
-        { value: "STAFF", label: "Nhân viên" },
-        { value: "PATIENT", label: "Bệnh nhân" },
-      ],
-    },
-    {
-      name: "email",
-      label: "Email",
-      type: "email",
-    },
-    {
-      name: "phone",
-      label: "Số điện thoại",
-      type: "tel",
-    },
-    {
-      name: "status",
-      label: "Trạng thái",
-      type: "select",
-      required: true,
-      options: [
-        { value: "ACTIVE", label: "Đang hoạt động" },
-        { value: "LOCKED", label: "Đã khóa" },
-      ],
-    },
-  ];
-
+      onClose();
+    }
+    catch(error){
+      setError(error);
+      Swal.fire({
+          icon: "error",
+          title: "Cập nhật thất bại",
+          text: error.message,
+          timer: 2000,
+          showConfirmButton: true,
+        });
+    }
+    finally{
+      setLoading(false);
+    }
+  }
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 !p-[1rem]">
       <section
         aria-labelledby="edit-account-modal-title"
@@ -81,7 +69,7 @@ function EditModal({ account, onClose, fetchAccounts }) {
         <div className="!mb-[1.5rem] flex items-start justify-between gap-[1rem]">
           <div>
             <p className="text-[0.7rem] font-bold tracking-[0.03rem] text-[#8a96a8]">
-              CẬP NHẬT
+              CẬP NHẬT TRẠNG THÁI
             </p>
 
             <h2
@@ -102,54 +90,102 @@ function EditModal({ account, onClose, fetchAccounts }) {
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-x-[1rem] gap-y-[1.125rem] sm:grid-cols-2">
-            {fields.map((field) => (
-              <label
-                key={field.name}
-                className="flex min-w-0 flex-col gap-[0.5rem]"
-              >
+              <label className="flex min-w-0 flex-col gap-[0.5rem]">
                 <span className="text-[0.8125rem] font-semibold text-[#475467]">
-                  {field.label}
-                  {field.required && (
-                    <i className="!ml-[0.25rem] not-italic text-[#d04444]">
-                      *
-                    </i>
-                  )}
+                  Mã tài khoản
                 </span>
 
-                {field.type === "select" ? (
-                  <select
-                    name={field.name}
-                    required={field.required}
-                    defaultValue={
-                      account?.[field.name] ??
-                      field.options[0].value
-                    }
-                    className="h-[2.75rem] w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white !px-[0.75rem] text-[0.8125rem] text-[#344054] outline-none transition-colors focus:border-[#2878d0] focus:ring-2 focus:ring-[#2878d0]/15"
-                  >
-                    {field.options.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    name={field.name}
-                    type={field.type}
-                    required={field.required}
-                    defaultValue={account?.[field.name] ?? ""}
-                    className="h-[2.75rem] w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white !px-[0.75rem] text-[0.8125rem] text-[#344054] outline-none transition-colors placeholder:text-[#98a2b3] focus:border-[#2878d0] focus:ring-2 focus:ring-[#2878d0]/15"
-                  />
+                <p className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-gray-200 text-sm text-[#344054]">
+          {request.userId}
+        </p>
+              </label>
+
+              <label className={`${error?.email && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Email
+                </span>
+
+                <input
+                  value={request.email}
+                  onChange={(e) => setRequest(prev => ({ ...prev, email: e.target.value }))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.email && (
+                  <p className="italic text-sm">* {error.email}</p>
                 )}
               </label>
-            ))}
+
+              <label className={`${error?.fullName && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Họ tên
+                </span>
+
+                <input
+                  value={request.fullName}
+                  onChange={(e)=>setRequest(prev=>({...prev, fullName: e.target.value}))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.fullName && (
+                  <p className="italic text-sm">* {error.fullName}</p>
+                )}
+              </label>
+
+              <label className={`${error?.phone && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Số điện thoại
+                </span>
+
+                <input
+                  value={request.phone ?? ""}
+                  onChange={(e)=>setRequest(prev=>({...prev, phone: e.target.value}))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.phone && (
+                  <p className="italic text-sm">* {error.phone}</p>
+                )}
+              </label>
+
+              <label className={`${error?.username && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Tên tài khoản
+                </span>
+
+                <input
+                  value={request.username}
+                  onChange={(e)=>setRequest(prev=>({...prev, username: e.target.value}))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.username && (
+                  <p className="italic text-sm">* {error.username}</p>
+                )}
+              </label>
+
+              <label className={`${error?.role && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Vai trò
+                </span>
+
+                <select
+                  value={request.role}
+                  onChange={(e) => setRequest((prev) => ({ ...prev, role: e.target.value }))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]">
+                  <option value="" disabled>--- Chọn vai trò ---</option>
+                  <option value={USER_ROLE.ADMIN}>{USER_ROLE.ADMIN}</option>
+                  <option value={USER_ROLE.STAFF}>{USER_ROLE.STAFF}</option>
+                  <option value={USER_ROLE.DOCTOR}>{USER_ROLE.DOCTOR}</option>
+                  <option value={USER_ROLE.PATIENT}>{USER_ROLE.PATIENT}</option>
+                </select>
+                {error?.role && (
+                  <p className="italic text-sm">* {error.role}</p>
+                )}
+
+              </label>
+
           </div>
 
           {/* Actions */}
-          <div className="!mt-[1.5rem] flex flex-wrap justify-end gap-[0.75rem] border-t border-[#eaecf0] pt-[1.25rem]">
+          <div className="!mt-[1.5rem] flex flex-wrap justify-end gap-[0.75rem] border-t border-[#eaecf0] !pt-[1.25rem]">
             <button
               type="button"
               onClick={onClose}
@@ -157,17 +193,18 @@ function EditModal({ account, onClose, fetchAccounts }) {
             >
               Hủy
             </button>
-
             <button
-              type="submit"
-              className="inline-flex h-[2.75rem] items-center justify-center rounded-[0.5rem] bg-[#2878d0] !px-[1.125rem] text-[0.8125rem] font-semibold text-white transition-colors hover:bg-[#185ca8]"
+              type="button"
+              onClick={()=>handleUpdateProfile(request)}
+              className="inline-flex h-[2.75rem] cursor-pointer items-center justify-center rounded-[0.5rem] bg-blue-500 !px-[1.125rem] text-[0.8125rem] font-semibold text-white transition-colors hover:bg-blue-600"
             >
-              Lưu thay đổi
+              Cập nhật thông tin
             </button>
           </div>
-        </form>
       </section>
     </div>
+
+    </>
   );
 }
 

@@ -31,4 +31,12 @@ public class UserDeleteService implements IUserDelete {
         return user;
     }
 
+    @Override
+    public User restoreById(String userId) {
+        if(!userRepository.existsById(userId))
+            throw new RuntimeException("Không tìm thấy người dùng");
+        User user =userRepository.restoreById(userId);
+        return user;
+    }
+
 }
