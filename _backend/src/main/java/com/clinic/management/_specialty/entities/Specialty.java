@@ -24,7 +24,8 @@ public class Specialty {
     @Column(name = "PHIKHAMCHUAN", precision = 12, scale = 2)
     private BigDecimal standardFee;
 
-    @Column(name = "TRANGTHAI", columnDefinition = "bit")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TRANGTHAI", length = 20, nullable = false)
     private SpecialtyStatus status;
 
     @Column(name = "TRANGTHAIXOA")
