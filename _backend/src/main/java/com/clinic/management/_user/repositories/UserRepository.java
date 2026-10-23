@@ -4,9 +4,13 @@ import org.springframework.stereotype.Repository;
 import com.clinic.management._auth.dtos.*;
 import com.clinic.management._user.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends 
+            JpaRepository<User, String>,
+            JpaSpecificationExecutor<User>
+    {
 	User findByUsername(String username);
 	User findByEmail(String email);
     User findByPhone(String phone);

@@ -2,13 +2,8 @@ import { Plus } from "@boxicons/react";
 import { useState } from "react";
 import CreateModal from "./CreateModal";
 
-function AccountWelcome({ onCreateAccount }) {
+function AccountWelcome({ fetchAccounts }) {
   const [showModal, setShowModal] = useState(false);
-
-  const handleCreateAccount = (formData) => {
-    onCreateAccount?.(formData);
-    setShowModal(false);
-  };
 
   return (
     <>
@@ -40,7 +35,7 @@ function AccountWelcome({ onCreateAccount }) {
       {showModal && (
         <CreateModal
           onClose={() => setShowModal(false)}
-          onSubmit={handleCreateAccount}
+          fetchAccounts = {fetchAccounts}
         />
       )}
     </>

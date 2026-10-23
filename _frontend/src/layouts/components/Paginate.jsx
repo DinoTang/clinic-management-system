@@ -13,11 +13,11 @@ function Paginate({data, page, setPage}){
 
 	return (
 		<>
-		{data.empty && (
+		{data.empty ? (
 			<div className="font-bold text-center !p-4">
 				Không tìm thấy dữ liệu
 			</div>
-		)}
+		): (
 		<div className="flex flex-row gap-4 w-fit !p-4 !mx-auto">
 			{((!data.first && data.last) || (!data.first && !data.last)) &&(
 				<div
@@ -54,6 +54,7 @@ function Paginate({data, page, setPage}){
 				</div>
 			)}
 		</div>
+		)}
 		</>
 		);
 }

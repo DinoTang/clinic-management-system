@@ -19,7 +19,7 @@ public class RegisterRequest {
     private String password;
 
     @NotBlank(message="Họ tên không được để trống")
-    @Size(min=5, max=20, message="Họ tên từ 2 đến 50 ký tự")
+    @Size(min=5, max=20, message="Họ tên từ 5 đến 50 ký tự")
     private String fullName;
 
     @Email(message="Hãy cung cấp địa chỉ email hợp lệ")
