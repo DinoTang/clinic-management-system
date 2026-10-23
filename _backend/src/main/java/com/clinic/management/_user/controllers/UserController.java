@@ -1,6 +1,7 @@
 package com.clinic.management._user.controllers;
 
 import com.clinic.management.common.enums.Role;
+import com.clinic.management.common.enums.UserStatus;
 import com.clinic.management._user.dtos.*;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._user.services.UserUpdateService;
@@ -42,9 +43,19 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Page<User>> findAll(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String role,
+        @RequestParam(required = false) String status
     ) {
-        Page<User> users = userQueryService.findAll(page, size);
+        Role roleEnum = (role == null || role.equalsIgnoreCase("all"))
+            ? null : Role.valueOf(role.toUpperCase());
+
+        UserStatus statusEnum = (status == null || status.equalsIgnoreCase("all"))
+            ? null : UserStatus.valueOf(status.toUpperCase());
+
+        Page<User> users = userQueryService.findAll(
+            page, size, roleEnum, statusEnum
+        );
 
         return ResponseEntity.ok(users);
     }

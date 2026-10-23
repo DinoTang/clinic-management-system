@@ -1,10 +1,12 @@
 package com.clinic.management._user.services;
 
-import org.springframework.stereotype.Service;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._user.interfaces.IUserQuery;
 import com.clinic.management._user.repositories.UserRepository;
 import com.clinic.management._auth.dtos.*;
+import com.clinic.management.common.enums.Role;
+import com.clinic.management.common.enums.UserStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -59,10 +61,15 @@ public class UserQueryService implements IUserQuery {
     }
 
     @Override
-    public Page<User> findAll(int page, int size) {
+    public Page<User> findAll(int page, int size, Role role, UserStatus status) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return userRepository.findAll(pageable);
+        return userRepository.findAll((root, query, cb) -> cb.and(
+            role == null
+                ? cb.conjunction() : cb.equal(root.get("role"), role),
+            status == null
+                ? cb.conjunction() : cb.equal(root.get("status"), status)
+        ), pageable);
     }
 
     @Override

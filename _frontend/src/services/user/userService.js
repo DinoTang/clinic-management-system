@@ -15,8 +15,8 @@ export async function updateProfile(request) {
 	return data;
 }
 
-export async function getAll(page, size) {
-	const response = await fetch(`${API_URL}?page=${page}&size=${size}`);
+export async function getAll(page, size, status='all', role="all") {
+	const response = await fetch(`${API_URL}?page=${page}&size=${size}&role=${role}&status=${status}`);
 	if(!response.ok)
 		throw new Error("Kết nối be that bai");
 	return response.json();
