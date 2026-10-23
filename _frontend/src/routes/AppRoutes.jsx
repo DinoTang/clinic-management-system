@@ -27,7 +27,7 @@ function AppRoutes() {
 
             <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminPage/>} />
-                <Route path="/accounts" element={<Account/>} />
+                <Route path="/admin/accounts" element={<Account/>} />
             </Route>
 
             <Route path="/a" element={<AdminRoleRoutes />} />            

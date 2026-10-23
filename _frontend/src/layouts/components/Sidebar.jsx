@@ -26,27 +26,27 @@ function Sidebar({ className }) {
     {
       title: "DANH MỤC & NHÂN SỰ",
       items: [
-        { path: "/accounts", label: "Tài khoản & phân quyền", icon: <Group /> },
-        { path: "/patients", label: "Bệnh nhân", icon: <User /> },
-        { path: "/doctors", label: "Bác sĩ", icon: <HeartPlus /> },
-        { path: "/specialties", label: "Chuyên khoa", icon: <PlusShield /> },
-        { path: "/clinics", label: "Phòng khám", icon: <BuildingHospital /> },
+        { path: "/admin/accounts", label: "Tài khoản & phân quyền", icon: <Group /> },
+        { path: "/admin/patients", label: "Bệnh nhân", icon: <User /> },
+        { path: "/admin/doctors", label: "Bác sĩ", icon: <HeartPlus /> },
+        { path: "/admin/specialties", label: "Chuyên khoa", icon: <PlusShield /> },
+        { path: "/admin/clinics", label: "Phòng khám", icon: <BuildingHospital /> },
       ]
     },
     {
       title: "VẬN HÀNH KHÁM",
       items: [
-        { path: "/schedules", label: "Lịch làm việc", icon: <CalendarPlus /> },
-        { path: "/appointments", label: "Lịch hẹn", icon: <CalendarDetail /> },
+        { path: "/admin/schedules", label: "Lịch làm việc", icon: <CalendarPlus /> },
+        { path: "/admin/appointments", label: "Lịch hẹn", icon: <CalendarDetail /> },
       ]
     },
     {
       title: "DỊCH VỤ & TÀI CHÍNH",
       items: [
-        { path: "/inventory", label: "Thuốc & tồn kho", icon: <Pill /> },
-        { path: "/services", label: "Dịch vụ y tế", icon: <PlusBig /> },
-        { path: "/invoices", label: "Hóa đơn", icon: <Receipt /> },
-        { path: "/reports", label: "Báo cáo", icon: <ChartLine /> },
+        { path: "/admin/inventory", label: "Thuốc & tồn kho", icon: <Pill /> },
+        { path: "/admin/services", label: "Dịch vụ y tế", icon: <PlusBig /> },
+        { path: "/admin/invoices", label: "Hóa đơn", icon: <Receipt /> },
+        { path: "/admin/reports", label: "Báo cáo", icon: <ChartLine /> },
       ]
     }
   ];
@@ -79,6 +79,7 @@ function Sidebar({ className }) {
                     <NavLink
                         key={itemIdx}
                         to={item.path}
+                        end
                         className={({ isActive }) => 
                         `${baseNavItemClass} ${
                         isActive 

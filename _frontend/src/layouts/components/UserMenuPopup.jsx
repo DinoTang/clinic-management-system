@@ -37,7 +37,7 @@ function UserMenuPopup({user, onClose}) {
 
 	return (
 		<>
-		<div className="absolute bottom-0 z-2 right-0 !p-3 flex gap-2 flex-col w-fit whitespace-nowrap translate-y-[100%]  bg-white rounded-[0.3rem] shadow-lg border-1 border-gray-200 max-h-[15rem] overflow-y-auto overflow-x-hidden slide-down">
+		<div className="absolute bottom-0 z-2 right-0 translate-y-[100%] !p-3 flex gap-2 flex-col w-fit whitespace-nowrap bg-white rounded-[0.3rem] shadow-lg border-1 border-gray-200 overflow-y-auto overflow-x-hidden slide-down">
 			{
 				user
 				? (<>
@@ -56,10 +56,6 @@ function UserMenuPopup({user, onClose}) {
 					<Link to="/login" className="!p-1 hover:bg-gray-200 hover:text-blue-600 p-2 rounded-[0.25rem] flex flex-row justify-start items-center gap-2 w-full cursor-pointer">
 						< ArrowRightStroke/>
 						<p>Đăng nhập</p>
-					</Link>
-					<Link to="/register" className="!p-1 hover:bg-gray-200 hover:text-blue-600 p-2 rounded-[0.25rem] flex flex-row justify-start items-center gap-2 w-full cursor-pointer">
-						<UserPlus />
-						<p>Đăng ký</p>
 					</Link>
 				</>)
 			}
