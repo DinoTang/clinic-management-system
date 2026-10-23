@@ -12,7 +12,7 @@ public interface IUserQuery {
     User findById(String userId);
     User findByPhone(String phone);
     User findByGoogleId(String googleId);
-    Page<User> findAll(int page, int size, Role role, UserStatus status);
+    Page<User> findAll(int page, int size, Role role, UserStatus status, String search);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);

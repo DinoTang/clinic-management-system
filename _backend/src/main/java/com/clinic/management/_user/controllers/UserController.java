@@ -45,7 +45,8 @@ public class UserController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(required = false) String role,
-        @RequestParam(required = false) String status
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String search
     ) {
         Role roleEnum = (role == null || role.equalsIgnoreCase("all"))
             ? null : Role.valueOf(role.toUpperCase());
@@ -54,7 +55,7 @@ public class UserController {
             ? null : UserStatus.valueOf(status.toUpperCase());
 
         Page<User> users = userQueryService.findAll(
-            page, size, roleEnum, statusEnum
+            page, size, roleEnum, statusEnum, search
         );
 
         return ResponseEntity.ok(users);

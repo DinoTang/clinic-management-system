@@ -1,18 +1,25 @@
+import { useState} from "react";
 import { Search, Filter } from "@boxicons/react";
 import {USER_STATUS} from "../../../enums/index.js";
 import {USER_ROLE} from "../../../enums/index.js";
 
-function DataToolbar({role, setRole, status, setStatus}) {
+function DataToolbar({role, setRole, status, setStatus, search, setSearch}) {
+  const [query, setQuery] = useState(search); 
+
   return (
     <div className="flex flex-wrap items-center gap-[0.75rem]">
       <label className="flex min-w-[14rem] flex-1 items-center gap-[0.625rem] rounded-[0.5rem] border border-[#e4e7ec] bg-white !px-[0.875rem] !py-[0.625rem] text-[#8490a0] transition-colors focus-within:border-[#2878d0]">
-        <Search className="h-[1.125rem] w-[1.125rem] shrink-0" />
 
         <input
           type="text"
+          value={query}
+          onChange={(e)=>setQuery(e.target.value)}
           placeholder="Tìm theo tên, mã hoặc thông tin..."
           className="min-w-0 flex-1 bg-transparent text-[0.8125rem] text-[#344054] outline-none placeholder:text-[#98a2b3]"
         />
+        <button onClick={()=>setSearch(query)}>
+          <Search className="h-[1.125rem] w-[1.125rem] shrink-0 cursor-pointer"/>
+        </button>
       </label>
 
       <label className="flex items-center gap-[0.5rem] rounded-[0.5rem] border border-[#e4e7ec] bg-white !px-[0.75rem] !py-[0.625rem] text-[#8490a0] focus-within:border-[#2878d0]">

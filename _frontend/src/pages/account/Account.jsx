@@ -11,6 +11,7 @@ function Account({ className = "" }) {
   const [size, setSize] = useState(10);
   const [role, setRole] = useState('all');
   const [status, setStatus] = useState('all');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   const fetchAccounts = useCallback(
@@ -18,23 +19,30 @@ function Account({ className = "" }) {
       currentPage = page,
       currentSize = size,
       currentRole = role,
-      currentStatus = status
+      currentStatus = status,
+      currentSearch= search
       ) => {
     setLoading(true);
 
     try {
-      const result = await getAll(currentPage, currentSize, currentStatus, currentRole);
+      const result = await getAll(
+        currentPage,
+        currentSize,
+        currentStatus,
+        currentRole,
+        currentSearch
+        );
       setData(result);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
-  }, [page, size, role, status]);
+  }, [page, size, role, status, search]);
 
   useEffect(()=>{
-    fetchAccounts(page, size, role, status);
-  },[page, role, status]);
+    fetchAccounts(page, size, role, status, search);
+  },[page,size, role, status, search]);
 
   if (loading) {
         return <p>Đang tải...</p>;
@@ -49,8 +57,10 @@ function Account({ className = "" }) {
           role = {role}
           setRole={setRole}
           status={status}
-          setStatus={setStatus}/>
-
+          setStatus={setStatus}
+          search={search}
+          setSearch={setSearch}
+        />
         <div className="!mt-[1rem]">
           <AccountTable accounts={data.content} fetchAccounts={fetchAccounts} />
         </div>

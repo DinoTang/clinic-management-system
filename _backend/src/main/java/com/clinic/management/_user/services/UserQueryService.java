@@ -61,14 +61,21 @@ public class UserQueryService implements IUserQuery {
     }
 
     @Override
-    public Page<User> findAll(int page, int size, Role role, UserStatus status) {
+    public Page<User> findAll(int page, int size, Role role, UserStatus status, String search) {
         Pageable pageable = PageRequest.of(page, size);
 
         return userRepository.findAll((root, query, cb) -> cb.and(
             role == null
                 ? cb.conjunction() : cb.equal(root.get("role"), role),
             status == null
-                ? cb.conjunction() : cb.equal(root.get("status"), status)
+                ? cb.conjunction() : cb.equal(root.get("status"), status),
+            search == null || search.isBlank()
+            ? cb.conjunction()
+            : cb.or(
+                cb.like(cb.lower(root.get("fullName")), "%" + search.toLowerCase() + "%"),
+                cb.like(cb.lower(root.get("email")), "%" + search.toLowerCase() + "%"),
+                cb.like(cb.lower(root.get("username")), "%" + search.toLowerCase() + "%")
+            )
         ), pageable);
     }
 
