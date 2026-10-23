@@ -8,7 +8,8 @@ import {USER_STATUS, USER_ROLE} from "../../../enums/index.js";
 function AccountTable({ accounts, fetchAccounts }) {
 	const [showEditModal, setShowEditModal] = useState(null);
   const [showLockedModal, setShowLockedModal] = useState(null);
-	const [showEditRoleModal, setShowEditRoleModal] = useState(null);
+  const [showEditRoleModal, setShowEditRoleModal] = useState(null);
+  
   return (
   	<>
     <div className="min-w-0 overflow-x-auto rounded-[0.5rem]">

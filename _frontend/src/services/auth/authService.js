@@ -29,19 +29,13 @@ export async function loginGoogle() {
     return data;
 }
 
-export async function register({username, password, email, fullName, phone}) {
+export async function register(request) {
     const response = await fetch(`${API_URL}/register`,{
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            "username": username,
-            "password":password,
-            "email": email,
-            "phone": phone,
-            "fullName": fullName
-        })
+        body: JSON.stringify(request)
     });
 
     const data= await response.json();

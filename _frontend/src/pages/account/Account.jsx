@@ -34,7 +34,7 @@ function Account({ className = "" }) {
 
   return (
     <div className={`flex flex-col gap-[1.25rem] ${className}`}>
-      <AccountWelcome />
+      <AccountWelcome fetchAccounts={fetchAccounts}/>
 
       <div className="min-w-0  shadow-xl rounded-[0.6875rem] border border-[#edf0f4] bg-white !p-[1.25rem]">
         <DataToolbar />
