@@ -9,23 +9,23 @@ function Paginate({data, page, setPage}){
 		if(Number.isInteger(newPage) && newPage>=1 && newPage<=data.totalPages){
 			setPage(newPage - 1);	
 		}
-		setInputPage(page+1);
 	}
+
 	return (
 		<>
-		{data.empty && (
+		{data.empty ? (
 			<div className="font-bold text-center !p-4">
 				Không tìm thấy dữ liệu
 			</div>
-		)}
-		<div className="flex flex-row gap-4 w-fit !p-8 !mx-auto">
-			{data.last && !data.first &&(
+		): (
+		<div className="flex flex-row gap-4 w-fit !p-4 !mx-auto">
+			{((!data.first && data.last) || (!data.first && !data.last)) &&(
 				<div
 					onClick={()=>{
 						setPage(page - 1);
 						setInputPage(page+ 1 -1);
 					}}
-					className="!p-4 border w-fit rounded  text-blue-600 hover:bg-blue-500 hover:text-white">
+					className="!p-2 border cursor-pointer w-fit rounded  text-blue-600 hover:bg-blue-500 hover:text-white">
 					<ChevronLeft />
 				</div>
 			)}
@@ -39,21 +39,22 @@ function Paginate({data, page, setPage}){
                             moveToPage();
                         }
                     }}
-					className=" w-[4rem] text-center !py-2"
+					className="w-[4rem] text-center !py-2"
 				/>
 				/ {data.totalPages}
 			</div>
-			{data.first && !data.last &&(
+			{((data.first && !data.last) || (!data.first && !data.last)) &&(
 				<div
 					onClick={()=>{
 						setPage(page + 1);
 						setInputPage(page+1 + 1);
 					}}
-					className="!p-4 border w-fit rounded  text-blue-600 hover:bg-blue-500 hover:text-white">
+					className="!p-2 cursor-pointer border w-fit rounded  text-blue-600 hover:bg-blue-500 hover:text-white">
 					<ChevronRight />
 				</div>
 			)}
 		</div>
+		)}
 		</>
 		);
 }

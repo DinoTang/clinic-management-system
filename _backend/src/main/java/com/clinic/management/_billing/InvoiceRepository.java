@@ -15,6 +15,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, String> {
 
     boolean existsByMedicalRecordIdAndDeletedFalse(String medicalRecordId);
 
+    java.util.Optional<Invoice> findByMedicalRecordIdAndDeletedFalse(String medicalRecordId);
+
     @Query(value = "SELECT MAHOADON FROM hoadon WHERE MAHOADON REGEXP '^HD[0-9]+$' " +
             "ORDER BY CAST(SUBSTRING(MAHOADON, 3) AS UNSIGNED) DESC LIMIT 1", nativeQuery = true)
     String findMaxId();

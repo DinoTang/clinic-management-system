@@ -6,7 +6,7 @@ import Paginate from "../../layouts/components/Paginate.jsx";
 function MStaff() {
 	const [data, setData] = useState([]);
 	const [page, setPage] = useState(0);
-	const [size, setSize] = useState(10);
+	const [size, setSize] = useState(1);
 	const [loading, setLoading] = useState(true);
 
 	async function fetchStaffs(page, size) {

@@ -3,6 +3,7 @@ import { loginGoogle} from "../../services/auth/authService.js";
 import { useAuth } from "../../context/AuthContext";
 import Swal from "sweetalert2";
 import { useNavigate} from "react-router-dom";
+import {USER_STATUS, USER_ROLE} from "../../enums/index.js";
 
 function GoogleCallback({className}){
 	const { login: loginContext} = useAuth();
@@ -11,6 +12,41 @@ function GoogleCallback({className}){
 	const handleGoogleLogin = async() => {
 		try {
 			const data= await loginGoogle();
+
+			const role = data.user?.role;
+			const isPatient = role === "PATIENT" || role === USER_ROLE.PATIENT;
+
+			if (isPatient) {
+				if (!data.token || !data.patientId) {
+					Swal.fire({
+						icon: "error",
+						title: "Đăng nhập thất bại",
+						text: "Tài khoản Google chưa có hồ sơ bệnh nhân hợp lệ.",
+						timer: 3000,
+						showConfirmButton: true,
+					});
+					return;
+				}
+
+				const session = {
+					token: data.token,
+					patient: {
+						patientId: data.patientId,
+						fullName: data.user.fullName,
+						role: data.user.role,
+						phone: data.user.phone,
+						email: data.user.email,
+					},
+				};
+				sessionStorage.setItem(
+					"clinic-patient-session",
+					JSON.stringify(session),
+				);
+				localStorage.removeItem("clinic-patient-session");
+				window.location.replace("/mobile");
+				return;
+			}
+
 			loginContext(data.token, data.user);
 			Swal.fire({
 				icon: "success",
@@ -20,7 +56,7 @@ function GoogleCallback({className}){
 				showConfirmButton: true,
 			});
 
-			if(data.user.status=="Đã khóa"){
+			if(data.user.status==USER_STATUS.LOCKED){
 				Swal.fire({
 					icon: "error",
 					title: "Đăng nhập từ chối",
@@ -28,14 +64,14 @@ function GoogleCallback({className}){
 					timer: 5000,
 					showConfirmButton: true,
 				});
+				navigate("/");
 				return;
 			}
-
-			if (data.user.role =="Nhà phát triển") navigate("/admin");      
-			else if (data.user.role =="Quản trị viên") navigate("/admin");
-			else if (data.user.role =="Nhân viên") navigate("/staff");
-			else if (data.user.role =="Bác sĩ") navigate("/doctor");
-			else if (data.user.role =="Bệnh nhân") navigate("/patient");
+			if (data.user.role == USER_ROLE.DEV) navigate("/admin");			
+			else if (data.user.role ==USER_ROLE.ADMIN) navigate("/admin");
+			else if (data.user.role ==USER_ROLE.STAFF) navigate("/staff");
+			else if (data.user.role ==USER_ROLE.DOCTOR) navigate("/doctor");
+			else if (data.user.role ==USER_ROLE.PATIENT) navigate("/patient");
 
 		} catch (error) {
 			if(error.status==500){

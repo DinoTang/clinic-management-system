@@ -2,7 +2,7 @@ package com.clinic.management._user.controllers;
 
 import com.clinic.management.common.enums.Role;
 import com.clinic.management.common.enums.UserStatus;
-import com.clinic.management._user.dtos.ProfileUpdateRequest;
+import com.clinic.management._user.dtos.*;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._user.services.UserUpdateService;
 import com.clinic.management._user.services.UserQueryService;
@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
@@ -42,9 +43,20 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Page<User>> findAll(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String role,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String search
     ) {
-        Page<User> users = userQueryService.findAll(page, size);
+        Role roleEnum = (role == null || role.equalsIgnoreCase("all"))
+            ? null : Role.valueOf(role.toUpperCase());
+
+        UserStatus statusEnum = (status == null || status.equalsIgnoreCase("all"))
+            ? null : UserStatus.valueOf(status.toUpperCase());
+
+        Page<User> users = userQueryService.findAll(
+            page, size, roleEnum, statusEnum, search
+        );
 
         return ResponseEntity.ok(users);
     }
@@ -57,27 +69,27 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/update-profile/{userId}")
+    @PutMapping("/update-profile")
     public ResponseEntity<User> updateProfile(
-        @PathVariable String userId,
+        @Valid
         @RequestBody ProfileUpdateRequest request){
-        User user = userUpdateService.updateProfile(userId, request);
+        User user = userUpdateService.updateProfile(request);
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/update-status/{userId}")
+    @PutMapping("/update-status")
     public ResponseEntity<User> updateStatus(
-        @PathVariable String userId,
-        @RequestBody UserStatus request){
-        User user = userUpdateService.updateStatus(userId, request);
+        @Valid
+        @RequestBody UpdateStatusRequest request){
+        User user = userUpdateService.updateStatus(request);
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/update-role/{userId}")
+    @PutMapping("/update-role")
     public ResponseEntity<User> updateRole(
-        @PathVariable String userId,
-        @RequestBody Role request){
-        User user = userUpdateService.updateRole(userId, request);
+        @Valid
+        @RequestBody UpdateRoleRequest request){
+        User user = userUpdateService.updateRole(request);
         return ResponseEntity.ok(user);
     }
 
@@ -85,7 +97,7 @@ public class UserController {
     public ResponseEntity<User> restoreById(
         @PathVariable String userId
     ){
-        User user = userUpdateService.restoreById(userId);
+        User user = userDeleteService.restoreById(userId);
         return ResponseEntity.ok(user);
     }
 

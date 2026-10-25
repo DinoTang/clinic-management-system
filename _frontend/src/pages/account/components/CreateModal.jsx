@@ -1,7 +1,23 @@
-import { X } from "@boxicons/react";
-import { useEffect } from "react";
+import { X, Eye, EyeClosed } from "@boxicons/react";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { register } from "../../../services/auth/authService.js";
 
-function CreateModal({ onClose, onSubmit }) {
+function CreateModal({ onClose, fetchAccounts}) {
+  const [loading, setLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+  const [request, setRequest] = useState({
+    username:'',
+    fullName: '',
+    password: '',
+    email: '',
+    phone: ''
+  });
+  function togglePassword() {
+    setShowPassword(!showPassword);
+  }
+
 	useEffect(()=>{
 		function handleKeyDown(e){
 			if(e.key==="Escape"){
@@ -14,80 +30,54 @@ function CreateModal({ onClose, onSubmit }) {
         };
 	}, [onClose]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  async function handleCreate(request){
+    try{
+      const data = await register(request);
+      await fetchAccounts();
+      Swal.fire({
+          icon: "success",
+          title: "Tạo tài khoản thành công",
+          timer: 2000,
+          showConfirmButton: true,
+        });
 
-    const formData = new FormData(event.currentTarget);
-    onSubmit?.(Object.fromEntries(formData.entries()));
-  };
-
-  const fields = [
-    {
-      name: "fullName",
-      label: "Họ và tên",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "username",
-      label: "Tên đăng nhập",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "role",
-      label: "Vai trò",
-      type: "select",
-      required: true,
-      options: [
-        { value: "ADMIN", label: "Quản trị viên" },
-        { value: "DOCTOR", label: "Bác sĩ" },
-        { value: "STAFF", label: "Nhân viên" },
-        { value: "PATIENT", label: "Bệnh nhân" },
-      ],
-    },
-    {
-      name: "email",
-      label: "Email",
-      type: "email",
-    },
-    {
-      name: "phone",
-      label: "Số điện thoại",
-      type: "tel",
-    },
-    {
-      name: "status",
-      label: "Trạng thái",
-      type: "select",
-      required: true,
-      options: [
-        { value: "ACTIVE", label: "Đang hoạt động" },
-        { value: "LOCKED", label: "Đã khóa" },
-      ],
-    },
-  ];
+      onClose();
+    }
+    catch(error){
+      setError(error);
+      Swal.fire({
+          icon: "error",
+          title: "Tạo tài khoản thất bại",
+          text: error.message,
+          timer: 2000,
+          showConfirmButton: true,
+        });
+    }
+    finally{
+      setLoading(false);
+    }
+  }
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 !p-[1rem]">
       <section
-        aria-labelledby="admin-modal-title"
+        aria-labelledby="edit-account-modal-title"
         aria-modal="true"
         role="dialog"
         className="!my-auto max-h-[calc(100vh-2rem)] w-full max-w-[42rem] overflow-y-auto rounded-[0.75rem] bg-white !p-[1.5rem] shadow-xl"
       >
-        {/* Modal header */}
         <div className="!mb-[1.5rem] flex items-start justify-between gap-[1rem]">
           <div>
             <p className="text-[0.7rem] font-bold tracking-[0.03rem] text-[#8a96a8]">
-              THÊM MỚI
+              TẠO MỚI TÀI KHOẢN
             </p>
 
             <h2
-              id="admin-modal-title"
+              id="edit-account-modal-title"
               className="!mt-[0.25rem] text-[1.25rem] font-bold text-[#344054]"
             >
-              Tạo tài khoản
+              Chỉnh sửa tài khoản &amp; phân quyền
             </h2>
           </div>
 
@@ -101,51 +91,89 @@ function CreateModal({ onClose, onSubmit }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {/* Form fields */}
           <div className="grid grid-cols-1 gap-x-[1rem] gap-y-[1.125rem] sm:grid-cols-2">
-            {fields.map((field) => (
-              <label
-                key={field.name}
-                className="flex min-w-0 flex-col gap-[0.5rem]"
-              >
+              <label className={`${error?.email && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
                 <span className="text-[0.8125rem] font-semibold text-[#475467]">
-                  {field.label}
-                  {field.required && (
-                    <i className="!ml-[0.25rem] not-italic text-[#d04444]">
-                      *
-                    </i>
-                  )}
+                  Email
                 </span>
 
-                {field.type === "select" ? (
-                  <select
-                    name={field.name}
-                    required={field.required}
-                    defaultValue={field.options[0].value}
-                    className="h-[2.75rem] w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white !px-[0.75rem] text-[0.8125rem] text-[#344054] outline-none transition-colors focus:border-[#2878d0] focus:ring-2 focus:ring-[#2878d0]/15"
-                  >
-                    {field.options.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    name={field.name}
-                    type={field.type}
-                    required={field.required}
-                    className="h-[2.75rem] w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white !px-[0.75rem] text-[0.8125rem] text-[#344054] outline-none transition-colors !placeholder:text-[#98a2b3] focus:border-[#2878d0] focus:ring-2 focus:ring-[#2878d0]/15"
-                  />
+                <input
+                  value={request.email}
+                  onChange={(e) => setRequest(prev => ({ ...prev, email: e.target.value }))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.email && (
+                  <p className="italic text-sm">* {error.email}</p>
                 )}
               </label>
-            ))}
-          </div>
 
-          {/* Note */}
-          <div className="!mt-[1.25rem] rounded-[0.5rem] bg-[#f8fafc] !px-[0.875rem] !py-[0.75rem] text-[0.75rem] leading-[1.5] text-[#8490a0]">
-            Bản ghi này chỉ được thêm/cập nhật trong dữ liệu demo của giao diện.
+              <label className={`${error?.fullName && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Họ tên
+                </span>
+
+                <input
+                  value={request.fullName}
+                  onChange={(e)=>setRequest(prev=>({...prev, fullName: e.target.value}))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.fullName && (
+                  <p className="italic text-sm">* {error.fullName}</p>
+                )}
+              </label>
+
+              <label className={`${error?.phone && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Số điện thoại
+                </span>
+
+                <input
+                  value={request.phone ?? ""}
+                  onChange={(e)=>setRequest(prev=>({...prev, phone: e.target.value}))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.phone && (
+                  <p className="italic text-sm">* {error.phone}</p>
+                )}
+              </label>
+
+              <label className={`${error?.username && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Tên tài khoản
+                </span>
+
+                <input
+                  value={request.username}
+                  onChange={(e)=>setRequest(prev=>({...prev, username: e.target.value}))}
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
+                />
+                {error?.username && (
+                  <p className="italic text-sm">* {error.username}</p>
+                )}
+              </label>
+
+              <label className={`${error?.password && "text-red-400"} flex min-w-0 flex-col gap-[0.5rem]`}>
+                <span className="text-[0.8125rem] font-semibold text-[#475467]">
+                  Mật khẩu
+                </span>
+                <div className="flex flex-row items-center border border-[#d0d5dd] !p-[0.8rem]  rounded-[0.5rem] ">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={request.password}
+                    onChange={(e)=>setRequest(prev=>({...prev, password: e.target.value}))}
+                    className="flex items-center w-full outline-none bg-white text-sm text-[#344054]"
+                  />
+                  {showPassword ? (
+                    <Eye onClick={togglePassword} className="cursor-pointer"/>
+                    ) : (
+                    <EyeClosed onClick={togglePassword} className="cursor-pointer" />
+                    )}
+                </div>
+                {error?.password&& (
+                  <p className="italic text-sm">* {error.password}</p>
+                )}
+              </label>
+
           </div>
 
           {/* Actions */}
@@ -157,17 +185,18 @@ function CreateModal({ onClose, onSubmit }) {
             >
               Hủy
             </button>
-
             <button
-              type="submit"
-              className="inline-flex h-[2.75rem] items-center justify-center rounded-[0.5rem] bg-[#2878d0] !px-[1.125rem] text-[0.8125rem] font-semibold text-white transition-colors hover:bg-[#185ca8]"
+              type="button"
+              onClick={()=>handleCreate(request)}
+              className="inline-flex h-[2.75rem] cursor-pointer items-center justify-center rounded-[0.5rem] bg-blue-500 !px-[1.125rem] text-[0.8125rem] font-semibold text-white transition-colors hover:bg-blue-600"
             >
-              Thêm vào danh sách
+              Tạo tài khoản
             </button>
           </div>
-        </form>
       </section>
     </div>
+
+    </>
   );
 }
 

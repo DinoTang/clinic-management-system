@@ -12,6 +12,7 @@ import {
 import Swal from "sweetalert2";
 import { login as loginApi } from "../../../services/auth/authService.js";
 import ButtonLoginGoogle from "./ButtonLoginGoogle";
+import {USER_STATUS, USER_ROLE} from "../../../enums/index.js";
 
 function Form() {
 	const [username, setUsername] = useState("");
@@ -59,7 +60,7 @@ function Form() {
 	        showConfirmButton: true,
 		    });
 
-			if(data.user.status=="Đã khóa"){
+			if(data.user.status==USER_STATUS.LOCKED){
 				Swal.fire({
 				    icon: "error",
 				    title: "Đăng nhập từ chối",
@@ -67,14 +68,15 @@ function Form() {
 				    timer: 5000,
 		        showConfirmButton: true,
 			    });
+			    navigate("/");
 			    return;
 			}
 			
-			if (data.user.role =="Nhà phát triển") navigate("/");			
-			else if (data.user.role =="Quản trị viên") navigate("/admin");
-			else if (data.user.role =="Nhân viên") navigate("/staff");
-			else if (data.user.role =="Bác sĩ") navigate("/doctor");
-			else if (data.user.role =="Bệnh nhân") navigate("/mobile");
+			if (data.user.role == USER_ROLE.DEV || data.user.role == "DEV" || data.user.role == "Nhà phát triển") navigate("/admin");			
+			else if (data.user.role == USER_ROLE.ADMIN || data.user.role == "ADMIN" || data.user.role == "Quản trị viên") navigate("/admin");
+			else if (data.user.role == USER_ROLE.STAFF || data.user.role == "STAFF" || data.user.role == "Nhân viên") navigate("/staff");
+			else if (data.user.role == USER_ROLE.DOCTOR || data.user.role == "DOCTOR" || data.user.role == "Bác sĩ") navigate("/doctor");
+			else if (data.user.role == USER_ROLE.PATIENT || data.user.role == "PATIENT" || data.user.role == "Bệnh nhân") navigate("/patient");
 
         } catch (error) {
         	setError(error);

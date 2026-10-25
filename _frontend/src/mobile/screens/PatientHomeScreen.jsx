@@ -1,4 +1,26 @@
+import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
+import { getAppointments } from "../services/patientApi";
+
+const terminalStatuses = [
+  "HoanTat",
+  "DaHuy",
+  "COMPLETED",
+  "CANCELLED",
+  "REJECTED",
+  "NO_SHOW",
+];
+
+const upcomingStatusLabels = {
+  DaDat: "Đã đặt lịch",
+  DaDen: "Đã tiếp đón",
+  HoanTat: "Hoàn tất khám",
+  DaHuy: "Đã hủy",
+};
+
+function hhmm(value) {
+  return value ? String(value).slice(0, 5) : "";
+}
 
 const quickLinks = [
   { id: "prescription", label: "Đơn thuốc", icon: "pill", tone: "purple" },
@@ -6,7 +28,56 @@ const quickLinks = [
   { id: "profile", label: "Thông tin cá nhân", icon: "shield", tone: "teal" },
 ];
 
-function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE" }) {
+function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId }) {
+  const [nextAppointment, setNextAppointment] = useState(null);
+  const [loading, setLoading] = useState(!!patientId);
+
+  useEffect(() => {
+    if (!patientId) {
+      setLoading(false);
+      return undefined;
+    }
+    let cancelled = false;
+    getAppointments(patientId)
+      .then((data) => {
+        if (cancelled) return;
+        const now = new Date();
+        const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 10);
+        const upcoming = data
+          .filter(
+            (appointment) =>
+              !terminalStatuses.includes(appointment.status) &&
+              appointment.date >= today,
+          )
+          .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+        setNextAppointment(upcoming[0] || null);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setNextAppointment(null);
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId]);
+
+  let dateTile = null;
+  if (nextAppointment) {
+    const date = new Date(`${nextAppointment.date}T00:00:00`);
+    const weekday = new Intl.DateTimeFormat("vi-VN", { weekday: "long" })
+      .format(date)
+      .replace(/^./, (char) => char.toUpperCase());
+    dateTile = {
+      weekday,
+      day: date.getDate(),
+      monthYear: `Th${date.getMonth() + 1} ${date.getFullYear()}`,
+    };
+  }
+
   return (
     <div className="dashboard-page">
       <section className="welcome-banner">
@@ -53,42 +124,55 @@ function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE" }) {
           </button>
         </div>
 
-        <button
-          className="upcoming-card"
-          onClick={() => onNavigate("appointments")}
-          type="button"
-        >
-          <span className="date-tile">
-            <span>Thứ 4</span>
-            <strong>14</strong>
-            <span>Th10 2026</span>
-          </span>
-          <span className="appointment-info">
-            <span className="doctor-line">
-              <span className="doctor-avatar">
-                <Avatar gender={doctorGender} type="doctor" />
-              </span>
-              <span className="doctor-copy">
-                <strong>BS. Trần Minh Tuấn</strong>
-                <span>Nội khoa</span>
-              </span>
-              <span className="appointment-status status-active">
-                Đã xác nhận
-              </span>
+        {loading ? (
+          <p className="workspace-note">Đang tải lịch hẹn...</p>
+        ) : nextAppointment ? (
+          <button
+            className="upcoming-card"
+            onClick={() => onNavigate("appointments")}
+            type="button"
+          >
+            <span className="date-tile">
+              <span>{dateTile.weekday}</span>
+              <strong>{dateTile.day}</strong>
+              <span>{dateTile.monthYear}</span>
             </span>
-            <span className="appointment-detail">
-              <Icon name="clock" size={19} />
-              <span>09:30 - 10:00</span>
+            <span className="appointment-info">
+              <span className="doctor-line">
+                <span className="doctor-avatar">
+                  <Avatar gender={doctorGender} type="doctor" />
+                </span>
+                <span className="doctor-copy">
+                  <strong>{nextAppointment.doctorName || "BS. Chưa cập nhật"}</strong>
+                  <span>{nextAppointment.specialtyName || "Chuyên khoa khám"}</span>
+                </span>
+                <span className="appointment-status status-active">
+                  {upcomingStatusLabels[nextAppointment.status] || nextAppointment.status}
+                </span>
+              </span>
+              <span className="appointment-detail">
+                <Icon name="clock" size={19} />
+                <span>
+                  {hhmm(nextAppointment.time)}
+                  {nextAppointment.endTime ? ` - ${hhmm(nextAppointment.endTime)}` : ""}
+                </span>
+              </span>
+              {nextAppointment.roomName && (
+                <span className="appointment-detail">
+                  <Icon name="pin" size={19} />
+                  <span>{nextAppointment.roomName}</span>
+                </span>
+              )}
             </span>
-            <span className="appointment-detail">
-              <Icon name="pin" size={19} />
-              <span>Phòng khám 1</span>
+            <span className="card-chevron">
+              <Icon name="chevron" size={21} />
             </span>
-          </span>
-          <span className="card-chevron">
-            <Icon name="chevron" size={21} />
-          </span>
-        </button>
+          </button>
+        ) : (
+          <p className="workspace-note">
+            Bạn chưa có lịch hẹn sắp tới. Bấm “Đặt lịch khám” để tạo lịch mới.
+          </p>
+        )}
       </section>
 
       <section className="quick-section">

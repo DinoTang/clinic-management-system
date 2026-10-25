@@ -306,6 +306,14 @@
   background: rgba(131, 164, 197, 0.35);
 }
 
+.auth-google-login {
+  margin-bottom: 14px;
+}
+
+.auth-google-login button {
+  width: 100%;
+}
+
 .auth-register-button {
   display: flex;
   width: 100%;

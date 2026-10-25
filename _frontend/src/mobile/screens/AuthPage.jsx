@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useRef, useState } from "react";
 import appIcon from "../../assets/IconApp.png";
+import ButtonLoginGoogle from "../../pages/login/components/ButtonLoginGoogle";
 import "./AuthPage.css";
 
 const initialRegistration = {
@@ -460,6 +461,12 @@ function AuthPage({ onLoginSuccess }) {
           <span>Hoặc</span>
           <span />
         </div>
+
+        {!isRegistering && (
+          <div className="auth-google-login">
+            <ButtonLoginGoogle />
+          </div>
+        )}
 
         {isRegistering ? (
           <p className="auth-switch-copy">

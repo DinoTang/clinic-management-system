@@ -1,13 +1,11 @@
 package com.clinic.management._user.interfaces;
 
-import com.clinic.management.common.enums.Role;
-import com.clinic.management.common.enums.UserStatus;
-import com.clinic.management._user.dtos.ProfileUpdateRequest;
+import com.clinic.management._user.dtos.*;
 import com.clinic.management._user.entities.User;
 
 public interface IUserUpdate {
-    User updateProfile(String userId, ProfileUpdateRequest request);
-    User updateStatus(String userId, UserStatus status);
-    User updateRole(String userId, Role role);
-    User restoreById(String userId);
+    User updateProfile(ProfileUpdateRequest request);
+    User updatePassword(UpdatePasswordRequest request);
+    User updateStatus(UpdateStatusRequest request);
+    User updateRole(UpdateRoleRequest request);
 }

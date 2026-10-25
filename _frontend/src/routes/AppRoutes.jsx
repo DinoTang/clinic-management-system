@@ -28,15 +28,18 @@ function AppRoutes() {
 
             <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminPage/>} />
+                <Route path="/admin/accounts" element={<Account/>} />
                 <Route path="/accounts" element={<Account/>} />
+                <Route path="/admin/schedules" element={<DesktopSchedulePage />} />
                 <Route path="/schedules" element={<DesktopSchedulePage />} />
             </Route>
 
-            <Route path="/a/*" element={<AdminRoleRoutes />} />            
+            <Route path="/a/*" element={<AdminRoleRoutes />} />
             <Route path="/doctor/*" element={<DoctorRoleRoutes />} />
             <Route path="/staff/*" element={<StaffRoleRoutes />} />
 
             <Route path="/mobile/*" element={<PatientMobileApp />} />
+            <Route path="/patient/*" element={<PatientMobileApp />} />
             <Route path="/desktop/*" element={<DesktopApp />} />
             <Route path="/*" element={<PatientMobileApp />} />
         </Routes>

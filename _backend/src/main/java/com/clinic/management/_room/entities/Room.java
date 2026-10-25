@@ -26,8 +26,9 @@ public class Room {
 
     @Column(name = "TANG", length = 20)
     private String floor;
-
-    @Column(name = "TRANGTHAI", columnDefinition = "bit")
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TRANGTHAI", length = 20, nullable = false)
     private RoomStatus status;
 
     @Column(name = "TRANGTHAIXOA")

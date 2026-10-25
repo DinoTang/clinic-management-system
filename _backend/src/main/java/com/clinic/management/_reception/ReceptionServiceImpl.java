@@ -16,6 +16,8 @@ public class ReceptionServiceImpl implements ReceptionService {
 
     private static final String STATUS_CANCELLED = "DaHuy";
     private static final String STATUS_ARRIVED = "DaDen";
+    private static final String STATUS_QUEUE_DONE = "DaKham";
+    private static final String STATUS_APPOINTMENT_COMPLETED = "HoanTat";
 
     private final ReceptionRepository receptionRepository;
     private final PatientRepository patientRepository;
@@ -180,7 +182,21 @@ public class ReceptionServiceImpl implements ReceptionService {
             return null;
         }
         reception.setQueueStatus(status);
-        return receptionRepository.save(reception);
+        Reception saved = receptionRepository.save(reception);
+
+        // BR: bác sĩ hoàn tất khám (DaKham) → đánh dấu lịch hẹn liên quan là hoàn tất
+        // để ứng dụng bệnh nhân thấy trạng thái mới (cùng transaction).
+        if (STATUS_QUEUE_DONE.equalsIgnoreCase(status) && saved.getAppointmentId() != null) {
+            appointmentRepository.findById(saved.getAppointmentId())
+                    .filter(a -> !Boolean.TRUE.equals(a.getDeleted()))
+                    .ifPresent(appointment -> {
+                        if (!STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())) {
+                            appointment.setStatus(STATUS_APPOINTMENT_COMPLETED);
+                            appointmentRepository.save(appointment);
+                        }
+                    });
+        }
+        return saved;
     }
 
     @Override
