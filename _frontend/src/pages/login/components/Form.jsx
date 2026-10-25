@@ -12,7 +12,8 @@ import {
 import Swal from "sweetalert2";
 import { login as loginApi } from "../../../services/auth/authService.js";
 import ButtonLoginGoogle from "./ButtonLoginGoogle";
-import {USER_STATUS, USER_ROLE} from "../../../enums/index.js";
+import { USER_STATUS, USER_ROLE } from "../../../enums/index.js";
+import { normalizeRole } from "../../../desktop/roles.js";
 
 function Form() {
 	const [username, setUsername] = useState("");
@@ -20,7 +21,7 @@ function Form() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-	const { login: loginContext} = useAuth();
+	const { login: loginContext } = useAuth();
 	const navigate = useNavigate();
 
     async function handleLogin(event) {
@@ -39,13 +40,15 @@ function Form() {
             };
             loginContext(data.token, userWithIds);
 
+            const normalizedRole = normalizeRole(data?.user?.role);
+
             // Lưu phiên làm việc đồng bộ cho role workspace desktop
             sessionStorage.setItem(
                 "clinic-staff-session",
                 JSON.stringify({
                     mode: "database",
                     token: data.token,
-                    role: data.user.role,
+                    role: normalizedRole || data.user.role,
                     user: userWithIds,
                     doctorId: data.doctorId,
                     staffId: data.staffId,
@@ -60,7 +63,7 @@ function Form() {
 	        showConfirmButton: true,
 		    });
 
-			if(data.user.status==USER_STATUS.LOCKED){
+			if (data.user.status == USER_STATUS.LOCKED) {
 				Swal.fire({
 				    icon: "error",
 				    title: "Đăng nhập từ chối",
@@ -72,23 +75,28 @@ function Form() {
 			    return;
 			}
 			
-			if (data.user.role == USER_ROLE.DEV || data.user.role == "DEV" || data.user.role == "Nhà phát triển") navigate("/admin");			
-			else if (data.user.role == USER_ROLE.ADMIN || data.user.role == "ADMIN" || data.user.role == "Quản trị viên") navigate("/admin");
-			else if (data.user.role == USER_ROLE.STAFF || data.user.role == "STAFF" || data.user.role == "Nhân viên") navigate("/staff");
-			else if (data.user.role == USER_ROLE.DOCTOR || data.user.role == "DOCTOR" || data.user.role == "Bác sĩ") navigate("/doctor");
-			else if (data.user.role == USER_ROLE.PATIENT || data.user.role == "PATIENT" || data.user.role == "Bệnh nhân") navigate("/patient");
+			if (normalizedRole === "ADMIN" || data.user.role == USER_ROLE.DEV || data.user.role == "DEV" || data.user.role == "Nhà phát triển") {
+				navigate("/admin");
+			} else if (normalizedRole === "STAFF") {
+				navigate("/staff");
+			} else if (normalizedRole === "DOCTOR") {
+				navigate("/doctor");
+			} else if (normalizedRole === "PATIENT" || data.user.role == USER_ROLE.PATIENT) {
+				navigate("/patient");
+			} else {
+				navigate("/");
+			}
 
         } catch (error) {
         	setError(error);
-        	if(error.status==500){
-				Swal.fire({
-				    icon: "error",
-				    title: "Đăng nhập thất bại",
-				    text: error.message,
-				    timer: 2000,
+        	const msg = error?.message || error?.error || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+			Swal.fire({
+			    icon: "error",
+			    title: "Đăng nhập thất bại",
+			    text: msg,
+			    timer: 3000,
 		        showConfirmButton: true,
-			    });
-        	}
+		    });
         } finally {
             setLoading(false);
         }
