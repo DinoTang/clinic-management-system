@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { getCollectionData } from "../../../utils/apiResponse.js";
 import { getLocalDateString } from "../../../utils/date.js";
 import "../../styles/desktop-schedule.css";
@@ -89,10 +90,32 @@ const isMissingApi = (err) =>
 
 function DoctorExaminationPage() {
   const today = getLocalDateString();
+  const auth = useAuth();
+  const user = auth?.user;
+  const staffSession = useMemo(() => {
+    try {
+      return JSON.parse(
+        sessionStorage.getItem("clinic-staff-session") || "null",
+      );
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const sessionDoctorId =
+    user?.doctorId ||
+    staffSession?.doctorId ||
+    staffSession?.user?.doctorId ||
+    "";
+
+  const isDoctorUser =
+    user?.role === "DOCTOR" ||
+    staffSession?.role === "DOCTOR" ||
+    Boolean(sessionDoctorId);
 
   /* ---------- Danh mục / bác sĩ ---------- */
   const [doctors, setDoctors] = useState([]);
-  const [doctorId, setDoctorId] = useState("");
+  const [doctorId, setDoctorId] = useState(sessionDoctorId);
   const [examDate, setExamDate] = useState(today);
   const [medicines, setMedicines] = useState(FALLBACK_MEDICINES);
   const [services, setServices] = useState(FALLBACK_SERVICES);
@@ -698,7 +721,23 @@ function DoctorExaminationPage() {
       .then((res) => {
         const list = getCollectionData(res.data);
         setDoctors(list);
-        setDoctorId((prev) => prev || (list[0] && list[0].id) || "");
+        if (sessionDoctorId) {
+          setDoctorId(sessionDoctorId);
+        } else if (isDoctorUser && list.length > 0) {
+          const matched = list.find(
+            (d) =>
+              d.user?.id === user?.id ||
+              d.userId === user?.id ||
+              d.user?.username === user?.username,
+          );
+          if (matched) {
+            setDoctorId(matched.id);
+          } else {
+            setDoctorId((prev) => prev || (list[0] && list[0].id) || "");
+          }
+        } else {
+          setDoctorId((prev) => prev || (list[0] && list[0].id) || "");
+        }
       })
       .catch((err) =>
         notify(
@@ -747,6 +786,12 @@ function DoctorExaminationPage() {
         /* dùng danh mục mẫu */
       });
   }, []);
+
+  useEffect(() => {
+    if (sessionDoctorId) {
+      setDoctorId(sessionDoctorId);
+    }
+  }, [sessionDoctorId]);
 
   useEffect(() => {
     if (doctorId) loadQueue();
@@ -862,9 +907,16 @@ function DoctorExaminationPage() {
 
   const doctorName = (() => {
     const doc = doctors.find((d) => d.id === doctorId);
-    if (!doc) return "";
+    if (doc) {
+      return (
+        doc.user?.fullName || doc.fullName || doc.name || `Bác sĩ ${doc.id}`
+      );
+    }
     return (
-      doc.user?.fullName || doc.fullName || doc.name || `Bác sĩ ${doc.id}`
+      user?.fullName ||
+      staffSession?.user?.fullName ||
+      staffSession?.name ||
+      (doctorId ? `Bác sĩ ${doctorId}` : "")
     );
   })();
 
@@ -883,24 +935,54 @@ function DoctorExaminationPage() {
         </div>
         <div className="exam-header-tools">
           <div className="tool-field">
-            <label htmlFor="exam-doctor">Bác sĩ trực</label>
-            <select
-              id="exam-doctor"
-              value={doctorId}
-              onChange={(e) => {
-                setDoctorId(e.target.value);
-                setSelected(null);
-                setPatient(null);
-              }}
-            >
-              <option value="">-- Chọn bác sĩ --</option>
-              {doctors.map((doc) => (
-                <option key={doc.id} value={doc.id}>
-                  {doc.id} -{" "}
-                  {doc.user?.fullName || doc.fullName || doc.name || "Bác sĩ"}
-                </option>
-              ))}
-            </select>
+            <label htmlFor="exam-doctor">Bác sĩ khám</label>
+            {isDoctorUser ? (
+              <div
+                id="exam-doctor"
+                className="doctor-fixed-badge"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "7px 12px",
+                  backgroundColor: "#eff6ff",
+                  color: "#1d4ed8",
+                  borderRadius: "6px",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  border: "1px solid #bfdbfe",
+                  minHeight: "36px",
+                }}
+                title={`Mã bác sĩ: ${doctorId || "Đang xác thực"}`}
+              >
+                <span>👨‍⚕️</span>
+                <span>
+                  {doctorName
+                    ? `${doctorId ? doctorName + " (" + doctorId + ")" : doctorName}`
+                    : doctorId
+                      ? `Bác sĩ (${doctorId})`
+                      : "Đang tải thông tin..."}
+                </span>
+              </div>
+            ) : (
+              <select
+                id="exam-doctor"
+                value={doctorId}
+                onChange={(e) => {
+                  setDoctorId(e.target.value);
+                  setSelected(null);
+                  setPatient(null);
+                }}
+              >
+                <option value="">-- Chọn bác sĩ --</option>
+                {doctors.map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                    {doc.id} -{" "}
+                    {doc.user?.fullName || doc.fullName || doc.name || "Bác sĩ"}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div className="tool-field">
             <label htmlFor="exam-date">Ngày khám</label>

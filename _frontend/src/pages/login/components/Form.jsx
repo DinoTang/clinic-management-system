@@ -30,7 +30,27 @@ function Form() {
 
         try {
             const data = await loginApi(username, password);
-			loginContext(data.token, data.user);
+            const userWithIds = {
+                ...data.user,
+                doctorId: data.doctorId,
+                staffId: data.staffId,
+                patientId: data.patientId,
+            };
+            loginContext(data.token, userWithIds);
+
+            // Lưu phiên làm việc đồng bộ cho role workspace desktop
+            sessionStorage.setItem(
+                "clinic-staff-session",
+                JSON.stringify({
+                    mode: "database",
+                    token: data.token,
+                    role: data.user.role,
+                    user: userWithIds,
+                    doctorId: data.doctorId,
+                    staffId: data.staffId,
+                })
+            );
+
 			Swal.fire({
 			    icon: "success",
 			    title: "Đăng nhập thành công",
@@ -54,6 +74,7 @@ function Form() {
 			else if (data.user.role =="Quản trị viên") navigate("/admin");
 			else if (data.user.role =="Nhân viên") navigate("/staff");
 			else if (data.user.role =="Bác sĩ") navigate("/doctor");
+			else if (data.user.role =="Bệnh nhân") navigate("/mobile");
 
         } catch (error) {
         	setError(error);

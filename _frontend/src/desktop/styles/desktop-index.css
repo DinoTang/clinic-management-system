@@ -116,3 +116,87 @@ body.desktop-mode {
     justify-content: flex-end;
   }
 }
+
+
+/* ========================================================
+   CÁC LỚP NÚT BẤM DÙNG CHUNG TRONG KHU VỰC DESKTOP (.btn)
+   ======================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  transition: all 0.15s ease-in-out;
+  text-decoration: none;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background-color: #1976d2;
+  color: #ffffff;
+  border-color: #1565c0;
+  box-shadow: 0 2px 5px rgba(25, 118, 210, 0.22);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1565c0;
+  border-color: #0d47a1;
+  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: #0d47a1;
+  transform: translateY(1px);
+}
+
+.btn-secondary {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  color: #1e293b;
+  border-color: #94a3b8;
+}
+
+.btn-secondary:active:not(:disabled) {
+  background-color: #cbd5e1;
+  transform: translateY(1px);
+}
+
+.btn-success {
+  background-color: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}

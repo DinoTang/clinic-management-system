@@ -9,6 +9,8 @@ public class LoginResponse {
     private String type = "Bearer";
     private User user;
     private String patientId;
+    private String doctorId;
+    private String staffId;
 
     public LoginResponse(){}
     public LoginResponse(String token, User user) {

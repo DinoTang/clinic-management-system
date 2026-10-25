@@ -12,6 +12,10 @@ import com.clinic.management._user.services.UserRegistrationService;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._patient.Patient;
 import com.clinic.management._patient.PatientRepository;
+import com.clinic.management._doctor.repositories.DoctorRepository;
+import com.clinic.management._doctor.entities.Doctor;
+import com.clinic.management._staff.repositories.StaffRepository;
+import com.clinic.management._staff.entities.Staff;
 import com.clinic.management.common.enums.Role;
 import java.util.Locale;
 
@@ -21,17 +25,23 @@ public class AuthService implements IAuth{
 	private final UserRegistrationService userRegistrationService;
 	private final JwtService jwtService;
     private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
+    private final StaffRepository staffRepository;
 
 	public AuthService(
 		UserQueryService userQueryService,
 		UserRegistrationService userRegistrationService,
 		JwtService jwtService,
-        PatientRepository patientRepository
+        PatientRepository patientRepository,
+        DoctorRepository doctorRepository,
+        StaffRepository staffRepository
 	){
 		this.userQueryService=userQueryService;
 		this.userRegistrationService = userRegistrationService;
 		this.jwtService = jwtService;
         this.patientRepository = patientRepository;
+        this.doctorRepository = doctorRepository;
+        this.staffRepository = staffRepository;
 	}
 
 	@Override
@@ -74,7 +84,7 @@ public class AuthService implements IAuth{
 		User user = userQueryService.findByGoogleId(googleId);
 
 		String token = jwtService.generateToken(user.getUsername());
-		return new LoginResponse(token, user);
+		return createLoginResponse(token, user);
 	}
 
 	@Override
@@ -87,24 +97,33 @@ public class AuthService implements IAuth{
 			throw new RuntimeException("Tên tài khoản hoặc mật khẩu không chính xác");
 		}
 		String token = jwtService.generateToken(request.getUsername());
-		return new LoginResponse(token, user);
+		return createLoginResponse(token, user);
 	}
 
 	@Override
 	public LoginResponse me(String token){
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
 	    User user = userQueryService.findByUsername(username);
-		return new LoginResponse(token, user);
+		return createLoginResponse(token, user);
 	}
 
 	private LoginResponse createLoginResponse(String token, User user) {
 		LoginResponse response = new LoginResponse(token, user);
-		if (user.getRole() == Role.PATIENT) {
-			String patientId = patientRepository.findByUserId(user.getId())
-					.map(Patient::getId)
-					.orElseThrow(() -> new IllegalStateException(
-							"Không tìm thấy hồ sơ bệnh nhân cho tài khoản này"));
-			response.setPatientId(patientId);
+		if (user != null && user.getRole() != null) {
+			if (user.getRole() == Role.PATIENT) {
+				patientRepository.findByUserId(user.getId())
+						.map(Patient::getId)
+						.ifPresent(response::setPatientId);
+			} else if (user.getRole() == Role.DOCTOR) {
+				doctorRepository.findByUserId(user.getId())
+						.map(Doctor::getId)
+						.ifPresent(response::setDoctorId);
+			} else if (user.getRole() == Role.STAFF || user.getRole() == Role.ADMIN) {
+				staffRepository.findByUserIdAndDeletedFalse(user.getId())
+						.or(() -> staffRepository.findByUserId(user.getId()))
+						.map(Staff::getId)
+						.ifPresent(response::setStaffId);
+			}
 		}
 		return response;
 	}

@@ -1,5 +1,6 @@
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { getCollectionData } from "../../../utils/apiResponse.js";
 import { getLocalDateString } from "../../../utils/date.js";
 import QrCheckInScanner from "./QrCheckInScanner.jsx";
@@ -15,6 +16,27 @@ const SPECIALTY_API = "http://localhost:8080/api/specialties";
 
 function ReceptionPage() {
   const today = getLocalDateString();
+  const auth = useAuth();
+  const staffSession = useMemo(() => {
+    try {
+      return JSON.parse(
+        sessionStorage.getItem("clinic-staff-session") || "null",
+      );
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const loggedInStaffId =
+    auth?.user?.staffId ||
+    staffSession?.staffId ||
+    staffSession?.user?.staffId ||
+    "";
+  const loggedInStaffName =
+    auth?.user?.fullName ||
+    staffSession?.user?.fullName ||
+    staffSession?.name ||
+    "";
 
   const [specialties, setSpecialties] = useState([]);
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
@@ -31,7 +53,7 @@ function ReceptionPage() {
 
   const [formData, setFormData] = useState({
     patientId: "",
-    employeeId: "NV001",
+    employeeId: loggedInStaffId || "",
     roomId: "",
     doctorId: "",
     appointmentId: "",
@@ -51,6 +73,12 @@ function ReceptionPage() {
   });
 
   const [createdSlip, setCreatedSlip] = useState(null);
+
+  useEffect(() => {
+    if (loggedInStaffId) {
+      setFormData((prev) => ({ ...prev, employeeId: loggedInStaffId }));
+    }
+  }, [loggedInStaffId]);
 
   // 1. Tải danh sách hàng đợi trong ngày
   const fetchTodayQueue = useCallback(() => {
@@ -191,7 +219,7 @@ function ReceptionPage() {
     axios
       .post(`${CHECKIN_API}/scan`, {
         code,
-        employeeId: formData.employeeId,
+        employeeId: loggedInStaffId || formData.employeeId || "",
         method,
       })
       .then((res) => applyCheckInResult(res.data))
@@ -239,7 +267,7 @@ function ReceptionPage() {
     setScanNotice(null);
     setFormData({
       patientId: "",
-      employeeId: "NV001",
+      employeeId: loggedInStaffId || "",
       roomId: "",
       doctorId: "",
       appointmentId: "",
@@ -263,6 +291,12 @@ function ReceptionPage() {
   const handleSubmitReception = (e) => {
     e.preventDefault();
 
+    const activeStaffId = loggedInStaffId || formData.employeeId;
+    if (!activeStaffId) {
+      return alert(
+        "Không xác định được mã nhân viên đang đăng nhập! Vui lòng đăng nhập lại tài khoản nhân viên tiếp đón.",
+      );
+    }
     if (!formData.receptionType) return alert("Vui lòng chọn Loại tiếp đón!");
     if (!formData.patientId) return alert("Chưa có mã bệnh nhân!");
     if (formData.receptionType === "TrucTiep" && !formData.patientName.trim()) {
@@ -273,6 +307,7 @@ function ReceptionPage() {
 
     const payload = {
       ...formData,
+      employeeId: activeStaffId,
       appointmentId:
         formData.receptionType === "HenTruoc" ? formData.appointmentId : null,
       pulse: formData.pulse ? parseInt(formData.pulse) : null,
@@ -308,11 +343,48 @@ function ReceptionPage() {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "12px",
+            flexWrap: "wrap",
+            gap: "8px",
           }}
         >
-          <h2 className="panel-title" style={{ margin: 0, border: "none" }}>
-            📋 TIẾP NHẬN BỆNH NHÂN TẠI QUẦY
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <h2 className="panel-title" style={{ margin: 0, border: "none" }}>
+              📋 TIẾP NHẬN BỆNH NHÂN TẠI QUẦY
+            </h2>
+            {loggedInStaffId ? (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "4px 10px",
+                  backgroundColor: "#eff6ff",
+                  color: "#1d4ed8",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  border: "1px solid #bfdbfe",
+                }}
+                title="Nhân viên tiếp đón đang đăng nhập"
+              >
+                👤 NV: {loggedInStaffName ? `${loggedInStaffName} (${loggedInStaffId})` : loggedInStaffId}
+              </span>
+            ) : (
+              <span
+                style={{
+                  padding: "4px 10px",
+                  backgroundColor: "#fef2f2",
+                  color: "#b91c1c",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  border: "1px solid #fecaca",
+                }}
+              >
+                ⚠️ Chưa đăng nhập nhân viên
+              </span>
+            )}
+          </div>
           <button
             type="button"
             className="btn btn-secondary"

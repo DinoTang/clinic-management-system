@@ -1,6 +1,7 @@
 import axios from "axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import Swal from "sweetalert2";
 import "../../styles/billing.css";
 import "../../styles/desktop-schedule.css";
@@ -22,8 +23,8 @@ const CLINIC_CONFIG = {
   hotline: "1900 6868",
 
   // 2. Cấu hình Ví MoMo nhận tiền viện phí
-  momoPhone: "0816808776", // Số điện thoại nhận tiền MoMo
-  momoOwnerName: "VÕ GIA HUY", // Tên chủ tài khoản MoMo
+  momoPhone: "0339494928", // Số điện thoại nhận tiền MoMo
+  momoOwnerName: "TRẦN QUỐC TẤN", // Tên chủ tài khoản MoMo
 
   // 3. Cấu hình Chuyển khoản VietQR / Ngân hàng
   bankCode: "VBA", // Mã ngân hàng: MB, VCB, BIDV, TCB, VPB...
@@ -96,6 +97,7 @@ function numberToVietnameseWords(num) {
 
 function BillingPage() {
   // Lấy mã nhân viên thu ngân từ phiên đăng nhập
+  const auth = useAuth();
   const staffSession = useMemo(() => {
     try {
       return JSON.parse(
@@ -105,8 +107,19 @@ function BillingPage() {
       return null;
     }
   }, []);
-  const currentStaffId =
-    staffSession?.username || staffSession?.user?.id || "NV001";
+
+  const loggedInStaffId =
+    auth?.user?.staffId ||
+    staffSession?.staffId ||
+    staffSession?.user?.staffId ||
+    "";
+  const loggedInStaffName =
+    auth?.user?.fullName ||
+    staffSession?.user?.fullName ||
+    staffSession?.name ||
+    "";
+
+  const currentStaffId = loggedInStaffId || "";
 
   // State danh sách và bộ lọc
   const [invoices, setInvoices] = useState([]);
@@ -235,6 +248,14 @@ function BillingPage() {
   // 3. Lập hóa đơn nhanh cho bệnh án vừa khám
   const handleQuickCreate = async (e) => {
     e.preventDefault();
+    if (!currentStaffId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Chưa đăng nhập nhân viên",
+        text: "Không xác định được mã nhân viên đang đăng nhập! Vui lòng đăng nhập lại tài khoản nhân viên thu ngân.",
+      });
+      return;
+    }
     if (!quickRecordId.trim()) {
       Swal.fire({
         icon: "warning",
@@ -282,6 +303,14 @@ function BillingPage() {
   // 5. Xử lý thanh toán
   const handlePayment = async () => {
     if (!selectedInvoice) return;
+    if (!currentStaffId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Chưa đăng nhập nhân viên",
+        text: "Không xác định được mã nhân viên đang đăng nhập! Vui lòng đăng nhập lại tài khoản nhân viên thu ngân.",
+      });
+      return;
+    }
     if (selectedInvoice.paymentStatus === "DaThanhToan") {
       Swal.fire({
         icon: "info",
@@ -333,6 +362,7 @@ function BillingPage() {
       const payload = {
         method: paymentMethod,
         amountGiven: paymentMethod === "CASH" ? numGiven : totalAmount,
+        staffId: currentStaffId,
       };
 
       let res;
@@ -444,9 +474,53 @@ function BillingPage() {
     <div className="billing-container">
       {/* ================= CỘT TRÁI: DANH SÁCH HÓA ĐƠN ================= */}
       <div className="billing-left">
-        <h2 className="panel-title">
-          <span>💳</span> Quản Lý Hóa Đơn & Viện Phí
-        </h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "12px",
+            flexWrap: "wrap",
+            gap: "8px",
+          }}
+        >
+          <h2 className="panel-title" style={{ margin: 0, border: "none" }}>
+            <span>💳</span> Quản Lý Hóa Đơn & Viện Phí
+          </h2>
+          {currentStaffId ? (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "4px 10px",
+                backgroundColor: "#eff6ff",
+                color: "#1d4ed8",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: 600,
+                border: "1px solid #bfdbfe",
+              }}
+              title="Nhân viên thu ngân đang đăng nhập"
+            >
+              👤 Thu ngân: {loggedInStaffName ? `${loggedInStaffName} (${currentStaffId})` : currentStaffId}
+            </span>
+          ) : (
+            <span
+              style={{
+                padding: "4px 10px",
+                backgroundColor: "#fef2f2",
+                color: "#b91c1c",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: 600,
+                border: "1px solid #fecaca",
+              }}
+            >
+              ⚠️ Chưa đăng nhập nhân viên
+            </span>
+          )}
+        </div>
 
         {/* Lập hóa đơn nhanh theo mã bệnh án */}
         <form onSubmit={handleQuickCreate} className="quick-invoice-box">
@@ -1279,7 +1353,7 @@ function BillingPage() {
                   </b>
                 </div>
                 <div>
-                  Thu ngân: <b>{currentStaffId}</b>
+                  Thu ngân: <b>{loggedInStaffName ? `${loggedInStaffName} (${currentStaffId})` : (currentStaffId || "N/A")}</b>
                 </div>
               </div>
 

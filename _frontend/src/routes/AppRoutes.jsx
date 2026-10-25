@@ -5,6 +5,7 @@ import AdminPage from "../pages/admin/Admin.jsx";
 import GoogleCallback from "../pages/callback/GoogleCallback";
 import Account from "../pages/account/Account";
 import AdminLayout from "../layouts/AdminLayout.jsx";
+import DesktopSchedulePage from "../desktop/pages/SchedulePage/DesktopSchedulePage.jsx";
 import {
     AdminRoleRoutes,
     DoctorRoleRoutes,
@@ -28,11 +29,12 @@ function AppRoutes() {
             <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminPage/>} />
                 <Route path="/accounts" element={<Account/>} />
+                <Route path="/schedules" element={<DesktopSchedulePage />} />
             </Route>
 
-            <Route path="/a" element={<AdminRoleRoutes />} />            
-            <Route path="/doctor" element={<DoctorRoleRoutes />} />
-            <Route path="/staff" element={<StaffRoleRoutes />} />
+            <Route path="/a/*" element={<AdminRoleRoutes />} />            
+            <Route path="/doctor/*" element={<DoctorRoleRoutes />} />
+            <Route path="/staff/*" element={<StaffRoleRoutes />} />
 
             <Route path="/mobile/*" element={<PatientMobileApp />} />
             <Route path="/desktop/*" element={<DesktopApp />} />
