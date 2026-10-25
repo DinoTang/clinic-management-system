@@ -1,5 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PatientBookingPage from "../../desktop/pages/BookingPage/PatientBookingPage.jsx";
+import {
+  cancelAppointment,
+  errorMessage,
+  getAppointments,
+  getMedicalRecords,
+  getProfile,
+  updateProfile,
+} from "../services/patientApi";
 import "../PatientWorkspace.css";
 
 const specialties = [
@@ -28,6 +36,10 @@ const demoSchedules = [
 ];
 
 const statusLabels = {
+  DaDat: "Đã đặt lịch",
+  DaDen: "Đã tiếp đón",
+  HoanTat: "Hoàn tất khám",
+  DaHuy: "Đã hủy",
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
   CHECKED_IN: "Đã đến khám",
@@ -38,55 +50,30 @@ const statusLabels = {
   NO_SHOW: "Không đến",
 };
 
-const sampleVisits = [
-  {
-    id: "BA20260918001",
-    date: "2026-09-18",
-    doctor: "BS. Trần Minh Tuấn",
-    specialty: "Nội khoa",
-    symptoms: "Mệt mỏi, tức ngực trái từng cơn.",
-    diagnosis: "Tăng huyết áp nguyên phát; rối loạn lipid máu.",
-    notes: "Ăn giảm muối, hạn chế dầu mỡ và tái khám theo hẹn.",
-  },
-  {
-    id: "BA20260802001",
-    date: "2026-08-02",
-    doctor: "BS. Nguyễn Thu Hà",
-    specialty: "Nội khoa",
-    symptoms: "Đau vùng thượng vị sau ăn.",
-    diagnosis: "Theo dõi viêm dạ dày.",
-    notes: "Ăn đúng bữa, hạn chế thức ăn cay nóng.",
-  },
-];
+const statusClasses = {
+  DaDat: "pending",
+  DaDen: "checked_in",
+  HoanTat: "completed",
+  DaHuy: "cancelled",
+};
 
-const samplePrescriptions = [
-  {
-    id: "DT20260918001",
-    date: "2026-09-18",
-    doctor: "BS. Trần Minh Tuấn",
-    medicines: [
-      { name: "Amlor 5mg", dosage: "1 viên mỗi ngày, sau ăn sáng", days: 30 },
-      { name: "Lipitor 20mg", dosage: "1 viên mỗi ngày, buổi tối", days: 30 },
-    ],
-  },
-];
+function statusClass(status) {
+  return `status-${statusClasses[status] || String(status || "").toLowerCase()}`;
+}
 
-const sampleInvoices = [
-  {
-    id: "HD20260918001",
-    date: "2026-09-18",
-    total: 245000,
-    status: "PAID",
-    items: ["Phí khám: 100.000đ", "Thuốc: 145.000đ"],
-  },
-  {
-    id: "HD20260802001",
-    date: "2026-08-02",
-    total: 100000,
-    status: "UNPAID",
-    items: ["Phí khám: 100.000đ"],
-  },
-];
+function isTerminalStatus(status) {
+  return ["HoanTat", "DaHuy", "COMPLETED", "CANCELLED", "REJECTED", "NO_SHOW"].includes(
+    status,
+  );
+}
+
+function isCancellable(status) {
+  return ["DaDat", "PENDING", "CONFIRMED"].includes(status);
+}
+
+function hhmm(value) {
+  return value ? String(value).slice(0, 5) : "";
+}
 
 function formatDate(value) {
   if (!value) return "Chưa cập nhật";
@@ -131,12 +118,12 @@ function EmptyState({ title, description, Icon }) {
 }
 
 function AppointmentCard({ appointment, onCancel, Icon }) {
-  const canCancel = ["PENDING", "CONFIRMED"].includes(appointment.status);
+  const canCancel = isCancellable(appointment.status);
 
   return (
     <article className="workspace-card appointment-workspace-card">
       <div className="workspace-card-topline">
-        <span className={`status-pill status-${appointment.status.toLowerCase()}`}>
+        <span className={`status-pill ${statusClass(appointment.status)}`}>
           {statusLabels[appointment.status] || appointment.status}
         </span>
         <span className="appointment-code">{appointment.id}</span>
@@ -147,7 +134,7 @@ function AppointmentCard({ appointment, onCancel, Icon }) {
       </p>
       <div className="appointment-meta-grid">
         <span><Icon name="calendar" size={17} /> {formatDate(appointment.date)}</span>
-        <span><Icon name="clock" size={17} /> {appointment.time}</span>
+        <span><Icon name="clock" size={17} /> {appointment.endTime ? `${appointment.time} – ${appointment.endTime}` : appointment.time}</span>
         {appointment.room && <span><Icon name="pin" size={17} /> {appointment.room}</span>}
       </div>
       {appointment.reason && (
@@ -168,27 +155,74 @@ function AppointmentCard({ appointment, onCancel, Icon }) {
   );
 }
 
-function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, showToast }) {
+function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, showToast, patientId }) {
   const [filter, setFilter] = useState("upcoming");
   const [cancelTarget, setCancelTarget] = useState(null);
+  const [loading, setLoading] = useState(!!patientId);
+  const [loadError, setLoadError] = useState("");
   const today = todayString();
+
+  useEffect(() => {
+    if (!patientId) {
+      setLoading(false);
+      return undefined;
+    }
+    let cancelled = false;
+    getAppointments(patientId)
+      .then((data) => {
+        if (cancelled) return;
+        setAppointments(
+          data.map((appointment) => ({
+            id: appointment.id,
+            status: appointment.status,
+            date: appointment.date,
+            time: hhmm(appointment.time),
+            endTime: hhmm(appointment.endTime),
+            specialty: appointment.specialtyName || "Chuyên khoa khám",
+            doctor: appointment.doctorName || "BS. Chưa cập nhật",
+            room: appointment.roomName,
+            reason: appointment.reason,
+            doctorId: appointment.doctorId,
+          })),
+        );
+        setLoadError("");
+        setLoading(false);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setAppointments([]);
+        setLoadError(errorMessage(error, "Không thể tải danh sách lịch hẹn."));
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientId]);
+
   const filteredAppointments = appointments.filter((appointment) => {
-    const isTerminal = ["COMPLETED", "CANCELLED", "REJECTED", "NO_SHOW"].includes(appointment.status);
+    const isTerminal = isTerminalStatus(appointment.status);
     return filter === "upcoming"
       ? !isTerminal && appointment.date >= today
       : isTerminal || appointment.date < today;
   });
 
-  const confirmCancel = () => {
-    setAppointments((current) =>
-      current.map((appointment) =>
-        appointment.id === cancelTarget.id
-          ? { ...appointment, status: "CANCELLED" }
-          : appointment,
-      ),
-    );
+  const confirmCancel = async () => {
+    const target = cancelTarget;
     setCancelTarget(null);
-    showToast("Đã hủy lịch hẹn.");
+    try {
+      await cancelAppointment(target.id, patientId);
+      setAppointments((current) =>
+        current.map((appointment) =>
+          appointment.id === target.id
+            ? { ...appointment, status: "DaHuy" }
+            : appointment,
+        ),
+      );
+      showToast("Đã hủy lịch hẹn.");
+    } catch (error) {
+      showToast(errorMessage(error, "Không thể hủy lịch hẹn."));
+    }
   };
 
   return (
@@ -229,7 +263,11 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
           Đã qua / đã hủy
         </button>
       </div>
-      {filteredAppointments.length ? (
+      {loading && <p className="workspace-note">Đang tải lịch hẹn...</p>}
+      {!loading && loadError && (
+        <p className="workspace-note" role="alert">{loadError}</p>
+      )}
+      {!loading && !loadError && filteredAppointments.length ? (
         <div className="workspace-list">
           {filteredAppointments.map((appointment) => (
             <AppointmentCard
@@ -241,11 +279,21 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
           ))}
         </div>
       ) : (
-        <EmptyState
-          Icon={Icon}
-          title={filter === "upcoming" ? "Chưa có lịch hẹn sắp tới" : "Chưa có lịch sử khám"}
-          description={filter === "upcoming" ? "Đặt lịch để chọn chuyên khoa, bác sĩ và giờ khám phù hợp." : "Các lịch đã qua hoặc đã hủy sẽ hiển thị tại đây."}
-        />
+        !loading &&
+        !loadError &&
+        (filter === "upcoming" ? (
+          <EmptyState
+            Icon={Icon}
+            title="Chưa có lịch hẹn sắp tới"
+            description="Đặt lịch để chọn chuyên khoa, bác sĩ và giờ khám phù hợp."
+          />
+        ) : (
+          <EmptyState
+            Icon={Icon}
+            title="Chưa có lịch sử khám"
+            description="Các lịch đã qua hoặc đã hủy sẽ hiển thị tại đây."
+          />
+        ))
       )}
       {filter === "upcoming" && (
         <button className="workspace-primary-button full-width-button" onClick={() => onNavigate("booking")} type="button">
@@ -538,9 +586,40 @@ function DemoBookingPage({ onNavigate, setAppointments, Icon, showToast, profile
   );
 }
 
-function RecordsPage({ Icon, onNavigate, initialTab = "visits" }) {
+function RecordsPage({ Icon, onNavigate, initialTab = "visits", patientId }) {
   const [tab, setTab] = useState(initialTab);
   const [expandedId, setExpandedId] = useState(null);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(!!patientId);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    if (!patientId) {
+      setLoading(false);
+      return undefined;
+    }
+    let cancelled = false;
+    getMedicalRecords(patientId)
+      .then((data) => {
+        if (cancelled) return;
+        setRecords(data);
+        setLoadError("");
+        setLoading(false);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setRecords([]);
+        setLoadError(errorMessage(error, "Không thể tải hồ sơ khám."));
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientId]);
+
+  const prescriptions = records.filter((record) => record.prescription);
+  const invoices = records.filter((record) => record.invoice);
 
   return (
     <>
@@ -569,11 +648,11 @@ function RecordsPage({ Icon, onNavigate, initialTab = "visits" }) {
         ))}
       </div>
       <div className="workspace-list">
-        {tab === "visits" && sampleVisits.map((visit) => (
+        {tab === "visits" && records.map((visit) => (
           <article className="workspace-card record-card" key={visit.id}>
             <button className="record-card-toggle" onClick={() => setExpandedId(expandedId === visit.id ? null : visit.id)} type="button">
               <span className="record-card-icon"><Icon name="heart" size={21} /></span>
-              <span className="record-card-title"><strong>{visit.specialty}</strong><small>{formatDate(visit.date)} · {visit.doctor}</small></span>
+              <span className="record-card-title"><strong>{visit.specialtyName || "Chuyên khoa khám"}</strong><small>{formatDate(visit.date)} · {visit.doctorName || "BS. Chưa cập nhật"}</small></span>
               <Icon name="chevron" size={19} />
             </button>
             {expandedId === visit.id && (
@@ -586,43 +665,64 @@ function RecordsPage({ Icon, onNavigate, initialTab = "visits" }) {
             )}
           </article>
         ))}
-        {tab === "prescriptions" && samplePrescriptions.map((prescription) => (
-          <article className="workspace-card record-card" key={prescription.id}>
-            <button className="record-card-toggle" onClick={() => setExpandedId(expandedId === prescription.id ? null : prescription.id)} type="button">
+        {tab === "prescriptions" && prescriptions.map((record) => (
+          <article className="workspace-card record-card" key={record.prescription.id}>
+            <button className="record-card-toggle" onClick={() => setExpandedId(expandedId === record.prescription.id ? null : record.prescription.id)} type="button">
               <span className="record-card-icon purple"><Icon name="pill" size={21} /></span>
-              <span className="record-card-title"><strong>Đơn thuốc · {prescription.id}</strong><small>{formatDate(prescription.date)} · {prescription.doctor}</small></span>
+              <span className="record-card-title"><strong>Đơn thuốc · {record.prescription.id}</strong><small>{formatDate(record.prescription.date)} · {record.doctorName || "BS. Chưa cập nhật"}</small></span>
               <Icon name="chevron" size={19} />
             </button>
-            {expandedId === prescription.id && (
+            {expandedId === record.prescription.id && (
               <div className="record-expanded">
-                {prescription.medicines.map((medicine) => (
-                  <div className="medicine-row" key={medicine.name}>
-                    <strong>{medicine.name}</strong>
-                    <span>{medicine.dosage}</span>
-                    <small>Dùng trong {medicine.days} ngày</small>
+                {record.prescription.medicines.map((medicine) => (
+                  <div className="medicine-row" key={medicine.medicineId}>
+                    <strong>{medicine.medicineName}</strong>
+                    <span>{medicine.dosage || "Theo chỉ định của bác sĩ"}</span>
+                    <small>
+                      {medicine.quantity} {medicine.unit || "đơn vị"}
+                      {medicine.unitPrice ? ` · ${new Intl.NumberFormat("vi-VN").format(medicine.unitPrice)}đ` : ""}
+                    </small>
                   </div>
                 ))}
+                {record.prescription.advice && (
+                  <p className="workspace-note">{record.prescription.advice}</p>
+                )}
                 <p className="workspace-note">Dùng thuốc đúng theo hướng dẫn của bác sĩ. Không tự ý thay đổi liều dùng.</p>
               </div>
             )}
           </article>
         ))}
-        {tab === "invoices" && sampleInvoices.map((invoice) => (
-          <article className="workspace-card invoice-card" key={invoice.id}>
-            <div className="invoice-card-heading">
-              <span className="record-card-icon orange"><Icon name="invoice" size={21} /></span>
-              <div><strong>{invoice.id}</strong><small>{formatDate(invoice.date)}</small></div>
-              <span className={`status-pill ${invoice.status === "PAID" ? "status-paid" : "status-unpaid"}`}>
-                {invoice.status === "PAID" ? "Đã thanh toán" : "Chưa thanh toán"}
-              </span>
-            </div>
-            <div className="invoice-detail-list">{invoice.items.map((item) => <span key={item}>{item}</span>)}</div>
-            <div className="invoice-total"><span>Tổng cộng</span><strong>{new Intl.NumberFormat("vi-VN").format(invoice.total)}đ</strong></div>
-            {invoice.status === "UNPAID" && <p className="workspace-note">Vui lòng liên hệ quầy thu ngân để được hướng dẫn thanh toán.</p>}
-          </article>
-        ))}
+        {tab === "invoices" && invoices.map((record) => {
+          const invoice = record.invoice;
+          const paid = invoice.paymentStatus === "DaThanhToan";
+          return (
+            <article className="workspace-card invoice-card" key={invoice.id}>
+              <div className="invoice-card-heading">
+                <span className="record-card-icon orange"><Icon name="invoice" size={21} /></span>
+                <div><strong>{invoice.id}</strong><small>{formatDate(record.date)}</small></div>
+                <span className={`status-pill ${paid ? "status-paid" : "status-unpaid"}`}>
+                  {paid ? "Đã thanh toán" : "Chưa thanh toán"}
+                </span>
+              </div>
+              <div className="invoice-detail-list">
+                {invoice.items.map((item) => (
+                  <span key={`${item.itemType || ""}-${item.itemName}`}>
+                    {item.itemName}
+                    {item.quantity > 1 ? ` × ${item.quantity}` : ""}: {new Intl.NumberFormat("vi-VN").format(item.totalPrice)}đ
+                  </span>
+                ))}
+              </div>
+              <div className="invoice-total"><span>Tổng cộng</span><strong>{new Intl.NumberFormat("vi-VN").format(invoice.total)}đ</strong></div>
+              {!paid && <p className="workspace-note">Vui lòng liên hệ quầy thu ngân để được hướng dẫn thanh toán.</p>}
+            </article>
+          );
+        })}
       </div>
-      <p className="workspace-demo-caption">Hồ sơ hiển thị là dữ liệu minh họa, chưa lấy từ bệnh án thực tế.</p>
+      {loading && <p className="workspace-note">Đang tải hồ sơ khám...</p>}
+      {!loading && loadError && <p className="workspace-note" role="alert">{loadError}</p>}
+      {!loading && !loadError && records.length === 0 && (
+        <p className="workspace-note">Chưa có dữ liệu hồ sơ khám. Sau khi khám xong, kết quả sẽ hiển thị tại đây.</p>
+      )}
       {tab === "visits" && (
         <button className="workspace-secondary-button full-width-button" onClick={() => onNavigate("appointments")} type="button">Xem lịch khám</button>
       )}
@@ -638,13 +738,95 @@ function RecordsPage({ Icon, onNavigate, initialTab = "visits" }) {
 function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(profile);
+  const [loading, setLoading] = useState(!!profile?.patientId);
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   const update = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
-  const save = (event) => {
+
+  useEffect(() => {
+    if (!profile?.patientId) {
+      setLoading(false);
+      return undefined;
+    }
+    let cancelled = false;
+    getProfile(profile.patientId)
+      .then((data) => {
+        if (cancelled) return;
+        setDraft({
+          ...profile,
+          ...data,
+          patientId: data.patientId || profile.patientId,
+          fullName: data.fullName || profile.fullName || "",
+          birthDate: data.birthDate || "",
+          gender: data.gender || "Nam",
+          phone: data.phone || "",
+          email: data.email || "",
+          address: data.address || "",
+          medicalHistory: data.medicalHistory || "",
+        });
+        setLoadError("");
+        setLoading(false);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setLoadError(errorMessage(error, "Không thể tải hồ sơ cá nhân."));
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.patientId]);
+
+  const save = async (event) => {
     event.preventDefault();
-    setProfile(draft);
-    setEditing(false);
-    showToast("Đã cập nhật hồ sơ trên thiết bị.");
+    if (!profile?.patientId) return;
+    setSaving(true);
+    try {
+      const saved = await updateProfile(profile.patientId, {
+        fullName: draft.fullName,
+        birthDate: draft.birthDate || null,
+        gender: draft.gender,
+        phone: draft.phone,
+        email: draft.email,
+        address: draft.address,
+        medicalHistory: draft.medicalHistory,
+        bloodGroup: draft.bloodGroup,
+        healthInsuranceNumber: draft.healthInsuranceNumber,
+      });
+      const merged = { ...draft, ...saved };
+      setDraft(merged);
+      setProfile(merged);
+
+      // đồng bộ phiên để tiêu đề & lần đăng nhập sau dùng thông tin mới
+      const storage = sessionStorage.getItem("clinic-patient-session")
+        ? sessionStorage
+        : localStorage;
+      const raw = storage.getItem("clinic-patient-session");
+      if (raw) {
+        try {
+          const session = JSON.parse(raw);
+          session.patient = {
+            ...session.patient,
+            fullName: saved.fullName,
+            phone: saved.phone,
+            email: saved.email,
+            gender: saved.gender,
+          };
+          storage.setItem("clinic-patient-session", JSON.stringify(session));
+        } catch {
+          /* bỏ qua phiên hỏng */
+        }
+      }
+
+      setEditing(false);
+      showToast("Đã cập nhật hồ sơ.");
+    } catch (error) {
+      showToast(errorMessage(error, "Không thể cập nhật hồ sơ."));
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -664,6 +846,8 @@ function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
         <span className="profile-summary-avatar"><Icon name="user" size={27} /></span>
         <div><strong>{profile.fullName || "Bệnh nhân"}</strong><small>Hồ sơ bệnh nhân</small></div>
       </div>
+      {loading && <p className="workspace-note">Đang tải hồ sơ...</p>}
+      {!loading && loadError && <p className="workspace-note" role="alert">{loadError}</p>}
       {editing ? (
         <form className="profile-form" onSubmit={save}>
           <label className="workspace-field"><span>Họ và tên</span><input maxLength={100} onChange={(event) => update("fullName", event.target.value)} required value={draft.fullName} /></label>
@@ -673,8 +857,7 @@ function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
           <label className="workspace-field"><span>Email</span><input autoComplete="email" onChange={(event) => update("email", event.target.value)} type="email" value={draft.email} /></label>
           <label className="workspace-field"><span>Địa chỉ</span><input autoComplete="street-address" onChange={(event) => update("address", event.target.value)} value={draft.address} /></label>
           <label className="workspace-field"><span>Tiền sử bệnh <small>(không bắt buộc)</small></span><textarea maxLength={500} onChange={(event) => update("medicalHistory", event.target.value)} rows={3} value={draft.medicalHistory} /></label>
-          <p className="workspace-note">Bản demo chỉ lưu thay đổi trong phiên hiện tại, chưa cập nhật hồ sơ trên hệ thống phòng khám.</p>
-          <button className="workspace-primary-button full-width-button" type="submit"><Icon name="check" size={20} /> Lưu thông tin</button>
+          <button className="workspace-primary-button full-width-button" disabled={saving} type="submit"><Icon name="check" size={20} /> {saving ? "Đang lưu..." : "Lưu thông tin"}</button>
           <button className="workspace-link-button" onClick={() => setEditing(false)} type="button">Hủy chỉnh sửa</button>
         </form>
       ) : (
@@ -687,7 +870,6 @@ function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
             ["Địa chỉ", profile.address || "Chưa cập nhật"],
             ["Tiền sử bệnh", profile.medicalHistory || "Chưa cập nhật"],
           ].map(([label, value]) => <div className="profile-detail-row" key={label}><span>{label}</span><strong>{value}</strong></div>)}
-          <p className="workspace-note">Hồ sơ đang hiển thị trên thiết bị. Chức năng cập nhật chưa kết nối Backend.</p>
         </div>
       )}
       <button className="patient-logout-button" onClick={onLogout} type="button"><Icon name="logout" size={19} /> Đăng xuất</button>
@@ -790,6 +972,7 @@ function PatientWorkspace({
           appointments={appointments}
           Icon={Icon}
           onNavigate={onNavigate}
+          patientId={profile?.patientId}
           setAppointments={setAppointments}
           showToast={showToast}
         />
@@ -809,6 +992,7 @@ function PatientWorkspace({
           initialTab={page === "prescription" ? "prescriptions" : page === "invoices" ? "invoices" : "visits"}
           key={page}
           onNavigate={onNavigate}
+          patientId={profile?.patientId}
         />
       )}
       {page === "profile" && (

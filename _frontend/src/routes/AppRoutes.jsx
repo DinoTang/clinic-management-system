@@ -30,9 +30,9 @@ function AppRoutes() {
                 <Route path="/admin/accounts" element={<Account/>} />
             </Route>
 
-            <Route path="/a" element={<AdminRoleRoutes />} />            
-            <Route path="/doctor" element={<DoctorRoleRoutes />} />
-            <Route path="/staff" element={<StaffRoleRoutes />} />
+            <Route path="/a/*" element={<AdminRoleRoutes />} />
+            <Route path="/doctor/*" element={<DoctorRoleRoutes />} />
+            <Route path="/staff/*" element={<StaffRoleRoutes />} />
 
             <Route path="/mobile/*" element={<PatientMobileApp />} />
             <Route path="/desktop/*" element={<DesktopApp />} />

@@ -1,4 +1,4 @@
-import IconGG from "../../../assets/Icon_gg.png";
+import IconGG from "../../../assets/icon_gg.png";
 
 function ButtonLoginGoogle({classname}){
 	const handleGoogleLogin = async() => {

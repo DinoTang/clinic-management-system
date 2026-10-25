@@ -12,6 +12,41 @@ function GoogleCallback({className}){
 	const handleGoogleLogin = async() => {
 		try {
 			const data= await loginGoogle();
+
+			const role = data.user?.role;
+			const isPatient = role === "PATIENT" || role === USER_ROLE.PATIENT;
+
+			if (isPatient) {
+				if (!data.token || !data.patientId) {
+					Swal.fire({
+						icon: "error",
+						title: "Đăng nhập thất bại",
+						text: "Tài khoản Google chưa có hồ sơ bệnh nhân hợp lệ.",
+						timer: 3000,
+						showConfirmButton: true,
+					});
+					return;
+				}
+
+				const session = {
+					token: data.token,
+					patient: {
+						patientId: data.patientId,
+						fullName: data.user.fullName,
+						role: data.user.role,
+						phone: data.user.phone,
+						email: data.user.email,
+					},
+				};
+				sessionStorage.setItem(
+					"clinic-patient-session",
+					JSON.stringify(session),
+				);
+				localStorage.removeItem("clinic-patient-session");
+				window.location.replace("/mobile");
+				return;
+			}
+
 			loginContext(data.token, data.user);
 			Swal.fire({
 				icon: "success",
