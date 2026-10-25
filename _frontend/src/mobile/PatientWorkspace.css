@@ -1416,3 +1416,127 @@
     gap: 7px;
   }
 }
+
+/* QR Code Check-in Styles */
+.upcoming-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.qr-show-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid #cbe4fd;
+  background: #f0f7ff;
+  color: #1a73e8;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qr-show-button:hover {
+  background: #e1effe;
+  border-color: #a8d4fc;
+}
+
+.qr-show-button:active {
+  transform: scale(0.98);
+}
+
+.qr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 34, 53, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.qr-modal {
+  width: min(100%, 340px);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(15, 34, 53, 0.25);
+  animation: qrModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes qrModalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.qr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.qr-modal-header strong {
+  font-size: 18px;
+  color: #123b62;
+  font-weight: 700;
+}
+
+.qr-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.qr-modal-close:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.qr-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.qr-appointment-id {
+  margin: 16px 0 6px;
+  font-family: monospace;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e3a5f;
+  background: #f1f7fe;
+  padding: 6px 14px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+
+.qr-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}

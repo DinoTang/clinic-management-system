@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import Avatar from "../components/Avatar";
 import { getAppointments } from "../services/patientApi";
 
@@ -31,6 +32,7 @@ const quickLinks = [
 function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId }) {
   const [nextAppointment, setNextAppointment] = useState(null);
   const [loading, setLoading] = useState(!!patientId);
+  const [showQr, setShowQr] = useState(false);
 
   useEffect(() => {
     if (!patientId) {
@@ -127,47 +129,62 @@ function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId 
         {loading ? (
           <p className="workspace-note">Đang tải lịch hẹn...</p>
         ) : nextAppointment ? (
-          <button
-            className="upcoming-card"
-            onClick={() => onNavigate("appointments")}
-            type="button"
-          >
-            <span className="date-tile">
-              <span>{dateTile.weekday}</span>
-              <strong>{dateTile.day}</strong>
-              <span>{dateTile.monthYear}</span>
-            </span>
-            <span className="appointment-info">
-              <span className="doctor-line">
-                <span className="doctor-avatar">
-                  <Avatar gender={doctorGender} type="doctor" />
-                </span>
-                <span className="doctor-copy">
-                  <strong>{nextAppointment.doctorName || "BS. Chưa cập nhật"}</strong>
-                  <span>{nextAppointment.specialtyName || "Chuyên khoa khám"}</span>
-                </span>
-                <span className="appointment-status status-active">
-                  {upcomingStatusLabels[nextAppointment.status] || nextAppointment.status}
-                </span>
+          <div className="upcoming-card-wrapper">
+            <button
+              className="upcoming-card"
+              onClick={() => onNavigate("appointments")}
+              type="button"
+            >
+              <span className="date-tile">
+                <span>{dateTile.weekday}</span>
+                <strong>{dateTile.day}</strong>
+                <span>{dateTile.monthYear}</span>
               </span>
-              <span className="appointment-detail">
-                <Icon name="clock" size={19} />
-                <span>
-                  {hhmm(nextAppointment.time)}
-                  {nextAppointment.endTime ? ` - ${hhmm(nextAppointment.endTime)}` : ""}
+              <span className="appointment-info">
+                <span className="doctor-line">
+                  <span className="doctor-avatar">
+                    <Avatar gender={doctorGender} type="doctor" />
+                  </span>
+                  <span className="doctor-copy">
+                    <strong>{nextAppointment.doctorName || "BS. Chưa cập nhật"}</strong>
+                    <span>{nextAppointment.specialtyName || "Chuyên khoa khám"}</span>
+                  </span>
+                  <span className="appointment-status status-active">
+                    {upcomingStatusLabels[nextAppointment.status] || nextAppointment.status}
+                  </span>
                 </span>
-              </span>
-              {nextAppointment.roomName && (
                 <span className="appointment-detail">
-                  <Icon name="pin" size={19} />
-                  <span>{nextAppointment.roomName}</span>
+                  <Icon name="clock" size={19} />
+                  <span>
+                    {hhmm(nextAppointment.time)}
+                    {nextAppointment.endTime ? ` - ${hhmm(nextAppointment.endTime)}` : ""}
+                  </span>
                 </span>
-              )}
-            </span>
-            <span className="card-chevron">
-              <Icon name="chevron" size={21} />
-            </span>
-          </button>
+                {nextAppointment.roomName && (
+                  <span className="appointment-detail">
+                    <Icon name="pin" size={19} />
+                    <span>{nextAppointment.roomName}</span>
+                  </span>
+                )}
+              </span>
+              <span className="card-chevron">
+                <Icon name="chevron" size={21} />
+              </span>
+            </button>
+            <button
+              className="qr-show-button"
+              onClick={() => setShowQr(true)}
+              type="button"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
+                <rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/>
+                <rect x="18" y="18" width="3" height="3"/>
+              </svg>
+              Hiện mã QR để check-in
+            </button>
+          </div>
         ) : (
           <p className="workspace-note">
             Bạn chưa có lịch hẹn sắp tới. Bấm “Đặt lịch khám” để tạo lịch mới.
@@ -197,6 +214,30 @@ function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId 
         </div>
       </section>
 
+      {showQr && nextAppointment && (
+        <div className="qr-modal-backdrop" onClick={() => setShowQr(false)}>
+          <div className="qr-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="qr-modal-header">
+              <strong>Mã QR lịch hẹn</strong>
+              <button className="qr-modal-close" onClick={() => setShowQr(false)} type="button" aria-label="Đóng">&#x2715;</button>
+            </div>
+            <div className="qr-modal-body">
+              <QRCodeSVG
+                value={nextAppointment.id}
+                size={200}
+                bgColor="#ffffff"
+                fgColor="#123b62"
+                level="M"
+                style={{ display: "block", margin: "0 auto" }}
+              />
+              <p className="qr-appointment-id">{nextAppointment.id}</p>
+              <p className="qr-hint">
+                Đưa mã này cho nhân viên lễ tân quét để check-in
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <button
         className="health-reminder"
         onClick={() => onNavigate("appointments")}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import PatientBookingPage from "../../desktop/pages/BookingPage/PatientBookingPage.jsx";
 import {
   cancelAppointment,
@@ -119,6 +120,8 @@ function EmptyState({ title, description, Icon }) {
 
 function AppointmentCard({ appointment, onCancel, Icon }) {
   const canCancel = isCancellable(appointment.status);
+  const [showQr, setShowQr] = useState(false);
+  const canShowQr = !isTerminalStatus(appointment.status);
 
   return (
     <article className="workspace-card appointment-workspace-card">
@@ -142,6 +145,21 @@ function AppointmentCard({ appointment, onCancel, Icon }) {
           <strong>Lý do khám:</strong> {appointment.reason}
         </p>
       )}
+      {canShowQr && (
+        <button
+          className="qr-show-button"
+          onClick={() => setShowQr(true)}
+          type="button"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
+            <rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/>
+            <rect x="18" y="18" width="3" height="3"/>
+          </svg>
+          Hiện mã QR để check-in
+        </button>
+      )}
       {canCancel && (
         <button
           className="workspace-secondary-button cancel-appointment-button"
@@ -150,6 +168,30 @@ function AppointmentCard({ appointment, onCancel, Icon }) {
         >
           Hủy lịch hẹn
         </button>
+      )}
+      {showQr && (
+        <div className="qr-modal-backdrop" onClick={() => setShowQr(false)}>
+          <div className="qr-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="qr-modal-header">
+              <strong>Mã QR lịch hẹn</strong>
+              <button className="qr-modal-close" onClick={() => setShowQr(false)} type="button" aria-label="Đóng">&#x2715;</button>
+            </div>
+            <div className="qr-modal-body">
+              <QRCodeSVG
+                value={appointment.id}
+                size={200}
+                bgColor="#ffffff"
+                fgColor="#123b62"
+                level="M"
+                style={{ display: "block", margin: "0 auto" }}
+              />
+              <p className="qr-appointment-id">{appointment.id}</p>
+              <p className="qr-hint">
+                Đưa mã này cho nhân viên lễ tân quét để check-in
+              </p>
+            </div>
+          </div>
+        </div>
       )}
     </article>
   );
