@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -48,6 +50,11 @@ public class AuthController {
         LoginResponse response =  authService.registerGoogle(googleUser);
         return ResponseEntity.ok(response);
     }
+
+	@GetMapping("/login")
+	public void getLogin(HttpServletResponse response) throws IOException {
+		response.sendRedirect("http://localhost:5173/");
+	}
 
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> loginLocal(
@@ -77,18 +84,20 @@ public class AuthController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<LoginResponse> registerLocal(
+	public ResponseEntity<Void> register(
 		@Valid
-		@RequestBody RegisterRequest request){
-		LoginResponse result = authService.registerLocal(request);
-		return ResponseEntity.ok(result);
+		@RequestBody RegisterRequest request
+	){
+		authService.registerLocal(request);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
-    @PostMapping("/patient/register")
-    public ResponseEntity<LoginResponse> registerPatient(
-            @Valid @RequestBody PatientRegisterRequest request
-    ) {
-        LoginResponse result = authService.registerPatient(request);
-        return ResponseEntity.ok(result);
-    }
+	@PostMapping("/patient/register")
+	public ResponseEntity<Void> registerPatient(
+		@Valid
+		@RequestBody PatientRegisterRequest request
+	) {
+		authService.registerPatient(request);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
 }

@@ -24,6 +24,7 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<LoginPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/oauth/callback" element={<GoogleCallback />} />
 
             <Route element={<AdminLayout />}>

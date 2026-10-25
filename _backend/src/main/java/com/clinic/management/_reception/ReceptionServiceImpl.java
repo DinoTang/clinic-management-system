@@ -138,6 +138,24 @@ public class ReceptionServiceImpl implements ReceptionService {
                 throw new IllegalStateException(
                         "Lịch hẹn " + appointment.getId() + " đã bị huỷ, không thể tiếp đón.");
             }
+            if (STATUS_APPOINTMENT_COMPLETED.equalsIgnoreCase(appointment.getStatus())
+                    || STATUS_QUEUE_DONE.equalsIgnoreCase(appointment.getStatus())) {
+                throw new IllegalStateException(
+                        "Lịch hẹn " + appointment.getId() + " đã hoàn tất khám bệnh, không thể tiếp đón lại.");
+            }
+            List<Reception> existing = receptionRepository.findByAppointmentIdAndDeletedFalse(appointment.getId());
+            boolean inQueue = existing.stream()
+                    .anyMatch(r -> "ChoKham".equalsIgnoreCase(r.getQueueStatus()) || "DangKham".equalsIgnoreCase(r.getQueueStatus()));
+            if (inQueue) {
+                throw new IllegalStateException(
+                        "Lịch hẹn " + appointment.getId() + " đã được tiếp đón và đang trong hàng đợi.");
+            }
+            boolean examined = existing.stream()
+                    .anyMatch(r -> STATUS_QUEUE_DONE.equalsIgnoreCase(r.getQueueStatus()));
+            if (examined) {
+                throw new IllegalStateException(
+                        "Lịch hẹn " + appointment.getId() + " đã hoàn tất khám bệnh, không thể tiếp đón lại.");
+            }
             appointment.setStatus(STATUS_ARRIVED);
             appointmentRepository.save(appointment);
         }

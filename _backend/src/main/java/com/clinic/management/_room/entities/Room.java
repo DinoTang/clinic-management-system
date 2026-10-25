@@ -1,6 +1,7 @@
 package com.clinic.management._room.entities;
 
 import com.clinic.management.common.enums.RoomStatus;
+import com.clinic.management.common.enums.RoomStatusConverter;
 import com.clinic.management._specialty.entities.Specialty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -27,7 +28,7 @@ public class Room {
     @Column(name = "TANG", length = 20)
     private String floor;
     
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RoomStatusConverter.class)
     @Column(name = "TRANGTHAI", length = 20, nullable = false)
     private RoomStatus status;
 

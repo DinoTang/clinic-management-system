@@ -1,7 +1,9 @@
 package com.clinic.management._user.entities;
 
 import com.clinic.management.common.enums.Role;
+import com.clinic.management.common.enums.RoleConverter;
 import com.clinic.management.common.enums.UserStatus;
+import com.clinic.management.common.enums.UserStatusConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -37,11 +39,11 @@ public class User {
     @Column(name = "GOOGLE_ID", unique = true)
     private String googleId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RoleConverter.class)
     @Column(name = "VAITRO", length = 20, nullable = false)
     private Role role = Role.PATIENT;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = UserStatusConverter.class)
     @Column(name = "TRANGTHAI", length = 20, nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
     

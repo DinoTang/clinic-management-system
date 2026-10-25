@@ -6,6 +6,8 @@ import com.clinic.management._checkin.dto.CheckInScanRequest;
 import com.clinic.management._checkin.dto.CheckInScanResult;
 import com.clinic.management._doctor.repositories.DoctorRepository;
 import com.clinic.management._patient.PatientRepository;
+import com.clinic.management._reception.Reception;
+import com.clinic.management._reception.ReceptionRepository;
 import com.clinic.management._schedule.DoctorScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,10 @@ public class CheckInServiceImpl implements CheckInService {
 
     private static final String STATUS_CANCELLED = "DaHuy";
     private static final String STATUS_ARRIVED = "DaDen";
+    private static final String STATUS_COMPLETED = "HoanTat";
+    private static final String STATUS_EXAMINED = "DaKham";
+    private static final String QUEUE_WAITING = "ChoKham";
+    private static final String QUEUE_EXAMINING = "DangKham";
     private static final String DEFAULT_METHOD = "QR";
     private static final int APPOINTMENT_ID_MAX = 20;
     private static final int NOTE_MAX = 255;
@@ -30,17 +36,20 @@ public class CheckInServiceImpl implements CheckInService {
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final DoctorScheduleRepository scheduleRepository;
+    private final ReceptionRepository receptionRepository;
 
     public CheckInServiceImpl(CheckInLogRepository checkInLogRepository,
                               AppointmentRepository appointmentRepository,
                               PatientRepository patientRepository,
                               DoctorRepository doctorRepository,
-                              DoctorScheduleRepository scheduleRepository) {
+                              DoctorScheduleRepository scheduleRepository,
+                              ReceptionRepository receptionRepository) {
         this.checkInLogRepository = checkInLogRepository;
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
         this.scheduleRepository = scheduleRepository;
+        this.receptionRepository = receptionRepository;
     }
 
     @Override
@@ -72,15 +81,40 @@ public class CheckInServiceImpl implements CheckInService {
                     "Lịch hẹn " + code + " đã bị huỷ, không thể tiếp đón.");
         }
 
-        boolean alreadyCheckedIn = STATUS_ARRIVED.equalsIgnoreCase(appointment.getStatus());
-        log.setResult(alreadyCheckedIn ? CheckInLog.RESULT_ALREADY_CHECKED_IN : CheckInLog.RESULT_SUCCESS);
-        log.setNote(alreadyCheckedIn ? "Lịch hẹn đã được tiếp đón trước đó" : null);
+        List<Reception> existingReceptions = receptionRepository.findByAppointmentIdAndDeletedFalse(appointment.getId());
+
+        // 1. Kiểm tra nếu lịch hẹn đã có tiếp đón và cấp số thứ tự rồi, đang trong hàng đợi
+        var inQueueReception = existingReceptions.stream()
+                .filter(r -> QUEUE_WAITING.equalsIgnoreCase(r.getQueueStatus()) || QUEUE_EXAMINING.equalsIgnoreCase(r.getQueueStatus()))
+                .findFirst();
+        if (inQueueReception.isPresent()) {
+            Reception r = inQueueReception.get();
+            String queueMsg = "Lịch hẹn " + code + " đã được tiếp đón và đang trong hàng đợi (STT: "
+                    + r.getQueueNumber() + ", Phòng: " + r.getRoomId() + "). Không thể tiếp đón lại.";
+            return saveFailure(log, CheckInLog.RESULT_ALREADY_CHECKED_IN, queueMsg);
+        }
+
+        // 2. Kiểm tra nếu lịch hẹn đã khám xong (trạng thái HoanTat, DaKham hoặc lượt tiếp đón đã khám)
+        boolean isExamined = STATUS_COMPLETED.equalsIgnoreCase(appointment.getStatus())
+                || STATUS_EXAMINED.equalsIgnoreCase(appointment.getStatus())
+                || existingReceptions.stream().anyMatch(r -> STATUS_EXAMINED.equalsIgnoreCase(r.getQueueStatus()));
+        if (isExamined) {
+            return saveFailure(log, STATUS_EXAMINED,
+                    "Lịch hẹn " + code + " đã hoàn tất khám bệnh, không thể tiếp đón lại.");
+        }
+
+        // 3. Nếu lịch hẹn ghi nhận đã đến trước đó nhưng chưa hoàn tất
+        if (STATUS_ARRIVED.equalsIgnoreCase(appointment.getStatus())) {
+            return saveFailure(log, CheckInLog.RESULT_ALREADY_CHECKED_IN,
+                    "Lịch hẹn " + code + " đã được tiếp đón trước đó, không thể tiếp đón lại.");
+        }
+
+        // Hợp lệ: ghi nhận thành công và chỉ điền thông tin lịch hẹn khi hợp lệ
+        log.setResult(CheckInLog.RESULT_SUCCESS);
         checkInLogRepository.save(log);
 
-        CheckInScanResult result = buildResult(true, log.getResult(), log.getId(), alreadyCheckedIn,
-                alreadyCheckedIn
-                        ? "Bệnh nhân đã được tiếp đón trước đó. Kiểm tra kỹ trước khi tạo lượt mới."
-                        : "Quét thành công. Kiểm tra thông tin rồi xác nhận tiếp đón.");
+        CheckInScanResult result = buildResult(true, log.getResult(), log.getId(), false,
+                "Quét thành công. Kiểm tra thông tin rồi xác nhận tiếp đón.");
         fillAppointmentInfo(result, appointment);
         return result;
     }
@@ -101,7 +135,6 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Override
-    @Transactional
     public void linkReception(String appointmentId, String receptionId) {
         if (appointmentId == null || appointmentId.isBlank() || receptionId == null || receptionId.isBlank()) {
             return;

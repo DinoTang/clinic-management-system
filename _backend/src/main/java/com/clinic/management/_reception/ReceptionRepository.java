@@ -15,6 +15,8 @@ public interface ReceptionRepository extends JpaRepository<Reception, String> {
 
     List<Reception> findByPatientIdAndDeletedFalseOrderByReceptionDateDesc(String patientId);
 
+    List<Reception> findByAppointmentIdAndDeletedFalse(String appointmentId);
+
     @Query("SELECT r FROM Reception r WHERE r.receptionDate = :date AND r.deleted = false ORDER BY r.queueNumber ASC")
     List<Reception> findByDate(@Param("date") LocalDate date);
 

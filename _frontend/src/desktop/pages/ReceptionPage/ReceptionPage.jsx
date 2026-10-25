@@ -1,4 +1,5 @@
 import axios from "axios";
+import Swal from "sweetalert2";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { getCollectionData } from "../../../utils/apiResponse.js";
@@ -172,6 +173,19 @@ function ReceptionPage() {
 
     if (!result.ok) {
       setScanNotice({ tone: "error", text: result.message });
+      Swal.fire({
+        icon: "error",
+        title: "Không thể tiếp đón",
+        text: result.message,
+        confirmButtonColor: "#2563eb",
+      });
+      setLookupAppointmentId("");
+      setFormData((prev) => ({
+        ...prev,
+        appointmentId: "",
+        receptionType: prev.receptionType === "HenTruoc" ? "TrucTiep" : prev.receptionType,
+        initialSymptoms: "",
+      }));
       return;
     }
 
@@ -225,12 +239,26 @@ function ReceptionPage() {
       .then((res) => applyCheckInResult(res.data))
       .catch((err) => {
         console.error(err);
+        const errMsg =
+          err.response?.data?.message ||
+          "Lỗi tra cứu: không tìm thấy mã lịch hẹn " + code;
         setScanNotice({
           tone: "error",
-          text:
-            err.response?.data?.message ||
-            "Lỗi tra cứu: không tìm thấy mã lịch hẹn " + code,
+          text: errMsg,
         });
+        Swal.fire({
+          icon: "error",
+          title: "Không thể tiếp đón",
+          text: errMsg,
+          confirmButtonColor: "#2563eb",
+        });
+        setLookupAppointmentId("");
+        setFormData((prev) => ({
+          ...prev,
+          appointmentId: "",
+          receptionType: prev.receptionType === "HenTruoc" ? "TrucTiep" : prev.receptionType,
+          initialSymptoms: "",
+        }));
       })
       .finally(() => setLookupLoading(false));
   };
@@ -494,7 +522,6 @@ function ReceptionPage() {
                 >
                   Hẹn Trước (Website - Tự động nhận diện)
                 </option>
-                <option value="CapCuu">Cấp Cứu</option>
               </select>
             </div>
           </div>
