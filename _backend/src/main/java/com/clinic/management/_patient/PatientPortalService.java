@@ -245,6 +245,20 @@ public class PatientPortalService {
                 : scheduleRepository.findById(appointment.getScheduleId()).orElse(null);
         Doctor doctor = schedule != null ? schedule.getDoctor() : findDoctor(appointment.getDoctorId());
         String roomId = schedule != null ? schedule.getRoomId() : null;
+
+        Reception reception = receptionRepository
+                .findByAppointmentIdAndDeletedFalse(appointment.getId())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        Integer queueNumber = reception != null ? reception.getQueueNumber() : null;
+        String queueStatus = reception != null ? reception.getQueueStatus() : null;
+
+        if (reception != null && reception.getRoomId() != null) {
+            roomId = reception.getRoomId();
+        }
+
         String roomName = null;
         if (roomId != null) {
             roomName = roomRepository.findById(roomId)
@@ -266,7 +280,9 @@ public class PatientPortalService {
                 specialtyName(doctor),
                 roomId,
                 roomName,
-                appointment.getScheduleId()
+                appointment.getScheduleId(),
+                queueNumber,
+                queueStatus
         );
     }
 

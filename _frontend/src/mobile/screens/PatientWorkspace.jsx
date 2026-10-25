@@ -121,7 +121,14 @@ function EmptyState({ title, description, Icon }) {
 function AppointmentCard({ appointment, onCancel, Icon }) {
   const canCancel = isCancellable(appointment.status);
   const [showQr, setShowQr] = useState(false);
-  const canShowQr = !isTerminalStatus(appointment.status);
+  const isCompleted = appointment.status === "HoanTat" || appointment.status === "COMPLETED" || appointment.queueStatus === "DaKham" || appointment.queueStatus === "HoanTat";
+  const hasQueue = appointment.queueNumber != null || appointment.status === "DaDen" || isCompleted;
+  const canShowQr = !isTerminalStatus(appointment.status) && !hasQueue;
+  const queueStatusText = isCompleted
+    ? "Đã hoàn tất khám"
+    : appointment.queueStatus === "DangKham"
+    ? "Đang khám"
+    : "Đã tiếp đón · Đang chờ gọi";
 
   return (
     <article className="workspace-card appointment-workspace-card">
@@ -144,6 +151,18 @@ function AppointmentCard({ appointment, onCancel, Icon }) {
         <p className="appointment-reason">
           <strong>Lý do khám:</strong> {appointment.reason}
         </p>
+      )}
+      {hasQueue && (
+        <div className={`appointment-queue-banner ${isCompleted ? "is-completed" : ""}`}>
+          <div className="appointment-queue-number">
+            <small>STT</small>
+            <strong>{appointment.queueNumber != null ? String(appointment.queueNumber).padStart(2, "0") : "--"}</strong>
+          </div>
+          <div className="appointment-queue-info">
+            <span>{queueStatusText}</span>
+            <small>{appointment.room ? `Phòng: ${appointment.room}` : "Tại phòng khám chỉ định"}</small>
+          </div>
+        </div>
       )}
       {canShowQr && (
         <button
@@ -210,34 +229,42 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
       return undefined;
     }
     let cancelled = false;
-    getAppointments(patientId)
-      .then((data) => {
-        if (cancelled) return;
-        setAppointments(
-          data.map((appointment) => ({
-            id: appointment.id,
-            status: appointment.status,
-            date: appointment.date,
-            time: hhmm(appointment.time),
-            endTime: hhmm(appointment.endTime),
-            specialty: appointment.specialtyName || "Chuyên khoa khám",
-            doctor: appointment.doctorName || "BS. Chưa cập nhật",
-            room: appointment.roomName,
-            reason: appointment.reason,
-            doctorId: appointment.doctorId,
-          })),
-        );
-        setLoadError("");
-        setLoading(false);
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        setAppointments([]);
-        setLoadError(errorMessage(error, "Không thể tải danh sách lịch hẹn."));
-        setLoading(false);
-      });
+    const loadAppointments = () => {
+      getAppointments(patientId)
+        .then((data) => {
+          if (cancelled) return;
+          setAppointments(
+            data.map((appointment) => ({
+              id: appointment.id,
+              status: appointment.status,
+              date: appointment.date,
+              time: hhmm(appointment.time),
+              endTime: hhmm(appointment.endTime),
+              specialty: appointment.specialtyName || "Chuyên khoa khám",
+              doctor: appointment.doctorName || "BS. Chưa cập nhật",
+              room: appointment.roomName,
+              reason: appointment.reason,
+              doctorId: appointment.doctorId,
+              queueNumber: appointment.queueNumber,
+              queueStatus: appointment.queueStatus,
+            })),
+          );
+          setLoadError("");
+          setLoading(false);
+        })
+        .catch((error) => {
+          if (cancelled) return;
+          setAppointments([]);
+          setLoadError(errorMessage(error, "Không thể tải danh sách lịch hẹn."));
+          setLoading(false);
+        });
+    };
+
+    loadAppointments();
+    const interval = setInterval(loadAppointments, 4000);
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId]);
@@ -919,7 +946,7 @@ function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
   );
 }
 
-function NotificationsPage({ Icon, onNavigate, showToast, read, onMarkRead }) {
+function NotificationsPage({ Icon, onNavigate, showToast, notifications = [], onMarkRead }) {
   const markRead = () => {
     onMarkRead();
     showToast("Đã đánh dấu thông báo đã đọc.");
@@ -929,18 +956,48 @@ function NotificationsPage({ Icon, onNavigate, showToast, read, onMarkRead }) {
     <>
       <PageHeading
         title="Thông báo"
-        description="Nhắc lịch và cập nhật dành cho bạn."
+        description="Nhắc lịch và cập nhật trạng thái khám của bạn."
         Icon={Icon}
         icon="bell"
-        action={<button className="workspace-text-action" onClick={markRead} type="button">Đánh dấu đã đọc</button>}
+        action={notifications.length > 0 && (
+          <button className="workspace-text-action" onClick={markRead} type="button">
+            Đánh dấu đã đọc
+          </button>
+        )}
       />
       <div className="workspace-list">
-        <button className={`workspace-card notification-card${read ? " is-read" : ""}`} onClick={() => onNavigate("appointments")} type="button">
-          <span className="notification-card-icon"><Icon name="calendar" size={22} /></span>
-          <span><strong>Nhắc lịch khám</strong><small>Bạn có lịch hẹn ngày 14/10/2026 lúc 09:30. Vui lòng đến trước giờ khám 15 phút.</small><em>Hôm nay · Lịch minh họa</em></span>
-          {!read && <i aria-label="Chưa đọc" />}
-        </button>
-        <div className="workspace-note">Thông báo trong bản demo là nội dung minh họa, chưa gửi thông báo thực tế.</div>
+        {notifications.length === 0 ? (
+          <div className="workspace-empty">
+            <span><Icon name="bell" size={27} /></span>
+            <strong>Chưa có thông báo nào</strong>
+            <p>Khi bác sĩ gọi khám hoặc cập nhật lượt khám, thông báo sẽ hiển thị tại đây.</p>
+          </div>
+        ) : (
+          notifications.map((item) => (
+            <button
+              className={`workspace-card notification-card${item.read ? " is-read" : ""}`}
+              key={item.id}
+              onClick={() => {
+                if (item.type === "completed") {
+                  onNavigate("records");
+                } else {
+                  onNavigate("home");
+                }
+              }}
+              type="button"
+            >
+              <span className={`notification-card-icon ${item.type === "calling" ? "orange" : item.type === "completed" ? "green" : ""}`}>
+                <Icon name={item.type === "completed" ? "check" : item.type === "calling" ? "bell" : "clock"} size={22} />
+              </span>
+              <span>
+                <strong>{item.title}</strong>
+                <small>{item.content}</small>
+                <em>{item.time}</em>
+              </span>
+              {!item.read && <i aria-label="Chưa đọc" />}
+            </button>
+          ))
+        )}
       </div>
     </>
   );
@@ -1003,7 +1060,7 @@ function PatientWorkspace({
   profile,
   setProfile,
   showToast,
-  notificationsRead,
+  notifications = [],
   onMarkNotificationsRead,
   onLogout,
 }) {
@@ -1051,7 +1108,7 @@ function PatientWorkspace({
           Icon={Icon}
           onMarkRead={onMarkNotificationsRead}
           onNavigate={onNavigate}
-          read={notificationsRead}
+          notifications={notifications}
           showToast={showToast}
         />
       )}
