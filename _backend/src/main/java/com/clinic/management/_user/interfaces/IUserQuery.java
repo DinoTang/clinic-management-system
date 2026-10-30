@@ -17,4 +17,5 @@ public interface IUserQuery {
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);
     boolean existsByGoogleId(String googleId);
+    boolean existsRoleById(String id);
 }

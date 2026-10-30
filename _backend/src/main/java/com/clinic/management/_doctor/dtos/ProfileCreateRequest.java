@@ -1,8 +1,8 @@
 package com.clinic.management._doctor.dtos;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 import lombok.Data;
 
@@ -16,16 +16,21 @@ public class ProfileCreateRequest {
     private String specialtyId;
 
     private String academicDegree;
-    private int experienceYears;
+
+    @NotNull(message="Số năm kinh nghiệm không được để trống") 
+    @Min(value = 0, message = "Số năm kinh nghiệm không được là số âm")
+    private Integer experienceYears; 
+
     private String bio;
     private BigDecimal examinationFee;
 
     public ProfileCreateRequest() {}
+    
     public ProfileCreateRequest(
         String userId,
         String specialtyId,
         String academicDegree,
-        int experienceYears,
+        Integer experienceYears,
         String bio,
         BigDecimal examinationFee
     ) {
@@ -36,5 +41,4 @@ public class ProfileCreateRequest {
         this.bio = bio;
         this.examinationFee = examinationFee;
     }
-
 }

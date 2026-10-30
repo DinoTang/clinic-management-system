@@ -1,11 +1,12 @@
 package com.clinic.management._doctor.interfaces;
 
+import com.clinic.management.common.enums.UserStatus;
 import com.clinic.management._doctor.entities.Doctor;
 import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface IDoctorQuery{
-	Page<Doctor> findAll(int page, int size);
+    Page<Doctor> findAll(int page, int size, String specialtyId, UserStatus status, String search);
 	Doctor findById(String doctorId);
 	boolean existsByUserId(String userId);
 }

@@ -25,8 +25,8 @@ public class DoctorUpdateService implements IDoctorUpdate{
 	}
 
 	@Override
-	public Doctor updateProfile(String doctorId, ProfileUpdateRequest request){
-		Doctor doctor = doctorRepository.findById(doctorId).
+	public Doctor updateProfile(ProfileUpdateRequest request){
+		Doctor doctor = doctorRepository.findById(request.getDoctorId()).
 			orElseThrow(
 				() -> new RuntimeException("Bác sĩ không tồn tại")
 			);

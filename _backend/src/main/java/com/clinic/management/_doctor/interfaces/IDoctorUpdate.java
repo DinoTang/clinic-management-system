@@ -5,5 +5,5 @@ import com.clinic.management._doctor.entities.Doctor;
 import java.util.List;
 
 public interface IDoctorUpdate{
-	Doctor updateProfile(String doctorId, ProfileUpdateRequest request);
+	Doctor updateProfile(ProfileUpdateRequest request);
 }

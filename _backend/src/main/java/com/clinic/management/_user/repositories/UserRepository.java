@@ -20,6 +20,7 @@ public interface UserRepository extends
 	boolean existsById(String userId);
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);
+    boolean existsRoleById(String id);
     long count();
 
 	default User softDeleteById(String userId) {

@@ -27,6 +27,11 @@ public class SpecialtyQueryService implements ISpecialtyQuery{
     }
 
     @Override
+    public List<Specialty> findAll() {
+        return specialtyRepository.findAll();
+    }
+
+    @Override
     public Specialty findById(String specialtyId){
         Specialty specialty = specialtyRepository.findById(specialtyId)
             .orElseThrow(

@@ -27,7 +27,7 @@ public class Doctor {
     private String academicDegree;
 
     @Column(name = "NAMKINHNGHIEM")
-    private int experienceYears;
+    private Integer experienceYears;
 
     @Column(name = "TIEUSU", columnDefinition = "TEXT")
     private String bio;
@@ -43,7 +43,7 @@ public class Doctor {
         User user,
         Specialty specialty,
         String academicDegree,
-        int experienceYears,
+        Integer experienceYears,
         String bio,
         BigDecimal examinationFee
     ) {

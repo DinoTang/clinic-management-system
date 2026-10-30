@@ -98,5 +98,8 @@ public class UserQueryService implements IUserQuery {
     public boolean existsByGoogleId(String googleId){
         return userRepository.existsByGoogleId(googleId);
     }
-
+    @Override
+    public boolean existsRoleById(String id){
+        return userRepository.existsRoleById(id);
+    }
 }

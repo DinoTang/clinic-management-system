@@ -45,6 +45,11 @@ public class SpecialtyController {
     }
 
     @GetMapping
+    public List<Specialty> findAll() {
+        return specialtyQueryService.findAll();
+    }
+
+    @GetMapping("/v2")
     public ResponseEntity<Page<Specialty>> findAll(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
