@@ -7,6 +7,7 @@ import com.clinic.management._doctor.interfaces.IDoctorCreate;
 import com.clinic.management._doctor.interfaces.IDoctorDelete;
 import com.clinic.management._doctor.interfaces.IDoctorUpdate;
 import com.clinic.management._doctor.interfaces.IDoctorQuery;
+import com.clinic.management.common.enums.UserStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,9 +55,19 @@ public class DoctorController {
     @GetMapping
     public ResponseEntity<Page<Doctor>> findAll(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String specialty,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String search
     ) {
-        Page<Doctor> doctors = doctorQueryService.findAll(page, size);
+        UserStatus statusEnum = (status == null || status.equalsIgnoreCase("all"))
+            ? null : UserStatus.valueOf(status.toUpperCase());
+
+        String specialtyId = (specialty == null || specialty.equalsIgnoreCase("all")) ? null : specialty;
+
+        Page<Doctor> doctors = doctorQueryService.findAll(
+            page, size, specialtyId, statusEnum, search
+        );
 
         return ResponseEntity.ok(doctors);
     }
@@ -69,12 +80,11 @@ public class DoctorController {
         return ResponseEntity.ok(doctor);
     }
 
-    @PutMapping("/update-profile/{doctorId}")
+    @PutMapping("/update-profile")
     public ResponseEntity<Doctor> updateProfile(
-        @PathVariable String doctorId,
         @RequestBody ProfileUpdateRequest request
     ){
-        Doctor doctor = doctorUpdateService.updateProfile(doctorId, request);
+        Doctor doctor = doctorUpdateService.updateProfile(request);
         return ResponseEntity.ok(doctor);
     }
 

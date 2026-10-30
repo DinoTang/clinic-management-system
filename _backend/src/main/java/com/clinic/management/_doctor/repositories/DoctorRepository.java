@@ -3,10 +3,14 @@ package com.clinic.management._doctor.repositories;
 import com.clinic.management._doctor.entities.Doctor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 
 @Repository
-public interface DoctorRepository extends JpaRepository<Doctor, String> {
+public interface DoctorRepository extends 
+    JpaRepository<Doctor, String>,
+    JpaSpecificationExecutor<Doctor>
+ {
 
     long count();
     boolean existsByUserId(String userId);

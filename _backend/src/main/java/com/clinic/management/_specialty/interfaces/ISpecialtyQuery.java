@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface ISpecialtyQuery{
     Page<Specialty> findAll(int page, int size);
+    List<Specialty> findAll();
     Specialty findById(String specialtyId);
 }

@@ -7,6 +7,9 @@ import lombok.Data;
 
 @Data
 public class ProfileUpdateRequest {
+    
+    @NotBlank(message="Mã bác sĩ không được để trống")
+    private String doctorId;
 
     @NotBlank(message="Mã chuyên khoa không được để trống")
     private String specialtyId;
