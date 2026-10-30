@@ -54,14 +54,18 @@ public class AuthService implements IAuth{
 	}
 
 	@Override
+	@Transactional
 	public LoginResponse registerGoogle(GoogleUserInfo googleUser){
-        String sub = googleUser.googleId();;
-        
+        String sub = googleUser.googleId();
+
+		User user;
 		if(userQueryService.existsByGoogleId(sub)){
-			return this.loginGoogle(sub);
+			user = userQueryService.findByGoogleId(sub);
+		} else {
+			user = userRegistrationService.createByGoogle(googleUser);
 		}
 
-		User user = userRegistrationService.createByGoogle(googleUser);
+		ensurePatientProfile(user);
 		return this.loginGoogle(sub);
 	}
 
@@ -74,7 +78,7 @@ public class AuthService implements IAuth{
 		User user = userQueryService.findByGoogleId(googleId);
 
 		String token = jwtService.generateToken(user.getUsername());
-		return new LoginResponse(token, user);
+		return createLoginResponse(token, user);
 	}
 
 	@Override
@@ -123,11 +127,7 @@ public class AuthService implements IAuth{
         // và mã hóa mật khẩu trước khi lưu tài khoản.
         User user = userRegistrationService.createByLocal(userRequest);
 
-        String maxPatientId = patientRepository.findMaxPatientId();
-        int nextPatientNumber = maxPatientId == null
-                ? 1
-                : Integer.parseInt(maxPatientId.substring(2)) + 1;
-        String patientId = String.format("BN%03d", nextPatientNumber);
+        String patientId = generateNextPatientId();
 
         Patient patient = new Patient(
                 patientId,
@@ -157,6 +157,35 @@ public class AuthService implements IAuth{
             case "other", "khac", "khác" -> "Khác";
             default -> throw new IllegalArgumentException("Giới tính không hợp lệ");
         };
+    }
+
+    private void ensurePatientProfile(User user) {
+        if (user.getRole() != Role.PATIENT) {
+            return;
+        }
+        if (patientRepository.findByUserId(user.getId()).isPresent()) {
+            return;
+        }
+        Patient patient = new Patient(
+                generateNextPatientId(),
+                user,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false
+        );
+        patientRepository.save(patient);
+    }
+
+    private String generateNextPatientId() {
+        String maxPatientId = patientRepository.findMaxPatientId();
+        int nextPatientNumber = maxPatientId == null
+                ? 1
+                : Integer.parseInt(maxPatientId.substring(2)) + 1;
+        return String.format("BN%03d", nextPatientNumber);
     }
 
     public LoginResponse loginPatient(PatientLoginRequest request) {

@@ -261,6 +261,7 @@ function App() {
             onNavigate={setCurrentPage}
             Icon={Icon}
             doctorGender="MALE"
+            patientId={patientProfile?.patientId}
           />
         ) : (
           <PatientWorkspace
