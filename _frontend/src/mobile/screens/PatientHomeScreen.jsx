@@ -104,7 +104,7 @@ function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId 
       <section className="primary-actions" aria-label="Thao tác nhanh">
         <button
           className="primary-action appointment-action"
-          onClick={() => onNavigate("appointments")}
+          onClick={() => onNavigate("booking")}
           type="button"
         >
           <span className="action-icon">

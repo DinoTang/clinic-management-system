@@ -72,6 +72,14 @@ function isCancellable(status) {
   return ["DaDat", "PENDING", "CONFIRMED"].includes(status);
 }
 
+function queueLabel(queueStatus) {
+  if (!queueStatus) return "Chưa tiếp đón";
+  if (queueStatus === "DaKham") return "Đã hoàn tất khám";
+  if (queueStatus === "DangKham") return "Đang được khám";
+  if (queueStatus === "ChoKham") return "Đã tiếp đón · Đang chờ gọi";
+  return queueStatus;
+}
+
 function hhmm(value) {
   return value ? String(value).slice(0, 5) : "";
 }
@@ -118,7 +126,7 @@ function EmptyState({ title, description, Icon }) {
   );
 }
 
-function AppointmentCard({ appointment, onCancel, Icon }) {
+function AppointmentCard({ appointment, onCancel, onOpen, Icon }) {
   const canCancel = isCancellable(appointment.status);
   const [showQr, setShowQr] = useState(false);
   const isCompleted = appointment.status === "HoanTat" || appointment.status === "COMPLETED" || appointment.queueStatus === "DaKham" || appointment.queueStatus === "HoanTat";
@@ -179,15 +187,24 @@ function AppointmentCard({ appointment, onCancel, Icon }) {
           Hiện mã QR để check-in
         </button>
       )}
-      {canCancel && (
+      <div className="appointment-card-actions">
         <button
-          className="workspace-secondary-button cancel-appointment-button"
-          onClick={() => onCancel(appointment)}
+          className="workspace-inline-link appointment-detail-link"
+          onClick={() => onOpen(appointment)}
           type="button"
         >
-          Hủy lịch hẹn
+          Xem chi tiết lịch hẹn <Icon name="chevron" size={16} />
         </button>
-      )}
+        {canCancel && (
+          <button
+            className="workspace-secondary-button cancel-appointment-button"
+            onClick={() => onCancel(appointment)}
+            type="button"
+          >
+            Hủy lịch hẹn
+          </button>
+        )}
+      </div>
       {showQr && (
         <div className="qr-modal-backdrop" onClick={() => setShowQr(false)}>
           <div className="qr-modal" onClick={(e) => e.stopPropagation()}>
@@ -219,8 +236,10 @@ function AppointmentCard({ appointment, onCancel, Icon }) {
 function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, showToast, patientId }) {
   const [filter, setFilter] = useState("upcoming");
   const [cancelTarget, setCancelTarget] = useState(null);
+  const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(!!patientId);
   const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
   const today = todayString();
 
   useEffect(() => {
@@ -267,7 +286,7 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientId]);
+  }, [patientId, reloadKey]);
 
   const filteredAppointments = appointments.filter((appointment) => {
     const isTerminal = isTerminalStatus(appointment.status);
@@ -334,7 +353,20 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
       </div>
       {loading && <p className="workspace-note">Đang tải lịch hẹn...</p>}
       {!loading && loadError && (
-        <p className="workspace-note" role="alert">{loadError}</p>
+        <div className="workspace-error-state" role="alert">
+          <p>{loadError}</p>
+          <button
+            className="workspace-secondary-button"
+            onClick={() => {
+              setLoading(true);
+              setLoadError("");
+              setReloadKey((current) => current + 1);
+            }}
+            type="button"
+          >
+            Thử lại
+          </button>
+        </div>
       )}
       {!loading && !loadError && filteredAppointments.length ? (
         <div className="workspace-list">
@@ -344,6 +376,7 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
               Icon={Icon}
               key={appointment.id}
               onCancel={setCancelTarget}
+              onOpen={setDetail}
             />
           ))}
         </div>
@@ -383,6 +416,79 @@ function AppointmentPage({ appointments, onNavigate, setAppointments, Icon, show
             <div className="workspace-modal-actions">
               <button className="workspace-secondary-button" onClick={() => setCancelTarget(null)} type="button">Giữ lịch</button>
               <button className="workspace-danger-button" onClick={confirmCancel} type="button">Xác nhận hủy</button>
+            </div>
+          </section>
+        </div>
+      )}
+      {detail && (
+        <div className="workspace-modal-backdrop" onClick={() => setDetail(null)}>
+          <section
+            aria-labelledby="appointment-detail-title"
+            aria-modal="true"
+            className="workspace-modal appointment-detail-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <div className="appointment-detail-head">
+              <span className={`status-pill ${statusClass(detail.status)}`}>
+                {statusLabels[detail.status] || detail.status}
+              </span>
+              <strong className="appointment-code">{detail.id}</strong>
+            </div>
+            <h2 id="appointment-detail-title">{detail.specialty}</h2>
+            <div className="appointment-detail-list">
+              {[
+                ["Bác sĩ", detail.doctor],
+                ["Ngày khám", formatDate(detail.date)],
+                ["Giờ hẹn", detail.endTime ? `${detail.time} – ${detail.endTime}` : detail.time],
+                ["Phòng khám", detail.room || "Chỉ định khi tiếp đón"],
+                ["Lý do khám", detail.reason || "Không ghi rõ"],
+              ].map(([label, value]) => (
+                <div className="appointment-detail-row" key={label}>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </div>
+              ))}
+            </div>
+            {(detail.queueNumber != null || detail.queueStatus) && (
+              <div className="appointment-detail-queue">
+                <div className="appointment-queue-number">
+                  <small>STT</small>
+                  <strong>{detail.queueNumber != null ? String(detail.queueNumber).padStart(2, "0") : "--"}</strong>
+                </div>
+                <div className="appointment-queue-info">
+                  <span>{queueLabel(detail.queueStatus)}</span>
+                  <small>{detail.room ? `Phòng: ${detail.room}` : "Chưa phân phòng"}</small>
+                </div>
+              </div>
+            )}
+            {!isTerminalStatus(detail.status) && (
+              <div className="appointment-detail-qr">
+                <QRCodeSVG
+                  value={detail.id}
+                  size={168}
+                  bgColor="#ffffff"
+                  fgColor="#123b62"
+                  level="M"
+                  style={{ display: "block", margin: "0 auto" }}
+                />
+                <p>Quét mã này tại quầy lễ tân để check-in.</p>
+              </div>
+            )}
+            <div className="workspace-modal-actions">
+              <button className="workspace-secondary-button" onClick={() => setDetail(null)} type="button">Đóng</button>
+              {isCancellable(detail.status) && (
+                <button
+                  className="workspace-danger-button"
+                  onClick={() => {
+                    setCancelTarget(detail);
+                    setDetail(null);
+                  }}
+                  type="button"
+                >
+                  Hủy lịch hẹn
+                </button>
+              )}
             </div>
           </section>
         </div>
@@ -661,6 +767,7 @@ function RecordsPage({ Icon, onNavigate, initialTab = "visits", patientId }) {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(!!patientId);
   const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!patientId) {
@@ -685,7 +792,7 @@ function RecordsPage({ Icon, onNavigate, initialTab = "visits", patientId }) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientId]);
+  }, [patientId, reloadKey]);
 
   const prescriptions = records.filter((record) => record.prescription);
   const invoices = records.filter((record) => record.invoice);
@@ -788,7 +895,22 @@ function RecordsPage({ Icon, onNavigate, initialTab = "visits", patientId }) {
         })}
       </div>
       {loading && <p className="workspace-note">Đang tải hồ sơ khám...</p>}
-      {!loading && loadError && <p className="workspace-note" role="alert">{loadError}</p>}
+      {!loading && loadError && (
+        <div className="workspace-error-state" role="alert">
+          <p>{loadError}</p>
+          <button
+            className="workspace-secondary-button"
+            onClick={() => {
+              setLoading(true);
+              setLoadError("");
+              setReloadKey((current) => current + 1);
+            }}
+            type="button"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
       {!loading && !loadError && records.length === 0 && (
         <p className="workspace-note">Chưa có dữ liệu hồ sơ khám. Sau khi khám xong, kết quả sẽ hiển thị tại đây.</p>
       )}
@@ -810,6 +932,7 @@ function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
   const [loading, setLoading] = useState(!!profile?.patientId);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
   const update = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
 
@@ -846,7 +969,7 @@ function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.patientId]);
+  }, [profile?.patientId, reloadKey]);
 
   const save = async (event) => {
     event.preventDefault();
@@ -916,7 +1039,22 @@ function ProfilePage({ profile, setProfile, onLogout, Icon, showToast }) {
         <div><strong>{profile.fullName || "Bệnh nhân"}</strong><small>Hồ sơ bệnh nhân</small></div>
       </div>
       {loading && <p className="workspace-note">Đang tải hồ sơ...</p>}
-      {!loading && loadError && <p className="workspace-note" role="alert">{loadError}</p>}
+      {!loading && loadError && (
+        <div className="workspace-error-state" role="alert">
+          <p>{loadError}</p>
+          <button
+            className="workspace-secondary-button"
+            onClick={() => {
+              setLoading(true);
+              setLoadError("");
+              setReloadKey((current) => current + 1);
+            }}
+            type="button"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
       {editing ? (
         <form className="profile-form" onSubmit={save}>
           <label className="workspace-field"><span>Họ và tên</span><input maxLength={100} onChange={(event) => update("fullName", event.target.value)} required value={draft.fullName} /></label>
