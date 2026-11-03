@@ -103,7 +103,14 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
         return;
       }
 
-      onLoginSuccess({ mode: "database", token: data.token, role });
+      onLoginSuccess({
+        mode: "database",
+        token: data.token,
+        role,
+        user: { ...data.user, doctorId: data.doctorId, staffId: data.staffId },
+        doctorId: data.doctorId,
+        staffId: data.staffId,
+      });
     } catch (error) {
       const serverMessage =
         error.response?.data?.message || error.response?.data?.error;
@@ -173,7 +180,7 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
                 <button
                   className="staff-demo-role"
                   onClick={() =>
-                    onLoginSuccess({ mode: "demo", role: "DOCTOR" })
+                    onLoginSuccess({ mode: "demo", role: "DOCTOR", doctorId: "BS001" })
                   }
                   type="button"
                 >
@@ -182,14 +189,14 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
                   </span>
                   <span className="staff-demo-role-copy">
                     <strong>Bác sĩ</strong>
-                    <span>Lịch trực và khám bệnh</span>
+                    <span>Khám bệnh và kê đơn</span>
                   </span>
                   <Icon name="arrow" size={20} />
                 </button>
                 <button
                   className="staff-demo-role"
                   onClick={() =>
-                    onLoginSuccess({ mode: "demo", role: "STAFF" })
+                    onLoginSuccess({ mode: "demo", role: "STAFF", staffId: "NV001" })
                   }
                   type="button"
                 >
@@ -198,7 +205,7 @@ function StaffLoginPage({ onLoginSuccess, demoLogin = false }) {
                   </span>
                   <span className="staff-demo-role-copy">
                     <strong>Nhân viên</strong>
-                    <span>Tiếp đón và đặt lịch bệnh nhân</span>
+                    <span>Tiếp đón và thu viện phí</span>
                   </span>
                   <Icon name="arrow" size={20} />
                 </button>

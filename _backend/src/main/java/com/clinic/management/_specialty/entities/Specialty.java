@@ -1,6 +1,7 @@
 package com.clinic.management._specialty.entities;
 
 import com.clinic.management.common.enums.SpecialtyStatus;
+import com.clinic.management.common.enums.SpecialtyStatusConverter;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class Specialty {
     @Column(name = "PHIKHAMCHUAN", precision = 12, scale = 2)
     private BigDecimal standardFee;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = SpecialtyStatusConverter.class)
     @Column(name = "TRANGTHAI", length = 20, nullable = false)
     private SpecialtyStatus status;
 

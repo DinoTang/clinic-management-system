@@ -9,7 +9,6 @@ import {
 } from "react-router-dom";
 import { ROLE_CONFIG } from "./roles.js";
 import AdminWorkspace from "./pages/AdminPage/AdminWorkspace.jsx";
-import PatientBookingPage from "./pages/BookingPage/PatientBookingPage.jsx";
 import DoctorExaminationPage from "./pages/ExaminationPage/DoctorExaminationPage.jsx";
 import ReceptionPage from "./pages/ReceptionPage/ReceptionPage.jsx";
 import BillingPage from "./pages/BillingPage/BillingPage.jsx";
@@ -63,19 +62,23 @@ function AdminRoleRoutes() {
 
   return (
     <Routes>
-      <Route
-        index
-        element={
-          <AdminWorkspace
-            onLogout={() => {
-              sessionStorage.removeItem("clinic-staff-session");
-              delete axios.defaults.headers.common.Authorization;
-              navigate("/", { replace: true });
-            }}
-          />
-        }
-      />
-      <Route path="*" element={<Navigate replace to="/admin" />} />
+      <Route element={<RoleWorkspaceLayout basePath="/a" role="ADMIN" />}>
+        <Route index element={<Navigate replace to="admin" />} />
+        <Route
+          path="admin"
+          element={
+            <AdminWorkspace
+              onLogout={() => {
+                sessionStorage.removeItem("clinic-staff-session");
+                delete axios.defaults.headers.common.Authorization;
+                navigate("/", { replace: true });
+              }}
+            />
+          }
+        />
+        <Route path="schedules" element={<DesktopSchedulePage />} />
+        <Route path="*" element={<Navigate replace to="/a/admin" />} />
+      </Route>
     </Routes>
   );
 }
@@ -84,10 +87,9 @@ function DoctorRoleRoutes() {
   return (
     <Routes>
       <Route element={<RoleWorkspaceLayout basePath="/doctor" role="DOCTOR" />}>
-        <Route index element={<Navigate replace to="schedule" />} />
-        <Route path="schedule" element={<DesktopSchedulePage />} />
+        <Route index element={<Navigate replace to="examination" />} />
         <Route path="examination" element={<DoctorExaminationPage />} />
-        <Route path="*" element={<Navigate replace to="/doctor/schedule" />} />
+        <Route path="*" element={<Navigate replace to="/doctor/examination" />} />
       </Route>
     </Routes>
   );
@@ -100,7 +102,6 @@ function StaffRoleRoutes() {
         <Route index element={<Navigate replace to="reception" />} />
         <Route path="reception" element={<ReceptionPage />} />
         <Route path="billing" element={<BillingPage />} />
-        <Route path="booking" element={<PatientBookingPage />} />
         <Route path="*" element={<Navigate replace to="/staff/reception" />} />
       </Route>
     </Routes>

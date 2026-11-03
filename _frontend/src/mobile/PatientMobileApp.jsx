@@ -1,5 +1,7 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Swal from "sweetalert2";
+import { getAppointments } from "./services/patientApi";
 import "./PatientMobileApp.css";
 import "./PatientWorkspace.css";
 import Avatar from "./components/Avatar";
@@ -212,8 +214,150 @@ function App() {
     setCurrentPage("auth");
   };
 
-  const [notificationsRead, setNotificationsRead] = useState(false);
-  const unreadNotifications = notificationsRead ? 0 : 1;
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("clinic-patient-notifications");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
+
+  const markAllNotificationsRead = () => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, read: true }));
+      try {
+        sessionStorage.setItem("clinic-patient-notifications", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const addNotification = (notif) => {
+    setNotifications((prev) => {
+      const updated = [notif, ...prev];
+      try {
+        sessionStorage.setItem("clinic-patient-notifications", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const prevQueueStatusRef = useRef({});
+  const initialFetchDoneRef = useRef(false);
+
+  useEffect(() => {
+    const patientId = patientProfile?.patientId;
+    if (!patientId) return undefined;
+
+    let cancelled = false;
+
+    const checkQueueChanges = () => {
+      getAppointments(patientId)
+        .then((data) => {
+          if (cancelled || !Array.isArray(data)) return;
+
+          const now = new Date();
+          const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 10);
+
+          const todayAppointments = data.filter((apt) => apt.date >= today);
+
+          todayAppointments.forEach((apt) => {
+            const aptId = apt.id;
+            const prev = prevQueueStatusRef.current[aptId];
+            const currentQueueStatus = apt.queueStatus;
+            const currentStatus = apt.status;
+
+            if (initialFetchDoneRef.current && prev) {
+              // Bác sĩ Gọi khám
+              if (prev.queueStatus !== "DangKham" && currentQueueStatus === "DangKham") {
+                Swal.fire({
+                  icon: "info",
+                  title: "ĐẾN LƯỢT KHÁM CỦA BẠN!",
+                  html: `Bác sĩ <b>${apt.doctorName || "phụ trách"}</b> đang gọi số <b>#${apt.queueNumber != null ? String(apt.queueNumber).padStart(2, "0") : ""}</b> vào <b>${apt.roomName || "phòng khám"}</b>.<br/><br/><span style="color:#d9363e; font-weight:700;">Vui lòng chuẩn bị và tiến vào phòng khám!</span>`,
+                  confirmButtonText: "Tôi đã hiểu",
+                  confirmButtonColor: "#1677ff",
+                  timer: 20000,
+                  timerProgressBar: true,
+                });
+                addNotification({
+                  id: "notif_" + Date.now(),
+                  type: "calling",
+                  title: "Bác sĩ đang gọi vào khám",
+                  content: `Bác sĩ ${apt.doctorName || "phụ trách"} đang gọi số #${apt.queueNumber} vào ${apt.roomName || "phòng khám"}.`,
+                  time: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+                  read: false,
+                });
+              }
+
+              // Bác sĩ Đưa về chờ
+              if (prev.queueStatus === "DangKham" && currentQueueStatus === "ChoKham") {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Chuyển về hàng chờ",
+                  html: `Lượt khám số <b>#${apt.queueNumber != null ? String(apt.queueNumber).padStart(2, "0") : ""}</b> của bạn đã được chuyển về trạng thái chờ.<br/>Vui lòng tiếp tục theo dõi loa và màn hình thông báo.`,
+                  confirmButtonText: "Đã rõ",
+                  confirmButtonColor: "#faad14",
+                });
+                addNotification({
+                  id: "notif_" + Date.now(),
+                  type: "waiting",
+                  title: "Chuyển về hàng chờ khám",
+                  content: `Số thứ tự #${apt.queueNumber} đã được chuyển về trạng thái chờ tại ${apt.roomName || "phòng khám"}.`,
+                  time: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+                  read: false,
+                });
+              }
+
+              // Hoàn tất khám
+              const wasCompleted = prev.status === "HoanTat" || prev.queueStatus === "DaKham";
+              const isNowCompleted = currentStatus === "HoanTat" || currentQueueStatus === "DaKham";
+              if (!wasCompleted && isNowCompleted) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Hoàn tất lượt khám",
+                  html: `Lượt khám với bác sĩ <b>${apt.doctorName || ""}</b> đã hoàn tất.<br/>Kết quả và đơn thuốc đã được cập nhật vào hồ sơ sức khỏe.`,
+                  confirmButtonText: "Xem hồ sơ",
+                  confirmButtonColor: "#52c41a",
+                }).then((res) => {
+                  if (res.isConfirmed) {
+                    setCurrentPage("records");
+                  }
+                });
+                addNotification({
+                  id: "notif_" + Date.now(),
+                  type: "completed",
+                  title: "Hoàn tất lượt khám",
+                  content: `Bạn đã hoàn tất khám với bác sĩ ${apt.doctorName || ""}. Kết quả đã sẵn sàng trong Hồ sơ sức khỏe.`,
+                  time: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+                  read: false,
+                });
+              }
+            }
+
+            prevQueueStatusRef.current[aptId] = {
+              queueStatus: currentQueueStatus,
+              status: currentStatus,
+            };
+          });
+
+          initialFetchDoneRef.current = true;
+        })
+        .catch(() => {});
+    };
+
+    checkQueueChanges();
+    const interval = setInterval(checkQueueChanges, 4000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [patientProfile?.patientId]);
 
   if (currentPage === "auth") {
     return <AuthPage onLoginSuccess={handleLoginSuccess} />;
@@ -273,8 +417,8 @@ function App() {
             profile={profileDetails}
             setProfile={setProfileDetails}
             showToast={showToast}
-            notificationsRead={notificationsRead}
-            onMarkNotificationsRead={() => setNotificationsRead(true)}
+            notifications={notifications}
+            onMarkNotificationsRead={markAllNotificationsRead}
             onLogout={requestLogout}
           />
         )}

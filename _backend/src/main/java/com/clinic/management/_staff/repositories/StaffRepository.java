@@ -8,6 +8,8 @@ import com.clinic.management._staff.entities.Staff;
 public interface StaffRepository extends JpaRepository<Staff, String> {
     long count();
     boolean existsByUserId(String userId);
+    java.util.Optional<Staff> findByUserId(String userId);
+    java.util.Optional<Staff> findByUserIdAndDeletedFalse(String userId);
 
     default Staff softDeleteById(String staffId) {
         Staff staff = this.findById(staffId)

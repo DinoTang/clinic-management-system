@@ -103,6 +103,7 @@ public class BillingService {
 
         Staff staff = staffRepository.findById(request.getStaffId())
                 .filter(s -> !s.isDeleted())
+                .or(() -> staffRepository.findByUserIdAndDeletedFalse(request.getStaffId()))
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy nhân viên: " + request.getStaffId()));
 
@@ -249,6 +250,17 @@ public class BillingService {
         invoice.setChangeAmount(given.subtract(invoice.getTotal()));
         invoice.setPaymentStatus(STATUS_PAID); // BR-059
         invoice.setPaidAt(LocalDateTime.now());
+        if (request.getStaffId() != null && !request.getStaffId().isBlank()) {
+            String resolvedStaffId = request.getStaffId();
+            Optional<Staff> staffOpt = staffRepository.findById(resolvedStaffId)
+                    .filter(s -> !s.isDeleted())
+                    .or(() -> staffRepository.findByUserIdAndDeletedFalse(resolvedStaffId));
+            if (staffOpt.isPresent()) {
+                invoice.setStaffId(staffOpt.get().getId());
+            } else {
+                invoice.setStaffId(resolvedStaffId);
+            }
+        }
         return invoiceRepository.save(invoice);
     }
 

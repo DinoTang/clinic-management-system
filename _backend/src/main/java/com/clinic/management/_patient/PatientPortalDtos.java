@@ -38,7 +38,9 @@ public final class PatientPortalDtos {
             String specialtyName,
             String roomId,
             String roomName,
-            String scheduleId
+            String scheduleId,
+            Integer queueNumber,
+            String queueStatus
     ) {
     }
 

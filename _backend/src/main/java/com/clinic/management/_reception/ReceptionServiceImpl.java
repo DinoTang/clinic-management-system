@@ -4,6 +4,7 @@ import com.clinic.management._appointment.AppointmentRepository;
 import com.clinic.management._checkin.CheckInService;
 import com.clinic.management._patient.Patient;
 import com.clinic.management._patient.PatientRepository;
+import com.clinic.management._staff.repositories.StaffRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +23,18 @@ public class ReceptionServiceImpl implements ReceptionService {
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
     private final CheckInService checkInService;
+    private final StaffRepository staffRepository;
 
     public ReceptionServiceImpl(ReceptionRepository receptionRepository,
                                 PatientRepository patientRepository,
                                 AppointmentRepository appointmentRepository,
-                                CheckInService checkInService) {
+                                CheckInService checkInService,
+                                StaffRepository staffRepository) {
         this.receptionRepository = receptionRepository;
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
         this.checkInService = checkInService;
+        this.staffRepository = staffRepository;
     }
 
     @Override
@@ -70,6 +74,11 @@ public class ReceptionServiceImpl implements ReceptionService {
             reception.setPatientId(generateNextPatientId());
         }
         requireValue(reception.getEmployeeId(), "Mã nhân viên không được để trống");
+        if (staffRepository.findById(reception.getEmployeeId()).isEmpty()) {
+            staffRepository.findByUserIdAndDeletedFalse(reception.getEmployeeId())
+                    .or(() -> staffRepository.findByUserId(reception.getEmployeeId()))
+                    .ifPresent(s -> reception.setEmployeeId(s.getId()));
+        }
         requireValue(reception.getRoomId(), "Mã phòng không được để trống");
         requireValue(reception.getDoctorId(), "Mã bác sĩ không được để trống");
 
@@ -128,6 +137,24 @@ public class ReceptionServiceImpl implements ReceptionService {
             if (STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())) {
                 throw new IllegalStateException(
                         "Lịch hẹn " + appointment.getId() + " đã bị huỷ, không thể tiếp đón.");
+            }
+            if (STATUS_APPOINTMENT_COMPLETED.equalsIgnoreCase(appointment.getStatus())
+                    || STATUS_QUEUE_DONE.equalsIgnoreCase(appointment.getStatus())) {
+                throw new IllegalStateException(
+                        "Lịch hẹn " + appointment.getId() + " đã hoàn tất khám bệnh, không thể tiếp đón lại.");
+            }
+            List<Reception> existing = receptionRepository.findByAppointmentIdAndDeletedFalse(appointment.getId());
+            boolean inQueue = existing.stream()
+                    .anyMatch(r -> "ChoKham".equalsIgnoreCase(r.getQueueStatus()) || "DangKham".equalsIgnoreCase(r.getQueueStatus()));
+            if (inQueue) {
+                throw new IllegalStateException(
+                        "Lịch hẹn " + appointment.getId() + " đã được tiếp đón và đang trong hàng đợi.");
+            }
+            boolean examined = existing.stream()
+                    .anyMatch(r -> STATUS_QUEUE_DONE.equalsIgnoreCase(r.getQueueStatus()));
+            if (examined) {
+                throw new IllegalStateException(
+                        "Lịch hẹn " + appointment.getId() + " đã hoàn tất khám bệnh, không thể tiếp đón lại.");
             }
             appointment.setStatus(STATUS_ARRIVED);
             appointmentRepository.save(appointment);

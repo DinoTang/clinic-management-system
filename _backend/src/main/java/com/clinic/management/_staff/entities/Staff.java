@@ -1,6 +1,7 @@
 package com.clinic.management._staff.entities;
 
 import com.clinic.management.common.enums.StaffPosition;
+import com.clinic.management.common.enums.StaffPositionConverter;
 import com.clinic.management._user.entities.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ public class Staff {
     @JoinColumn(name = "MANGUOIDUNG", referencedColumnName = "MANGUOIDUNG") 
     private User user;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StaffPositionConverter.class)
     @Column(name = "VITRI", length = 20, nullable = false)
     private StaffPosition position;
 

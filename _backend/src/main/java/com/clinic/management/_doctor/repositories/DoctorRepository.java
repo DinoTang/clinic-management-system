@@ -14,6 +14,8 @@ public interface DoctorRepository extends
 
     long count();
     boolean existsByUserId(String userId);
+    java.util.Optional<Doctor> findByUserId(String userId);
+    java.util.Optional<Doctor> findByUserIdAndDeletedFalse(String userId);
 
     default Doctor softDeleteById(String doctorId) {
         Doctor doctor = this.findById(doctorId)
