@@ -7,6 +7,10 @@ import {USER_STATUS} from "../../../enums/index.js";
 function DoctorTable({specialties, doctors, fetchDoctors }) {
 	const [showEditModal, setShowEditModal] = useState(null);
 	const [showLockedModal, setShowLockedModal] = useState(null);
+  const formatMoney = (value) => {
+    return value.toLocaleString('vi-VN') + ' đ';
+  };
+
   return (
   	<>
     <div className="min-w-0 overflow-x-auto rounded-[0.5rem]">
@@ -65,7 +69,7 @@ function DoctorTable({specialties, doctors, fetchDoctors }) {
                 {doctor.experienceYears}
               </td>
               <td className="whitespace-nowrap !px-[0.875rem] !py-[0.75rem]">
-                {doctor.examinationFee}
+                {doctor.examinationFee && formatMoney(doctor.examinationFee) }
               </td>
 				<td className="whitespace-nowrap !px-[0.875rem] !py-[0.75rem]">
                 <span

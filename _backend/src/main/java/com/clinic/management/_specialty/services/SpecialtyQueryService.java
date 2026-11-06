@@ -1,6 +1,7 @@
 package com.clinic.management._specialty.services;
 
 import com.clinic.management._specialty.interfaces.ISpecialtyQuery;
+import com.clinic.management.common.enums.SpecialtyStatus;
 import com.clinic.management._specialty.entities.Specialty;
 import com.clinic.management._specialty.repositories.SpecialtyRepository;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,24 @@ public class SpecialtyQueryService implements ISpecialtyQuery{
         this.specialtyRepository = specialtyRepository;
     }
 
-    @Override
-    public Page<Specialty> findAll(int page, int size) {
+
+    public Page<Specialty> findAll(int page, int size, SpecialtyStatus status, String search) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return specialtyRepository.findAll(pageable);
+        return specialtyRepository.findAll((root, query, cb) -> cb.and(
+
+            status == null
+                ? cb.conjunction() 
+                : cb.equal(root.get("status"), status),
+
+            search == null || search.isBlank()
+                ? cb.conjunction()
+                : cb.or(
+                    cb.like(cb.lower(root.get("id")), "%" + search.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("description")), "%" + search.toLowerCase() + "%")
+                )
+        ), pageable);
     }
 
     @Override

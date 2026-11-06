@@ -2,6 +2,7 @@ package com.clinic.management._specialty.services;
 
 import com.clinic.management.common.enums.SpecialtyStatus;
 import com.clinic.management._specialty.dtos.ProfileUpdateRequest;
+import com.clinic.management._specialty.dtos.UpdateStatusRequest;
 import com.clinic.management._specialty.interfaces.ISpecialtyUpdate;
 import com.clinic.management._specialty.interfaces.ISpecialtyQuery;
 import com.clinic.management._specialty.entities.Specialty;
@@ -24,8 +25,8 @@ public class SpecialtyUpdateService implements ISpecialtyUpdate{
 	}
 
 	@Override
-	public Specialty updateProfile(String specialtyId, ProfileUpdateRequest request){
-		Specialty specialty = specialtyRepository.findById(specialtyId).
+	public Specialty updateProfile(ProfileUpdateRequest request){
+		Specialty specialty = specialtyRepository.findById(request.getSpecialtyId()).
 			orElseThrow(
 				() -> new RuntimeException("Chuyên khoa không tồn tại")
 			);
@@ -37,9 +38,9 @@ public class SpecialtyUpdateService implements ISpecialtyUpdate{
 	}
 
 	@Override
-    public Specialty updateStatus(String specialtyId, SpecialtyStatus status){
-        Specialty specialty = specialtyQueryService.findById(specialtyId);
-        specialty.setStatus(status);
+    public Specialty updateStatus(UpdateStatusRequest request){
+        Specialty specialty = specialtyQueryService.findById(request.getSpecialtyId());
+        specialty.setStatus(request.getStatus());
         return specialtyRepository.save(specialty);
     }
 

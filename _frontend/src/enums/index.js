@@ -10,3 +10,8 @@ export const USER_ROLE = Object.freeze({
   STAFF: 'Nhân viên',
   PATIENT: 'Bệnh nhân',
 });
+
+export const SPECIALTY_STATUS = Object.freeze({
+  ACTIVE: 'Đang hoạt động',
+  INACTIVE: 'Chuyên khoa ngừng hoạt động',
+});
