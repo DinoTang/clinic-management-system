@@ -4,7 +4,7 @@ import {updateProfile} from "../../../services/doctor/doctorService";
 import {USER_STATUS} from "../../../enums/index.js";
 import Swal from "sweetalert2";
 
-function EditModal({ doctor, onClose, fetchDoctors }) {
+function EditModal({ specialties, doctor, onClose, fetchDoctors }) {
   const [request, setRequest] = useState({
   	doctorId: doctor.id,
     userId:doctor.user.id,
@@ -112,11 +112,15 @@ function EditModal({ doctor, onClose, fetchDoctors }) {
                   Mã chuyên khoa
                 </span>
 
-                <input
+                <select
                   value={request.specialtyId}
                   onChange={(e)=>setRequest(prev=>({...prev, specialtyId: e.target.value}))}
-                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
-                />
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]">
+                  <option value="" disabled>--- Chọn chuyên khoa ---</option>
+                  {specialties?.map((s)=>(
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
                 {error?.specialtyId && (
                   <p className="italic text-sm">* {error.specialtyId}</p>
                 )}

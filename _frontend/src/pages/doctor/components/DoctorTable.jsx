@@ -4,7 +4,7 @@ import LockedModal from "./LockedModal";
 import { useState } from "react";
 import {USER_STATUS} from "../../../enums/index.js";
 
-function DoctorTable({ doctors, fetchDoctors }) {
+function DoctorTable({specialties, doctors, fetchDoctors }) {
 	const [showEditModal, setShowEditModal] = useState(null);
 	const [showLockedModal, setShowLockedModal] = useState(null);
   return (
@@ -118,6 +118,7 @@ function DoctorTable({ doctors, fetchDoctors }) {
     </div>
     {showEditModal && (
     	<EditModal
+        specialties = {specialties}
     		doctor={showEditModal}
     		onClose={()=>setShowEditModal(null)}
         	fetchDoctors={fetchDoctors}

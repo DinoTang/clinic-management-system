@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { createAsync } from "../../../services/doctor/doctorService.js";
 
-function CreateModal({ onClose, fetchDoctors}) {
+function CreateModal({ onClose, fetchDoctors, specialties}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [request, setRequest] = useState({
@@ -15,7 +15,7 @@ function CreateModal({ onClose, fetchDoctors}) {
     examinationFee: ''
   });
 
-  	useEffect(()=>{
+	useEffect(()=>{
 		function handleKeyDown(e){
 			if(e.key==="Escape"){
 				onClose();
@@ -54,7 +54,7 @@ function CreateModal({ onClose, fetchDoctors}) {
       setLoading(false);
     }
   }
-
+  console.log(specialties);
   return (
     <>
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 !p-[1rem]">
@@ -109,11 +109,15 @@ function CreateModal({ onClose, fetchDoctors}) {
                   Mã chuyên khoa
                 </span>
 
-                <input
+                <select
                   value={request.specialtyId}
                   onChange={(e)=>setRequest(prev=>({...prev, specialtyId: e.target.value}))}
-                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]"
-                />
+                  className="!p-[0.8rem] flex items-center w-full rounded-[0.5rem] border border-[#d0d5dd] bg-white text-sm text-[#344054]">
+                  <option value="" disabled>--- Chọn chuyên khoa ---</option>
+                  {specialties?.map((s)=>(
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
                 {error?.specialtyId && (
                   <p className="italic text-sm">* {error.specialtyId}</p>
                 )}

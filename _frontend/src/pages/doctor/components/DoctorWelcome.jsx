@@ -2,7 +2,7 @@ import { Plus } from "@boxicons/react";
 import { useState } from "react";
 import CreateModal from "./CreateModal";
 
-function DoctorWelcome({ fetchDoctors }) {
+function DoctorWelcome({ fetchDoctors, specialties }) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -36,6 +36,7 @@ function DoctorWelcome({ fetchDoctors }) {
         <CreateModal
           onClose={() => setShowModal(false)}
           fetchDoctors = {fetchDoctors}
+          specialties= {specialties}
         />
       )}
     </>
