@@ -3,6 +3,7 @@ package com.clinic.management._specialty.controllers;
 import com.clinic.management.common.enums.SpecialtyStatus;
 import com.clinic.management._specialty.dtos.ProfileCreateRequest;
 import com.clinic.management._specialty.dtos.ProfileUpdateRequest;
+import com.clinic.management._specialty.dtos.UpdateStatusRequest;
 import com.clinic.management._specialty.entities.Specialty;
 import com.clinic.management._specialty.interfaces.ISpecialtyCreate;
 import com.clinic.management._specialty.interfaces.ISpecialtyUpdate;
@@ -22,6 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/specialties")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -52,9 +55,15 @@ public class SpecialtyController {
     @GetMapping("/v2")
     public ResponseEntity<Page<Specialty>> findAll(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String search
     ) {
-        Page<Specialty> specialtys = specialtyQueryService.findAll(page, size);
+
+        SpecialtyStatus statusEnum = (status == null || status.equalsIgnoreCase("all"))
+            ? null : SpecialtyStatus.valueOf(status.toUpperCase());
+
+        Page<Specialty> specialtys = specialtyQueryService.findAll(page, size, statusEnum, search);
 
         return ResponseEntity.ok(specialtys);
     }
@@ -67,19 +76,27 @@ public class SpecialtyController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/update-profile/{specialtyId}")
-    public ResponseEntity<Specialty> updateProfile(
-        @PathVariable String specialtyId,
-        @RequestBody ProfileUpdateRequest request){
-        Specialty specialty = specialtyUpdateService.updateProfile(specialtyId, request);
+    @PostMapping
+    public ResponseEntity<Specialty> create(
+        @Valid
+        @RequestBody ProfileCreateRequest request){
+        Specialty specialty = specialtyCreateService.create(request);
         return ResponseEntity.ok(specialty);
     }
 
-    @PutMapping("/update-status/{specialtyId}")
+    @PutMapping("/update-profile")
+    public ResponseEntity<Specialty> updateProfile(
+        @Valid
+        @RequestBody ProfileUpdateRequest request){
+        Specialty specialty = specialtyUpdateService.updateProfile(request);
+        return ResponseEntity.ok(specialty);
+    }
+
+    @PutMapping("/update-status")
     public ResponseEntity<Specialty> updateStatus(
-        @PathVariable String specialtyId,
-        @RequestBody SpecialtyStatus request){
-        Specialty specialty = specialtyUpdateService.updateStatus(specialtyId, request);
+        @Valid
+        @RequestBody UpdateStatusRequest request){
+        Specialty specialty = specialtyUpdateService.updateStatus(request);
         return ResponseEntity.ok(specialty);
     }
 

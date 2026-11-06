@@ -3,6 +3,7 @@ import DoctorWelcome from "./components/DoctorWelcome";
 import DataToolbar from "./components/DataToolbar";
 import DoctorTable from "./components/DoctorTable";
 import {getAll} from "../../services/doctor/doctorService.js";
+import {getAll as getAllSpe} from "../../services/specialty/specialtyService.js";
 import Paginate from "../../layouts/components/Paginate.jsx";
 
 function Doctor({ className = "" }) {
@@ -13,7 +14,7 @@ function Doctor({ className = "" }) {
   const [status, setStatus] = useState('all');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-
+  const [specialties, setSpecialties] = useState([]);
 
   const fetchDoctors = useCallback(
     async (
@@ -41,17 +42,31 @@ function Doctor({ className = "" }) {
     }
   }, [page, size, specialty, status, search]);
 
+  const fetchSpecialties= useCallback( async() =>{
+    try{
+      const result = await getAllSpe();
+      setSpecialties(result);
+    }
+    catch (error){
+      console.error(error);
+    }
+  },[]);
+
   useEffect(()=>{
     fetchDoctors(page, size, specialty, status, search);
+    fetchSpecialties();
   },[page,size, specialty, status, search]);
 
   if (loading) {
         return <p>Đang tải...</p>;
     }
-    
+  
   return (
     <div className={`flex flex-col gap-[1.25rem] ${className}`}>
-      <DoctorWelcome fetchDoctors={fetchDoctors}/>
+      <DoctorWelcome
+        fetchDoctors={fetchDoctors}
+        specialties={specialties}
+      />
 
       <div className="min-w-0  shadow-xl rounded-[0.6875rem] border border-[#edf0f4] bg-white !p-[1.25rem]">
         <DataToolbar
@@ -63,7 +78,9 @@ function Doctor({ className = "" }) {
           setSearch={setSearch}
         />
         <div className="!mt-[1rem]">
-          <DoctorTable doctors={data.content} fetchDoctors={fetchDoctors} />
+          <DoctorTable 
+            specialties= {specialties}
+            doctors={data.content} fetchDoctors={fetchDoctors} />
         </div>
         <Paginate data={data} setPage={setPage} page={page} />
 
