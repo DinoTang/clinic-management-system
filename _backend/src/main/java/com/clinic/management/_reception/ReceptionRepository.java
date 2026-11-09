@@ -17,13 +17,34 @@ public interface ReceptionRepository extends JpaRepository<Reception, String> {
 
     List<Reception> findByAppointmentIdAndDeletedFalse(String appointmentId);
 
-    @Query("SELECT r FROM Reception r WHERE r.receptionDate = :date AND r.deleted = false ORDER BY r.queueNumber ASC")
+    @Query("SELECT r FROM Reception r WHERE r.receptionDate = :date AND r.deleted = false " +
+            "ORDER BY CASE " +
+            "  WHEN r.queueStatus = 'DangKham' THEN 1 " +
+            "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NULL THEN 2 " +
+            "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NOT NULL THEN 3 " +
+            "  WHEN r.queueStatus = 'BoQua' THEN 4 " +
+            "  ELSE 5 " +
+            "END ASC, r.deferredAt ASC, r.queueNumber ASC")
     List<Reception> findByDate(@Param("date") LocalDate date);
 
-    @Query("SELECT r FROM Reception r WHERE r.roomId = :roomId AND r.receptionDate = :date AND r.deleted = false ORDER BY r.queueNumber ASC")
+    @Query("SELECT r FROM Reception r WHERE r.roomId = :roomId AND r.receptionDate = :date AND r.deleted = false " +
+            "ORDER BY CASE " +
+            "  WHEN r.queueStatus = 'DangKham' THEN 1 " +
+            "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NULL THEN 2 " +
+            "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NOT NULL THEN 3 " +
+            "  WHEN r.queueStatus = 'BoQua' THEN 4 " +
+            "  ELSE 5 " +
+            "END ASC, r.deferredAt ASC, r.queueNumber ASC")
     List<Reception> findByRoomAndDate(@Param("roomId") String roomId, @Param("date") LocalDate date);
 
-    @Query("SELECT r FROM Reception r WHERE r.doctorId = :doctorId AND r.receptionDate = :date AND r.deleted = false ORDER BY r.queueNumber ASC")
+    @Query("SELECT r FROM Reception r WHERE r.doctorId = :doctorId AND r.receptionDate = :date AND r.deleted = false " +
+            "ORDER BY CASE " +
+            "  WHEN r.queueStatus = 'DangKham' THEN 1 " +
+            "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NULL THEN 2 " +
+            "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NOT NULL THEN 3 " +
+            "  WHEN r.queueStatus = 'BoQua' THEN 4 " +
+            "  ELSE 5 " +
+            "END ASC, r.deferredAt ASC, r.queueNumber ASC")
     List<Reception> findByDoctorAndDate(@Param("doctorId") String doctorId, @Param("date") LocalDate date);
 
     @Query("SELECT COALESCE(MAX(r.queueNumber), 0) FROM Reception r WHERE r.roomId = :roomId AND r.receptionDate = :date AND r.deleted = false")

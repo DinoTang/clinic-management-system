@@ -66,6 +66,12 @@ public class Reception {
     @Column(name = "TRANGTHAIXOA")
     private Boolean deleted = false;
 
+    @Column(name = "THOIGIANHOAN")
+    private LocalDateTime deferredAt;
+
+    @Column(name = "SOLANHOAN")
+    private Integer deferCount = 0;
+
     @Transient
     private String patientName;
 

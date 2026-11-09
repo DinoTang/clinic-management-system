@@ -853,6 +853,22 @@ function ReceptionPage() {
                       >
                         {item.queueStatus}
                       </span>
+                      {item.deferredAt && item.queueStatus === "ChoKham" && (
+                        <span
+                          style={{
+                            marginLeft: "6px",
+                            fontSize: "11px",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            background: "#fef3c7",
+                            color: "#92400e",
+                            fontWeight: 600,
+                          }}
+                          title={`Bệnh nhân vắng mặt khi gọi, đã chuyển xuống cuối hàng (${item.deferCount || 1} lần)`}
+                        >
+                          Chờ cuối (L.${item.deferCount || 1})
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

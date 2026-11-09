@@ -76,11 +76,29 @@ public class ReceptionController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateQueueStatus(@PathVariable String id, @RequestBody Map<String, String> body) {
+        String action = body.get("action");
+        if ("defer".equalsIgnoreCase(action)) {
+            Reception updated = receptionService.deferReception(id);
+            if (updated == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(updated);
+        }
+
         String status = body.get("status");
         if (status == null || status.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Trạng thái không hợp lệ"));
         }
         Reception updated = receptionService.updateQueueStatus(id, status);
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/{id}/defer")
+    public ResponseEntity<?> deferReception(@PathVariable String id) {
+        Reception updated = receptionService.deferReception(id);
         if (updated == null) {
             return ResponseEntity.notFound().build();
         }

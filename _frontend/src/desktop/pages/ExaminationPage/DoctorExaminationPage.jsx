@@ -430,10 +430,63 @@ function DoctorExaminationPage() {
       );
   };
 
+  /** Bệnh nhân vắng mặt khi gọi: đưa về cuối hàng chờ, giữ nguyên STT */
+  const deferPatient = (item) => {
+    if (!item) return;
+    axios
+      .post(`${RECEPTION_API}/${item.id}/defer`)
+      .then(() => {
+        notify(
+          "warn",
+          `Bệnh nhân STT ${String(item.queueNumber).padStart(2, "0")} (${item.id}) vắng mặt — đã chuyển xuống cuối hàng chờ (vẫn giữ nguyên số thứ tự).`,
+        );
+        if (selected?.id === item.id) {
+          handleCloseExamination();
+        }
+        loadQueue(true);
+      })
+      .catch((err) =>
+        notify(
+          "error",
+          `Không thể chuyển cuối hàng: ${extractError(err, "lỗi kết nối")}`,
+        ),
+      );
+  };
+
+  /** Sắp xếp hàng đợi: DangKham -> ChoKham (chưa hoãn theo STT, hoãn theo thời điểm) -> BoQua -> DaKham */
+  const sortQueueItems = (a, b) => {
+    const statusPriority = { DangKham: 1, ChoKham: 2, BoQua: 3, DaKham: 4 };
+    const pA = statusPriority[a.queueStatus] || 5;
+    const pB = statusPriority[b.queueStatus] || 5;
+    if (pA !== pB) return pA - pB;
+
+    if (a.queueStatus === "ChoKham" && b.queueStatus === "ChoKham") {
+      const aDef = a.deferredAt ? 1 : 0;
+      const bDef = b.deferredAt ? 1 : 0;
+      if (aDef !== bDef) return aDef - bDef;
+      if (aDef === 1) {
+        const diff = new Date(a.deferredAt).getTime() - new Date(b.deferredAt).getTime();
+        if (diff !== 0) return diff;
+      }
+      return (a.queueNumber || 0) - (b.queueNumber || 0);
+    }
+
+    return (a.queueNumber || 0) - (b.queueNumber || 0);
+  };
+
   const callNextPatient = () => {
-    const next = queue
-      .filter((item) => item.queueStatus === "ChoKham")
-      .sort((a, b) => (a.queueNumber || 0) - (b.queueNumber || 0))[0];
+    const choKhamList = queue.filter((item) => item.queueStatus === "ChoKham");
+    const next = [...choKhamList].sort((a, b) => {
+      const aDef = a.deferredAt ? 1 : 0;
+      const bDef = b.deferredAt ? 1 : 0;
+      if (aDef !== bDef) return aDef - bDef;
+      if (aDef === 1) {
+        const diff = new Date(a.deferredAt).getTime() - new Date(b.deferredAt).getTime();
+        if (diff !== 0) return diff;
+      }
+      return (a.queueNumber || 0) - (b.queueNumber || 0);
+    })[0];
+
     if (!next) {
       notify("info", "Không còn lượt CHỜ KHÁM nào trong hàng đợi.");
       return;
@@ -815,7 +868,7 @@ function DoctorExaminationPage() {
 
   const filteredQueue = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    return queue.filter((item) => {
+    const list = queue.filter((item) => {
       const matchStatus =
         statusFilter === "all" || item.queueStatus === statusFilter;
       const matchKeyword =
@@ -826,6 +879,7 @@ function DoctorExaminationPage() {
         String(item.roomId).toLowerCase().includes(keyword);
       return matchStatus && matchKeyword;
     });
+    return [...list].sort(sortQueueItems);
   }, [queue, statusFilter, search]);
 
   const statusCounts = useMemo(
@@ -1089,6 +1143,14 @@ function DoctorExaminationPage() {
                     <div className="exam-queue-item-meta">
                       <span>{item.patientId}</span>
                       <span>{item.roomId}</span>
+                      {item.deferredAt && item.queueStatus === "ChoKham" && (
+                        <span
+                          className="exam-defer-tag"
+                          title={`Bệnh nhân vắng mặt khi gọi lượt. Đã chuyển xuống cuối hàng (${item.deferCount || 1} lần)`}
+                        >
+                          ⏳ Nhỡ lượt (x${item.deferCount || 1}) · Chờ cuối
+                        </span>
+                      )}
                     </div>
                     <div
                       style={{
@@ -1114,37 +1176,49 @@ function DoctorExaminationPage() {
                         <button
                           type="button"
                           className="exam-btn-call"
+                          title="Đưa bệnh nhân trở lại hàng chờ (xếp ở cuối hàng chờ, giữ nguyên STT)"
                           onClick={(e) => {
                             e.stopPropagation();
-                            changeStatus(item, "ChoKham");
+                            deferPatient(item);
                           }}
                         >
-                          Đưa về chờ
+                          Đưa về chờ (Cuối hàng)
                         </button>
                       )}
                       {item.queueStatus === "DangKham" && (
-                        <button
-                          type="button"
-                          className="exam-btn-done"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            changeStatus(item, "DaKham");
-                          }}
-                        >
-                          Hoàn tất
-                        </button>
-                      )}
-                      {item.queueStatus === "DangKham" && (
-                        <button
-                          type="button"
-                          className="exam-line-remove"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            changeStatus(item, "BoQua");
-                          }}
-                        >
-                          Bỏ qua
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="exam-btn-done"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              changeStatus(item, "DaKham");
+                            }}
+                          >
+                            Hoàn tất
+                          </button>
+                          <button
+                            type="button"
+                            className="exam-btn-defer"
+                            title="Bệnh nhân vắng mặt - chuyển xuống cuối hàng chờ, giữ nguyên STT"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deferPatient(item);
+                            }}
+                          >
+                            Vắng mặt (Chờ cuối)
+                          </button>
+                          <button
+                            type="button"
+                            className="exam-line-remove"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              changeStatus(item, "BoQua");
+                            }}
+                          >
+                            Bỏ qua
+                          </button>
+                        </>
                       )}
                       {item.queueStatus === "DaKham" && (
                         <span
@@ -1796,6 +1870,18 @@ function DoctorExaminationPage() {
                 >
                   📋 Lưu hồ sơ khám
                 </button>
+                {selected?.queueStatus === "DangKham" && (
+                  <button
+                    type="button"
+                    className="exam-btn-defer"
+                    style={{ padding: "8px 14px", fontSize: "13px" }}
+                    onClick={() => deferPatient(selected)}
+                    disabled={busy}
+                    title="Bệnh nhân không có mặt tại phòng - Trả về chờ và chuyển xuống cuối hàng, giữ nguyên STT"
+                  >
+                    ⏳ Vắng mặt - Chuyển cuối hàng
+                  </button>
+                )}
                 <button
                   type="button"
                   className="exam-btn-success"
