@@ -624,7 +624,9 @@ CREATE TABLE `tiepdonkham` (
   `CANNANG` decimal(5,2) DEFAULT NULL,
   `CHIEUCAO` decimal(5,2) DEFAULT NULL,
   `XTHOIGIANTIEPDON` timestamp NOT NULL DEFAULT current_timestamp(),
-  `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0
+  `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0,
+  `THOIGIANHOAN` datetime DEFAULT NULL,
+  `SOLANHOAN` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --

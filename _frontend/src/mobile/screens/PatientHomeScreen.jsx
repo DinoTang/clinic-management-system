@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import Avatar from "../components/Avatar";
 import { getAppointments } from "../services/patientApi";
@@ -192,6 +192,8 @@ function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId 
                       ? "Đã hoàn tất khám"
                       : nextAppointment.queueStatus === "DangKham"
                       ? "Đang khám"
+                      : (nextAppointment.deferred || (nextAppointment.deferCount && nextAppointment.deferCount > 0))
+                      ? `Nhỡ lượt (lần ${nextAppointment.deferCount || 1}) · Đang chờ khám`
                       : "Đã tiếp đón · Đang chờ khám"}
                   </span>
                   {nextAppointment.roomName && (
@@ -214,7 +216,9 @@ function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId 
                       Bác sĩ: <strong>{nextAppointment.doctorName || "Chưa phân công"}</strong>
                     </p>
                     <p className="queue-instruction">
-                      Vui lòng chú ý loa gọi và màn hình trước cửa phòng khám.
+                      {(nextAppointment.deferred || (nextAppointment.deferCount && nextAppointment.deferCount > 0)) && nextAppointment.queueStatus === "ChoKham"
+                        ? "Bạn đã vắng mặt khi được gọi. Số thứ tự vẫn giữ nguyên, lượt của bạn đã được chuyển xuống cuối hàng chờ. Vui lòng có mặt trước cửa phòng khám."
+                        : "Vui lòng chú ý loa gọi và màn hình trước cửa phòng khám."}
                     </p>
                   </div>
                 </div>

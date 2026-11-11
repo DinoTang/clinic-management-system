@@ -148,7 +148,7 @@ function QrCheckInScanner({ onDecoded, onClose }) {
     return (
         <div className="modal-overlay">
             <div className="qr-scan-card">
-                <h3>📷 QUÉT MÃ QR LỊCH HẸN</h3>
+                <h3>QUÉT MÃ QR LỊCH HẸN</h3>
 
                 <p className="qr-scan-hint">
                     Đưa mã QR trên phiếu hẹn của bệnh nhân vào giữa khung hình.

@@ -40,8 +40,28 @@ public final class PatientPortalDtos {
             String roomName,
             String scheduleId,
             Integer queueNumber,
-            String queueStatus
+            String queueStatus,
+            Integer deferCount,
+            Boolean deferred
     ) {
+        public AppointmentDto(
+                String id,
+                String status,
+                LocalDate date,
+                LocalTime time,
+                LocalTime endTime,
+                String reason,
+                String doctorId,
+                String doctorName,
+                String specialtyName,
+                String roomId,
+                String roomName,
+                String scheduleId,
+                Integer queueNumber,
+                String queueStatus
+        ) {
+            this(id, status, date, time, endTime, reason, doctorId, doctorName, specialtyName, roomId, roomName, scheduleId, queueNumber, queueStatus, 0, false);
+        }
     }
 
     public record CancelRequest(String patientId) {

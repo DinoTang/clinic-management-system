@@ -377,7 +377,7 @@ function ReceptionPage() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             <h2 className="panel-title" style={{ margin: 0, border: "none" }}>
-              📋 TIẾP NHẬN BỆNH NHÂN TẠI QUẦY
+              TIẾP NHẬN BỆNH NHÂN TẠI QUẦY
             </h2>
             {loggedInStaffId ? (
               <span
@@ -395,7 +395,7 @@ function ReceptionPage() {
                 }}
                 title="Nhân viên tiếp đón đang đăng nhập"
               >
-                👤 NV: {loggedInStaffName ? `${loggedInStaffName} (${loggedInStaffId})` : loggedInStaffId}
+                Nhân viên: {loggedInStaffName ? `${loggedInStaffName} (${loggedInStaffId})` : loggedInStaffId}
               </span>
             ) : (
               <span
@@ -409,7 +409,7 @@ function ReceptionPage() {
                   border: "1px solid #fecaca",
                 }}
               >
-                ⚠️ Chưa đăng nhập nhân viên
+                Chưa đăng nhập nhân viên
               </span>
             )}
           </div>
@@ -419,7 +419,7 @@ function ReceptionPage() {
             onClick={handleResetForm}
             style={{ padding: "6px 12px" }}
           >
-            🔄 Làm Mới
+            Làm Mới
           </button>
         </div>
 
@@ -428,7 +428,7 @@ function ReceptionPage() {
           <label
             style={{ fontSize: "13px", fontWeight: "700", color: "#1e40af" }}
           >
-            🔍 Tra Cứu Lịch Hẹn Đặt Trước:
+            Tra Cứu Lịch Hẹn Đặt Trước:
           </label>
           <div className="lookup-input-group">
             <input
@@ -453,7 +453,7 @@ function ReceptionPage() {
               onClick={() => setScanOpen(true)}
               disabled={lookupLoading}
             >
-              📷 Quét QR
+              Quét QR
             </button>
           </div>
           <p className="lookup-hint">
@@ -718,7 +718,7 @@ function ReceptionPage() {
           {/* Vitals Grid */}
           <div style={{ marginTop: "14px" }}>
             <label className="input-label" style={{ color: "#0369a1" }}>
-              🩺 Đo Chỉ Số Sinh Hiệu (Sinh Tồn):
+              Đo Chỉ Số Sinh Hiệu (Sinh Tồn):
             </label>
             <div className="vitals-grid">
               <div className="vital-item">
@@ -788,7 +788,7 @@ function ReceptionPage() {
               className="btn btn-primary"
               style={{ width: "100%", padding: "12px" }}
             >
-              ➕ Tiếp Nhận & Cấp Số Thứ Tự
+              Tiếp Nhận & Cấp Số Thứ Tự
             </button>
           </div>
         </form>
@@ -797,7 +797,7 @@ function ReceptionPage() {
       {/* CỘT PHẢI: HÀNG ĐỢI HÔM NAY */}
       <div className="reception-right">
         <h2 className="panel-title">
-          👥 HÀNG ĐỢI KHÁM HÔM NAY ({queueList.length})
+          HÀNG ĐỢI KHÁM HÔM NAY ({queueList.length})
         </h2>
 
         <div className="queue-filter-bar" style={{ marginTop: "12px" }}>
@@ -853,6 +853,22 @@ function ReceptionPage() {
                       >
                         {item.queueStatus}
                       </span>
+                      {item.deferredAt && item.queueStatus === "ChoKham" && (
+                        <span
+                          style={{
+                            marginLeft: "6px",
+                            fontSize: "11px",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            background: "#fef3c7",
+                            color: "#92400e",
+                            fontWeight: 600,
+                          }}
+                          title={`Bệnh nhân vắng mặt khi gọi (${item.deferCount || 1} lần)`}
+                        >
+                          Vắng mặt (L.${item.deferCount || 1})
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -927,7 +943,7 @@ function ReceptionPage() {
                   setCreatedSlip(null);
                 }}
               >
-                🖨️ In Phiếu
+                In Phiếu
               </button>
             </div>
           </div>

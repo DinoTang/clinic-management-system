@@ -266,6 +266,9 @@ public class PatientPortalService {
                     .orElse(roomId);
         }
 
+        Integer deferCount = (reception != null && reception.getDeferCount() != null) ? reception.getDeferCount() : 0;
+        Boolean deferred = reception != null && reception.getDeferredAt() != null;
+
         return new PatientPortalDtos.AppointmentDto(
                 appointment.getId(),
                 appointment.getStatus(),
@@ -282,7 +285,9 @@ public class PatientPortalService {
                 roomName,
                 appointment.getScheduleId(),
                 queueNumber,
-                queueStatus
+                queueStatus,
+                deferCount,
+                deferred
         );
     }
 

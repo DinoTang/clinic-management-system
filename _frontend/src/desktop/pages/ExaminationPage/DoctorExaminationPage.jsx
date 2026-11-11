@@ -430,10 +430,63 @@ function DoctorExaminationPage() {
       );
   };
 
+  /** Bệnh nhân vắng mặt khi gọi: đưa về cuối hàng chờ, giữ nguyên STT */
+  const deferPatient = (item) => {
+    if (!item) return;
+    axios
+      .post(`${RECEPTION_API}/${item.id}/defer`)
+      .then(() => {
+        notify(
+          "warn",
+          `Bệnh nhân STT ${String(item.queueNumber).padStart(2, "0")} (${item.id}) vắng mặt — đã chuyển xuống cuối hàng chờ (vẫn giữ nguyên số thứ tự).`,
+        );
+        if (selected?.id === item.id) {
+          handleCloseExamination();
+        }
+        loadQueue(true);
+      })
+      .catch((err) =>
+        notify(
+          "error",
+          `Không thể chuyển cuối hàng: ${extractError(err, "lỗi kết nối")}`,
+        ),
+      );
+  };
+
+  /** Sắp xếp hàng đợi: DangKham -> ChoKham (chưa hoãn theo STT, hoãn theo thời điểm) -> BoQua -> DaKham */
+  const sortQueueItems = (a, b) => {
+    const statusPriority = { DangKham: 1, ChoKham: 2, BoQua: 3, DaKham: 4 };
+    const pA = statusPriority[a.queueStatus] || 5;
+    const pB = statusPriority[b.queueStatus] || 5;
+    if (pA !== pB) return pA - pB;
+
+    if (a.queueStatus === "ChoKham" && b.queueStatus === "ChoKham") {
+      const aDef = a.deferredAt ? 1 : 0;
+      const bDef = b.deferredAt ? 1 : 0;
+      if (aDef !== bDef) return aDef - bDef;
+      if (aDef === 1) {
+        const diff = new Date(a.deferredAt).getTime() - new Date(b.deferredAt).getTime();
+        if (diff !== 0) return diff;
+      }
+      return (a.queueNumber || 0) - (b.queueNumber || 0);
+    }
+
+    return (a.queueNumber || 0) - (b.queueNumber || 0);
+  };
+
   const callNextPatient = () => {
-    const next = queue
-      .filter((item) => item.queueStatus === "ChoKham")
-      .sort((a, b) => (a.queueNumber || 0) - (b.queueNumber || 0))[0];
+    const choKhamList = queue.filter((item) => item.queueStatus === "ChoKham");
+    const next = [...choKhamList].sort((a, b) => {
+      const aDef = a.deferredAt ? 1 : 0;
+      const bDef = b.deferredAt ? 1 : 0;
+      if (aDef !== bDef) return aDef - bDef;
+      if (aDef === 1) {
+        const diff = new Date(a.deferredAt).getTime() - new Date(b.deferredAt).getTime();
+        if (diff !== 0) return diff;
+      }
+      return (a.queueNumber || 0) - (b.queueNumber || 0);
+    })[0];
+
     if (!next) {
       notify("info", "Không còn lượt CHỜ KHÁM nào trong hàng đợi.");
       return;
@@ -815,7 +868,7 @@ function DoctorExaminationPage() {
 
   const filteredQueue = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    return queue.filter((item) => {
+    const list = queue.filter((item) => {
       const matchStatus =
         statusFilter === "all" || item.queueStatus === statusFilter;
       const matchKeyword =
@@ -826,6 +879,7 @@ function DoctorExaminationPage() {
         String(item.roomId).toLowerCase().includes(keyword);
       return matchStatus && matchKeyword;
     });
+    return [...list].sort(sortQueueItems);
   }, [queue, statusFilter, search]);
 
   const statusCounts = useMemo(
@@ -955,7 +1009,7 @@ function DoctorExaminationPage() {
                 }}
                 title={`Mã bác sĩ: ${doctorId || "Đang xác thực"}`}
               >
-                <span>👨‍⚕️</span>
+                <span style={{ fontWeight: 700, color: "#1e40af" }}>Bác sĩ:</span>
                 <span>
                   {doctorName
                     ? `${doctorId ? doctorName + " (" + doctorId + ")" : doctorName}`
@@ -999,7 +1053,7 @@ function DoctorExaminationPage() {
             onClick={callNextPatient}
             disabled={!doctorId}
           >
-            🔔 Gọi BN tiếp theo
+            Gọi bệnh nhân tiếp theo
           </button>
           <button
             className="exam-btn-outline"
@@ -1007,7 +1061,7 @@ function DoctorExaminationPage() {
             disabled={!doctorId || loadingQueue}
             title="Làm mới hàng đợi khám, danh mục thuốc & dịch vụ"
           >
-            {loadingQueue ? "Đang tải..." : "🔄 Làm mới"}
+            {loadingQueue ? "Đang tải..." : "Làm mới"}
           </button>
         </div>
       </div>
@@ -1027,7 +1081,7 @@ function DoctorExaminationPage() {
         {/* ---------- CỘT 1: HÀNG ĐỢI ---------- */}
         <section className="exam-panel">
           <h2 className="exam-panel-title">
-            🕒 Hàng đợi khám
+            Hàng đợi khám
             <span className="title-count">{filteredQueue.length} lượt</span>
           </h2>
 
@@ -1089,6 +1143,14 @@ function DoctorExaminationPage() {
                     <div className="exam-queue-item-meta">
                       <span>{item.patientId}</span>
                       <span>{item.roomId}</span>
+                      {item.deferredAt && item.queueStatus === "ChoKham" && (
+                        <span
+                          className="exam-defer-tag"
+                          title={`Bệnh nhân vắng mặt khi gọi lượt (${item.deferCount || 1} lần)`}
+                        >
+                          Nhỡ lượt (x${item.deferCount || 1})
+                        </span>
+                      )}
                     </div>
                     <div
                       style={{
@@ -1114,37 +1176,49 @@ function DoctorExaminationPage() {
                         <button
                           type="button"
                           className="exam-btn-call"
+                          title="Đưa bệnh nhân trở lại hàng chờ, giữ nguyên STT"
                           onClick={(e) => {
                             e.stopPropagation();
-                            changeStatus(item, "ChoKham");
+                            deferPatient(item);
                           }}
                         >
                           Đưa về chờ
                         </button>
                       )}
                       {item.queueStatus === "DangKham" && (
-                        <button
-                          type="button"
-                          className="exam-btn-done"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            changeStatus(item, "DaKham");
-                          }}
-                        >
-                          Hoàn tất
-                        </button>
-                      )}
-                      {item.queueStatus === "DangKham" && (
-                        <button
-                          type="button"
-                          className="exam-line-remove"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            changeStatus(item, "BoQua");
-                          }}
-                        >
-                          Bỏ qua
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="exam-btn-done"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              changeStatus(item, "DaKham");
+                            }}
+                          >
+                            Hoàn tất
+                          </button>
+                          <button
+                            type="button"
+                            className="exam-btn-defer"
+                            title="Bệnh nhân vắng mặt - giữ nguyên STT"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deferPatient(item);
+                            }}
+                          >
+                            Vắng mặt
+                          </button>
+                          <button
+                            type="button"
+                            className="exam-line-remove"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              changeStatus(item, "BoQua");
+                            }}
+                          >
+                            Bỏ qua
+                          </button>
+                        </>
                       )}
                       {item.queueStatus === "DaKham" && (
                         <span
@@ -1154,7 +1228,7 @@ function DoctorExaminationPage() {
                             fontWeight: 700,
                           }}
                         >
-                          ✓ Đã hoàn tất
+                          Đã hoàn tất
                         </span>
                       )}
                     </div>
@@ -1176,7 +1250,7 @@ function DoctorExaminationPage() {
             }}
           >
             <span>
-              🩺 Hồ sơ & khám lâm sàng
+              Hồ sơ & khám lâm sàng
               {selected && (
                 <span className="title-count">{selected.id}</span>
               )}
@@ -1195,7 +1269,7 @@ function DoctorExaminationPage() {
                 onClick={handleCloseExamination}
                 title="Đóng / Hủy chọn hồ sơ khám hiện tại"
               >
-                ✕ Đóng hồ sơ
+                Đóng hồ sơ
               </button>
             )}
           </h2>
@@ -1278,7 +1352,7 @@ function DoctorExaminationPage() {
                 {history.length > 0 && (
                   <div className="exam-history-box">
                     <div className="exam-history-title">
-                      📁 Lần khám trước ({history.length})
+                      Lần khám trước ({history.length})
                     </div>
                     {history.map((h) => (
                       <div className="exam-history-row" key={h.id}>
@@ -1297,7 +1371,7 @@ function DoctorExaminationPage() {
 
               {/* Sinh hiệu */}
               <div className="exam-sub-title">
-                🩺 Chỉ số sinh hiệu
+                Chỉ số sinh hiệu
                 <button
                   type="button"
                   className="exam-btn-call"
@@ -1479,7 +1553,7 @@ function DoctorExaminationPage() {
 
         {/* ---------- CỘT 3: ĐƠN THUỐC & CHỈ ĐỊNH ---------- */}
         <section className="exam-panel exam-panel-right">
-          <h2 className="exam-panel-title">💊 Kê đơn & chỉ định</h2>
+          <h2 className="exam-panel-title">Kê đơn & chỉ định</h2>
 
           {!selected ? (
             <div className="exam-placeholder">
@@ -1496,13 +1570,11 @@ function DoctorExaminationPage() {
                 {/* Đơn thuốc */}
                 <div className="exam-sub-title">
                   Đơn thuốc
-                  <span
-                    className={`exam-source-badge ${medicineSource === "api" ? "live" : ""}`}
-                  >
-                    {medicineSource === "api"
-                      ? "Từ API"
-                      : "Danh mục mẫu (thiếu API thuốc)"}
-                  </span>
+                  {medicineSource !== "api" && (
+                    <span className="exam-source-badge">
+                      Danh mục mẫu (thiếu API thuốc)
+                    </span>
+                  )}
                 </div>
 
                 <table className="exam-lines">
@@ -1618,13 +1690,11 @@ function DoctorExaminationPage() {
                 {/* Chỉ định dịch vụ */}
                 <div className="exam-sub-title">
                   Chỉ định dịch vụ
-                  <span
-                    className={`exam-source-badge ${serviceSource === "api" ? "live" : ""}`}
-                  >
-                    {serviceSource === "api"
-                      ? "Từ API"
-                      : "Danh mục mẫu (thiếu API dịch vụ)"}
-                  </span>
+                  {serviceSource !== "api" && (
+                    <span className="exam-source-badge">
+                      Danh mục mẫu (thiếu API dịch vụ)
+                    </span>
+                  )}
                 </div>
 
                 <table className="exam-lines">
@@ -1740,7 +1810,7 @@ function DoctorExaminationPage() {
                     onClick={() => saveDraft()}
                     disabled={!examEditable}
                   >
-                    💾 Lưu nháp
+                    Lưu nháp
                   </button>
                   <button
                     type="button"
@@ -1754,14 +1824,14 @@ function DoctorExaminationPage() {
                     disabled={!examEditable}
                     title="Làm mới lại phiếu khám theo dữ liệu ban đầu"
                   >
-                    🔄 Làm mới phiếu
+                    Làm mới phiếu
                   </button>
                   <button
                     type="button"
                     className="exam-btn-outline"
                     onClick={() => setShowPrint(true)}
                   >
-                    🖨️ In phiếu
+                    In phiếu
                   </button>
                 </div>
                 <button
@@ -1794,8 +1864,20 @@ function DoctorExaminationPage() {
                   }}
                   disabled={!examEditable || busy}
                 >
-                  📋 Lưu hồ sơ khám
+                  Lưu hồ sơ khám
                 </button>
+                {selected?.queueStatus === "DangKham" && (
+                  <button
+                    type="button"
+                    className="exam-btn-defer"
+                    style={{ padding: "8px 14px", fontSize: "13px" }}
+                    onClick={() => deferPatient(selected)}
+                    disabled={busy}
+                    title="Bệnh nhân không có mặt tại phòng - Trả về chờ, giữ nguyên STT"
+                  >
+                    Vắng mặt
+                  </button>
+                )}
                 <button
                   type="button"
                   className="exam-btn-success"
@@ -1804,7 +1886,7 @@ function DoctorExaminationPage() {
                 >
                   {busy
                     ? "Đang xử lý..."
-                    : "✅ Hoàn tất khám & in phiếu"}
+                    : "Hoàn tất khám & in phiếu"}
                 </button>
                 {selected?.queueStatus === "ChoKham" && (
                   <p className="exam-hint">
@@ -2013,7 +2095,7 @@ function DoctorExaminationPage() {
                 className="exam-btn-primary"
                 onClick={() => window.print()}
               >
-                🖨️ In phiếu
+                In phiếu
               </button>
             </div>
           </div>

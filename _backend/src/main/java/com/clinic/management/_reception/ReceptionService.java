@@ -12,5 +12,6 @@ public interface ReceptionService {
     Reception createReception(Reception reception);
     Reception updateReception(String id, Reception reception);
     Reception updateQueueStatus(String id, String status);
+    Reception deferReception(String id);
     void deleteReception(String id);
 }

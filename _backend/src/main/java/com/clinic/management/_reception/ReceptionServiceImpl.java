@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -186,6 +187,12 @@ public class ReceptionServiceImpl implements ReceptionService {
         existing.setWeight(reception.getWeight());
         existing.setHeight(reception.getHeight());
         existing.setQueueStatus(reception.getQueueStatus());
+        if (reception.getDeferredAt() != null) {
+            existing.setDeferredAt(reception.getDeferredAt());
+        }
+        if (reception.getDeferCount() != null) {
+            existing.setDeferCount(reception.getDeferCount());
+        }
 
         return receptionRepository.save(existing);
     }
@@ -199,7 +206,17 @@ public class ReceptionServiceImpl implements ReceptionService {
         if (reception == null) {
             return null;
         }
+
+        String oldStatus = reception.getQueueStatus();
         reception.setQueueStatus(status);
+
+        // BR: Nếu trả về ChoKham từ DangKham hoặc BoQua (bệnh nhân vắng mặt / trả về chờ)
+        // -> Đưa bệnh nhân xuống cuối hàng chờ mà vẫn giữ nguyên số thứ tự SOTHUTU
+        if ("ChoKham".equalsIgnoreCase(status) && ("DangKham".equalsIgnoreCase(oldStatus) || "BoQua".equalsIgnoreCase(oldStatus))) {
+            reception.setDeferredAt(LocalDateTime.now());
+            reception.setDeferCount((reception.getDeferCount() == null ? 0 : reception.getDeferCount()) + 1);
+        }
+
         Reception saved = receptionRepository.save(reception);
 
         // BR: bác sĩ hoàn tất khám (DaKham) → đánh dấu lịch hẹn liên quan là hoàn tất
@@ -215,6 +232,21 @@ public class ReceptionServiceImpl implements ReceptionService {
                     });
         }
         return saved;
+    }
+
+    @Override
+    @Transactional
+    public Reception deferReception(String id) {
+        Reception reception = receptionRepository.findById(id)
+                .filter(r -> !Boolean.TRUE.equals(r.getDeleted()))
+                .orElse(null);
+        if (reception == null) {
+            return null;
+        }
+        reception.setQueueStatus("ChoKham");
+        reception.setDeferredAt(LocalDateTime.now());
+        reception.setDeferCount((reception.getDeferCount() == null ? 0 : reception.getDeferCount()) + 1);
+        return receptionRepository.save(reception);
     }
 
     @Override
