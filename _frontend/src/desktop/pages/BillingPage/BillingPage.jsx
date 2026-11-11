@@ -1,8 +1,8 @@
 import axios from "axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../../context/AuthContext.jsx";
 import Swal from "sweetalert2";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import "../../styles/billing.css";
 import "../../styles/desktop-schedule.css";
 
@@ -14,7 +14,7 @@ const PATIENT_API = "/api/patients";
 
 // ========================================================
 // CẤU HÌNH THÔNG TIN PHÒNG KHÁM & TÀI KHOẢN NHẬN TIỀN
-// 👉 Bạn có thể chỉnh sửa Tên, SĐT MoMo, Ngân hàng tại đây:
+// Cấu hình Tên, SĐT MoMo, Ngân hàng:
 // ========================================================
 const CLINIC_CONFIG = {
   // 1. Thông tin phòng khám & hiển thị trên hóa đơn/biên lai
@@ -23,8 +23,8 @@ const CLINIC_CONFIG = {
   hotline: "1900 6868",
 
   // 2. Cấu hình Ví MoMo nhận tiền viện phí
-  momoPhone: "0339494928", // Số điện thoại nhận tiền MoMo
-  momoOwnerName: "TRẦN QUỐC TẤN", // Tên chủ tài khoản MoMo
+  momoPhone: "0772663776", // Số điện thoại nhận tiền MoMo
+  momoOwnerName: "VÕ ĐẠT HẢI", // Tên chủ tài khoản MoMo
 
   // 3. Cấu hình Chuyển khoản VietQR / Ngân hàng
   bankCode: "VBA", // Mã ngân hàng: MB, VCB, BIDV, TCB, VPB...
@@ -35,6 +35,18 @@ const CLINIC_CONFIG = {
 
 const formatVnd = (value) =>
   `${new Intl.NumberFormat("vi-VN").format(Number(value) || 0)} ₫`;
+
+/** Chuyển tiếng Việt có dấu thành không dấu chữ in hoa cho chuỗi QR / VietQR / MoMo */
+function removeVietnameseTones(str) {
+  if (!str) return "";
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toUpperCase()
+    .trim();
+}
 
 /** Chuyển số tiền thành chữ tiếng Việt đơn giản cho biên lai thu tiền */
 function numberToVietnameseWords(num) {
@@ -136,6 +148,20 @@ function BillingPage() {
   const [paymentMethod, setPaymentMethod] = useState("CASH"); // CASH | VNPAY | MOMO | BANK_TRANSFER | CARD
   const [amountGiven, setAmountGiven] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [momoQrMode, setMomoQrMode] = useState("app"); // "app" | "vietqr"
+
+  // Cấu hình thông tin nhận tiền viện phí (MoMo / VietQR) - lưu tạm vào localStorage để dễ đổi số
+  const [clinicConfig, setClinicConfig] = useState(() => {
+    try {
+      const saved = localStorage.getItem("clinic_payment_config");
+      if (saved) {
+        return { ...CLINIC_CONFIG, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.warn("Failed to parse saved clinic config:", e);
+    }
+    return CLINIC_CONFIG;
+  });
 
   // State lập hóa đơn nhanh
   const [quickRecordId, setQuickRecordId] = useState("");
@@ -425,6 +451,106 @@ function BillingPage() {
     }
   };
 
+  // Modal chỉnh sửa thông tin thanh toán MoMo & VietQR (lưu tạm localStorage)
+  const handleEditPaymentConfig = async () => {
+    const result = await Swal.fire({
+      title: "Cấu hình Ví MoMo & Chuyển khoản",
+      html: `
+        <div style="text-align: left; font-size: 13px; display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+          <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 10px; border-radius: 8px; color: #831843; font-size: 12px; line-height: 1.45;">
+            <b>Lưu ý MoMo:</b> Khi quét mà app MoMo báo <i>"Bạn đang chuyển đến ví chưa xác thực"</i> là do số điện thoại này chưa hoàn thành định danh CCCD (eKYC) trên MoMo. Bạn hãy nhập <b>Số MoMo đã xác thực CCCD</b> tại đây để quét chuyển tiền ngay.
+          </div>
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 3px; color: #a50064;">Số điện thoại MoMo nhận tiền:</label>
+            <input id="swal-momo-phone" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box; font-size: 14px; height: 38px;" placeholder="Ví dụ: 0912345678" value="${clinicConfig.momoPhone || ""}" />
+          </div>
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 3px; color: #a50064;">Tên chủ Ví MoMo:</label>
+            <input id="swal-momo-owner" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box; font-size: 14px; height: 38px;" placeholder="Ví dụ: VO GIA HUY" value="${clinicConfig.momoOwnerName || ""}" />
+          </div>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;" />
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 3px; color: #1e3a8a;">Số tài khoản Ngân hàng (VietQR):</label>
+            <input id="swal-bank-acc" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box; font-size: 14px; height: 38px;" placeholder="Ví dụ: 9704..." value="${clinicConfig.bankAccount || ""}" />
+          </div>
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 3px; color: #1e3a8a;">Tên chủ tài khoản Ngân hàng:</label>
+            <input id="swal-bank-owner" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box; font-size: 14px; height: 38px;" placeholder="Ví dụ: VO GIA HUY" value="${clinicConfig.bankOwnerName || ""}" />
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: "Lưu cấu hình",
+      denyButtonText: "Đặt lại mặc định",
+      cancelButtonText: "Hủy",
+      confirmButtonColor: "#a50064",
+      denyButtonColor: "#64748b",
+      preConfirm: () => {
+        const momoPhone = (
+          document.getElementById("swal-momo-phone")?.value || ""
+        ).trim();
+        const momoOwner = (
+          document.getElementById("swal-momo-owner")?.value || ""
+        ).trim();
+        const bankAccount = (
+          document.getElementById("swal-bank-acc")?.value || ""
+        ).trim();
+        const bankOwner = (
+          document.getElementById("swal-bank-owner")?.value || ""
+        ).trim();
+        if (!momoPhone) {
+          Swal.showValidationMessage("Vui lòng nhập số điện thoại MoMo!");
+          return false;
+        }
+        return {
+          momoPhone,
+          momoOwnerName: momoOwner || "CHU VI MOMO",
+          bankAccount: bankAccount || clinicConfig.bankAccount,
+          bankOwnerName: bankOwner || clinicConfig.bankOwnerName,
+        };
+      },
+    });
+
+    if (result.isDenied) {
+      setClinicConfig(CLINIC_CONFIG);
+      try {
+        localStorage.removeItem("clinic_payment_config");
+      } catch (err) {
+        console.error(err);
+      }
+      Swal.fire({
+        icon: "info",
+        title: "Đã khôi phục mặc định!",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    if (result.isConfirmed && result.value) {
+      const formValues = result.value;
+      const updated = {
+        ...clinicConfig,
+        ...formValues,
+      };
+      setClinicConfig(updated);
+      try {
+        localStorage.setItem("clinic_payment_config", JSON.stringify(updated));
+      } catch (err) {
+        console.error("Failed to save clinic config:", err);
+      }
+      Swal.fire({
+        icon: "success",
+        title: "Đã cập nhật thông tin nhận tiền!",
+        text: `Mã QR MoMo & VietQR đã được làm mới tức thì.`,
+        timer: 1600,
+        showConfirmButton: false,
+      });
+    }
+  };
+
   // 6. Lọc hóa đơn theo tìm kiếm
   const filteredInvoices = useMemo(() => {
     return invoices.filter((item) => {
@@ -449,26 +575,51 @@ function BillingPage() {
     return invoices.filter((i) => i.paymentStatus !== "DaThanhToan").length;
   }, [invoices]);
 
-  // Chuỗi QR Code cho VNPay và MoMo
+  // Chuỗi QR Code cho VNPay, MoMo và VietQR
   const vnpayQrPayload = useMemo(() => {
     if (!selectedInvoice) return "";
     return `vnpay://pay?merchant=MEDIGO_CLINIC&invoice=${selectedInvoice.id}&amount=${selectedInvoice.total}&desc=Thanh+toan+vien+phi+${selectedInvoice.id}`;
   }, [selectedInvoice]);
 
-  const momoQrPayload = useMemo(() => {
+  const cleanMomoPhone = useMemo(
+    () =>
+      String(clinicConfig.momoPhone || "")
+        .replace(/\s+/g, "")
+        .trim(),
+    [clinicConfig.momoPhone],
+  );
+  const cleanMomoOwner = useMemo(
+    () => removeVietnameseTones(clinicConfig.momoOwnerName || "VO GIA HUY"),
+    [clinicConfig.momoOwnerName],
+  );
+
+  // Chuỗi QR chuẩn nội bộ Ví MoMo (P2P Wallet-to-Wallet: mở app MoMo quét là chuyển ngay)
+  const momoNativeQrPayload = useMemo(() => {
     if (!selectedInvoice) return "";
     const amount = Math.round(Number(selectedInvoice.total) || 0);
-    const phone = String(CLINIC_CONFIG.momoPhone || "").trim();
-    const owner = encodeURIComponent(
-      String(CLINIC_CONFIG.momoOwnerName || "").trim(),
-    );
-    return `https://img.vietqr.io/image/971025-${phone}-compact2.png?amount=${amount}&addInfo=MOMO%20${selectedInvoice.id}&accountName=${owner}`;
-  }, [selectedInvoice]);
+    const note = `MOMO ${selectedInvoice.id}`;
+    return `2|99|${cleanMomoPhone}|${cleanMomoOwner}||0|0|${amount}|${note}|transfer_myqr`;
+  }, [selectedInvoice, cleanMomoPhone, cleanMomoOwner]);
+
+  // Chuỗi QR VietQR Napas 24/7 (dành cho quét từ App Ngân hàng vào MoMo)
+  const momoVietQrPayload = useMemo(() => {
+    if (!selectedInvoice) return "";
+    const amount = Math.round(Number(selectedInvoice.total) || 0);
+    return `https://img.vietqr.io/image/971025-${cleanMomoPhone}-compact2.png?amount=${amount}&addInfo=MOMO%20${selectedInvoice.id}&accountName=${encodeURIComponent(cleanMomoOwner)}`;
+  }, [selectedInvoice, cleanMomoPhone, cleanMomoOwner]);
 
   const vietQrPayload = useMemo(() => {
     if (!selectedInvoice) return "";
-    return `https://img.vietqr.io/image/${CLINIC_CONFIG.bankCode}-${CLINIC_CONFIG.bankAccount}-compact2.png?amount=${selectedInvoice.total}&addInfo=MEDIGO%20${selectedInvoice.id}&accountName=${encodeURIComponent(CLINIC_CONFIG.bankOwnerName)}`;
-  }, [selectedInvoice]);
+    const cleanBankOwner = removeVietnameseTones(
+      clinicConfig.bankOwnerName || "VOGIAHUY",
+    );
+    return `https://img.vietqr.io/image/${clinicConfig.bankCode}-${clinicConfig.bankAccount}-compact2.png?amount=${selectedInvoice.total}&addInfo=MEDIGO%20${selectedInvoice.id}&accountName=${encodeURIComponent(cleanBankOwner)}`;
+  }, [
+    selectedInvoice,
+    clinicConfig.bankCode,
+    clinicConfig.bankAccount,
+    clinicConfig.bankOwnerName,
+  ]);
 
   return (
     <div className="billing-container">
@@ -485,7 +636,7 @@ function BillingPage() {
           }}
         >
           <h2 className="panel-title" style={{ margin: 0, border: "none" }}>
-            <span>💳</span> Quản Lý Hóa Đơn & Viện Phí
+            Quản Lý Hóa Đơn & Viện Phí
           </h2>
           {currentStaffId ? (
             <span
@@ -503,7 +654,10 @@ function BillingPage() {
               }}
               title="Nhân viên thu ngân đang đăng nhập"
             >
-              👤 Thu ngân: {loggedInStaffName ? `${loggedInStaffName} (${currentStaffId})` : currentStaffId}
+              Thu ngân:{" "}
+              {loggedInStaffName
+                ? `${loggedInStaffName} (${currentStaffId})`
+                : currentStaffId}
             </span>
           ) : (
             <span
@@ -517,7 +671,7 @@ function BillingPage() {
                 border: "1px solid #fecaca",
               }}
             >
-              ⚠️ Chưa đăng nhập nhân viên
+              Chưa đăng nhập nhân viên
             </span>
           )}
         </div>
@@ -582,7 +736,7 @@ function BillingPage() {
           <input
             type="text"
             className="billing-search-input"
-            placeholder="🔍 Tìm theo mã HĐ, mã bệnh án..."
+            placeholder="Tìm theo mã HĐ, mã bệnh án..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -591,8 +745,9 @@ function BillingPage() {
             className="btn btn-secondary"
             onClick={fetchInvoices}
             title="Làm mới danh sách"
+            style={{ padding: "6px 12px", whiteSpace: "nowrap" }}
           >
-            🔄
+            Làm mới
           </button>
         </div>
 
@@ -691,7 +846,7 @@ function BillingPage() {
                 className="panel-title"
                 style={{ border: "none", margin: 0, padding: 0 }}
               >
-                <span>🧾</span> Chi Tiết Viện Phí & Thu Ngân
+                Chi Tiết Viện Phí & Thu Ngân
               </h2>
               {selectedInvoice.paymentStatus === "DaThanhToan" && (
                 <button
@@ -705,7 +860,7 @@ function BillingPage() {
                   }
                   style={{ fontSize: "13px", padding: "6px 14px" }}
                 >
-                  🖨️ In Biên Lai
+                  In Biên Lai
                 </button>
               )}
             </div>
@@ -839,7 +994,20 @@ function BillingPage() {
                       className="icon-wrap"
                       style={{ background: "#dcfce7", color: "#15803d" }}
                     >
-                      💵
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="2" y="6" width="20" height="12" rx="2" />
+                        <circle cx="12" cy="12" r="2" />
+                        <path d="M6 12h.01M18 12h.01" />
+                      </svg>
                     </div>
                     <span className="method-name">Tiền Mặt</span>
                   </div>
@@ -925,7 +1093,18 @@ function BillingPage() {
                       className="icon-wrap"
                       style={{ background: "#fef3c7", color: "#b45309" }}
                     >
-                      🏦
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 2L2 7h20L12 2z" />
+                      </svg>
                     </div>
                     <span className="method-name">VietQR / Bank</span>
                   </div>
@@ -1088,7 +1267,7 @@ function BillingPage() {
                             marginTop: "4px",
                           }}
                         >
-                          ℹ️ Hướng dẫn: Bệnh nhân mở ứng dụng Ngân hàng (VCB,
+                          Hướng dẫn: Bệnh nhân mở ứng dụng Ngân hàng (VCB,
                           BIDV, Agribank, VietinBank...) hoặc Ví VNPAY, chọn
                           "Quét QR" để thanh toán.
                         </div>
@@ -1099,35 +1278,101 @@ function BillingPage() {
                   {/* 3. Ví MoMo */}
                   {paymentMethod === "MOMO" && (
                     <div className="momo-payment-card">
-                      <div className="momo-qr-wrap" style={{ padding: "6px" }}>
-                        <img
-                          src={momoQrPayload}
-                          alt="Ví MoMo VietQR"
-                          style={{
-                            width: "160px",
-                            height: "auto",
-                            borderRadius: "6px",
-                            display: "block",
-                          }}
-                        />
+                      <div className="momo-qr-wrap" style={{ padding: "8px" }}>
+                        {momoQrMode === "app" ? (
+                          <QRCodeCanvas
+                            value={momoNativeQrPayload}
+                            size={160}
+                            level="M"
+                            includeMargin
+                            style={{ borderRadius: "6px", display: "block" }}
+                          />
+                        ) : (
+                          <img
+                            src={momoVietQrPayload}
+                            alt="Ví MoMo VietQR"
+                            style={{
+                              width: "160px",
+                              height: "auto",
+                              borderRadius: "6px",
+                              display: "block",
+                            }}
+                          />
+                        )}
                         <span
                           className="momo-qr-label"
-                          style={{ marginTop: "4px" }}
+                          style={{ marginTop: "6px" }}
                         >
-                          VÍ MOMO • NAPAS 24/7
+                          {momoQrMode === "app"
+                            ? "VÍ MOMO • CHUYỂN TIỀN NHANH"
+                            : "VÍ MOMO • NAPAS 24/7"}
                         </span>
                       </div>
 
                       <div className="momo-info">
                         <div className="momo-header-logo">
                           ví <span>MoMo</span>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              color: "#059669",
+                              background: "#ecfdf5",
+                              border: "1px solid #a7f3d0",
+                              padding: "2px 8px",
+                              borderRadius: "12px",
+                            }}
+                          >
+                            Sẵn sàng nhận tiền
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleEditPaymentConfig}
+                            style={{
+                              fontSize: "11.5px",
+                              fontWeight: 600,
+                              color: "#a50064",
+                              background: "#ffffff",
+                              border: "1px solid #fbcfe8",
+                              padding: "3px 8px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              marginLeft: "auto",
+                              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                            }}
+                            title="Thay đổi số điện thoại MoMo nhận tiền"
+                          >
+                            Đổi số MoMo
+                          </button>
                         </div>
+
+                        {/* Switch giữa App MoMo và App Ngân hàng */}
+                        <div className="momo-mode-switch">
+                          <button
+                            type="button"
+                            className={`momo-mode-btn ${momoQrMode === "app" ? "active" : ""}`}
+                            onClick={() => setMomoQrMode("app")}
+                          >
+                            Quét bằng App MoMo (Khuyên dùng)
+                          </button>
+                          <button
+                            type="button"
+                            className={`momo-mode-btn ${momoQrMode === "vietqr" ? "active" : ""}`}
+                            onClick={() => setMomoQrMode("vietqr")}
+                          >
+                            Quét bằng App Ngân hàng (VietQR)
+                          </button>
+                        </div>
+
                         <div>
                           <b>Tài khoản thụ hưởng:</b>{" "}
-                          {CLINIC_CONFIG.momoOwnerName}
+                          {clinicConfig.momoOwnerName} ({cleanMomoOwner})
                         </div>
                         <div>
-                          <b>Số điện thoại MoMo:</b> {CLINIC_CONFIG.momoPhone}
+                          <b>Số điện thoại MoMo:</b> {clinicConfig.momoPhone}
                         </div>
                         <div>
                           <b>Số tiền:</b>{" "}
@@ -1149,6 +1394,7 @@ function BillingPage() {
                               padding: "2px 6px",
                               borderRadius: "4px",
                               border: "1px solid #fbcfe8",
+                              fontWeight: "700",
                             }}
                           >
                             MOMO {selectedInvoice.id}
@@ -1156,14 +1402,42 @@ function BillingPage() {
                         </div>
                         <div
                           style={{
-                            fontSize: "11px",
+                            fontSize: "11.5px",
                             color: "#831843",
                             marginTop: "4px",
+                            lineHeight: "1.4",
                           }}
                         >
-                          ℹ️ Hướng dẫn: Bệnh nhân mở ứng dụng Ví MoMo hoặc App
-                          Ngân hàng bất kỳ, chọn "Quét QR" để chuyển viện phí
-                          trực tiếp.
+                          {momoQrMode === "app" ? (
+                            <>
+                              <b>Hướng dẫn:</b> Bệnh nhân mở ứng dụng{" "}
+                              <b>Ví MoMo</b> trên điện thoại &gt; chọn{" "}
+                              <b>&quot;Quét mã&quot;</b> ở góc trên màn hình để
+                              chuyển viện phí trực tiếp (chuẩn ví-sang-ví không
+                              lỗi).
+                            </>
+                          ) : (
+                            <>
+                              <b>Hướng dẫn:</b> Bệnh nhân mở{" "}
+                              <b>App Ngân hàng bất kỳ</b> (VCB, MB, BIDV,
+                              Agribank...) &gt; chọn <b>&quot;Quét QR&quot;</b>{" "}
+                              để chuyển liên ngân hàng Napas 24/7 vào Ví MoMo.
+                            </>
+                          )}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#6b7280",
+                            marginTop: "2px",
+                            background: "#ffffff",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px dashed #fbcfe8",
+                            lineHeight: "1.4",
+                          }}
+                        >
+                          <b>Lưu ý:</b> Nếu app MoMo thông báo <i>&quot;Ví chưa xác thực&quot;</i>, bấm nút <b>&quot;Đổi số MoMo&quot;</b> ở góc trên để đổi sang số MoMo chính chủ đã hoàn thành eKYC/CCCD.
                         </div>
                       </div>
                     </div>
@@ -1199,18 +1473,37 @@ function BillingPage() {
                             fontSize: "15px",
                             fontWeight: "700",
                             color: "#1e3a8a",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
                           }}
                         >
-                          🏦 Chuyển khoản Ngân Hàng (Napas 24/7)
+                          <span>Chuyển khoản Ngân Hàng (Napas 24/7)</span>
+                          <button
+                            type="button"
+                            onClick={handleEditPaymentConfig}
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              color: "#1e3a8a",
+                              background: "#ffffff",
+                              border: "1px solid #bfdbfe",
+                              padding: "2px 8px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Đổi tài khoản
+                          </button>
                         </div>
                         <div>
-                          <b>Ngân hàng:</b> {CLINIC_CONFIG.bankName}
+                          <b>Ngân hàng:</b> {clinicConfig.bankName}
                         </div>
                         <div>
-                          <b>Số tài khoản:</b> {CLINIC_CONFIG.bankAccount}
+                          <b>Số tài khoản:</b> {clinicConfig.bankAccount}
                         </div>
                         <div>
-                          <b>Chủ tài khoản:</b> {CLINIC_CONFIG.bankOwnerName}
+                          <b>Chủ tài khoản:</b> {clinicConfig.bankOwnerName}
                         </div>
                         <div>
                           <b>Số tiền:</b>{" "}
@@ -1246,7 +1539,7 @@ function BillingPage() {
                     "Đang xử lý giao dịch..."
                   ) : (
                     <>
-                      <span>✅</span> Xác Nhận Đã Thu {formatVnd(totalAmount)} (
+                      Xác Nhận Đã Thu {formatVnd(totalAmount)} (
                       {paymentMethod === "VNPAY"
                         ? "VNPAY"
                         : paymentMethod === "MOMO"
@@ -1274,7 +1567,7 @@ function BillingPage() {
               >
                 <div>
                   <h4 style={{ margin: "0 0 4px 0", color: "#065f46" }}>
-                    ✅ HÓA ĐƠN NÀY ĐÃ ĐƯỢC THANH TOÁN
+                    HÓA ĐƠN NÀY ĐÃ ĐƯỢC THANH TOÁN
                   </h4>
                   <div style={{ fontSize: "13px", color: "#047857" }}>
                     Phương thức:{" "}
@@ -1296,7 +1589,7 @@ function BillingPage() {
                   }
                   style={{ background: "#059669", borderColor: "#059669" }}
                 >
-                  🖨️ In Lại Biên Lai
+                  In Lại Biên Lai
                 </button>
               </div>
             )}
@@ -1310,11 +1603,11 @@ function BillingPage() {
           <div className="receipt-modal-card">
             <div className="receipt-header">
               <div className="receipt-clinic-name">
-                {CLINIC_CONFIG.clinicName}
+                {clinicConfig.clinicName}
               </div>
               <div className="receipt-clinic-sub">
-                Địa chỉ: {CLINIC_CONFIG.clinicAddress} • Hotline:{" "}
-                {CLINIC_CONFIG.hotline}
+                Địa chỉ: {clinicConfig.clinicAddress} • Hotline:{" "}
+                {clinicConfig.hotline}
               </div>
               <div className="receipt-title">HÓA ĐƠN THU TIỀN VIỆN PHÍ</div>
               <div className="receipt-code">
@@ -1353,7 +1646,12 @@ function BillingPage() {
                   </b>
                 </div>
                 <div>
-                  Thu ngân: <b>{loggedInStaffName ? `${loggedInStaffName} (${currentStaffId})` : (currentStaffId || "N/A")}</b>
+                  Thu ngân:{" "}
+                  <b>
+                    {loggedInStaffName
+                      ? `${loggedInStaffName} (${currentStaffId})`
+                      : currentStaffId || "N/A"}
+                  </b>
                 </div>
               </div>
 
@@ -1435,7 +1733,7 @@ function BillingPage() {
                   chiếu.
                 </div>
                 <div className="receipt-paid-seal">
-                  <span>✔ ĐÃ THANH TOÁN</span>
+                  <span>ĐÃ THANH TOÁN</span>
                   <span style={{ fontSize: "10px", fontWeight: "normal" }}>
                     MEDIGO CLINIC
                   </span>
@@ -1458,7 +1756,7 @@ function BillingPage() {
                   window.print();
                 }}
               >
-                🖨️ In Hóa Đơn
+                In Hóa Đơn
               </button>
             </div>
           </div>

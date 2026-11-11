@@ -537,7 +537,7 @@ function PatientBookingPage({ patientProfile = null, isMobile = false }) {
                 onClick={handleDownloadPdf}
                 disabled={exportingPdf}
               >
-                {exportingPdf ? "Đang tạo PDF..." : "📄 Tải Phiếu Hẹn (PDF)"}
+                {exportingPdf ? "Đang tạo PDF..." : "Tải Phiếu Hẹn (PDF)"}
               </button>
               <button
                 className="btn-primary"

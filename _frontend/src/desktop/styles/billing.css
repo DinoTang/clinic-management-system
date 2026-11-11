@@ -602,6 +602,36 @@
   color: #a50064;
 }
 
+.momo-mode-switch {
+  display: flex;
+  gap: 6px;
+  margin: 2px 0 6px 0;
+  flex-wrap: wrap;
+}
+
+.momo-mode-btn {
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 1px solid #fbcfe8;
+  background: #ffffff;
+  color: #a50064;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.momo-mode-btn:hover {
+  background: #fdf2f8;
+}
+
+.momo-mode-btn.active {
+  background: #a50064;
+  color: #ffffff;
+  border-color: #a50064;
+  box-shadow: 0 2px 4px rgba(165, 0, 100, 0.25);
+}
+
 /* Nút thanh toán */
 .btn-pay-submit {
   width: 100%;

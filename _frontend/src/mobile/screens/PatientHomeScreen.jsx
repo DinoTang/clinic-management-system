@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import Avatar from "../components/Avatar";
 import { getAppointments } from "../services/patientApi";
@@ -193,7 +193,7 @@ function PatientHomeScreen({ onNavigate, Icon, doctorGender = "MALE", patientId 
                       : nextAppointment.queueStatus === "DangKham"
                       ? "Đang khám"
                       : (nextAppointment.deferred || (nextAppointment.deferCount && nextAppointment.deferCount > 0))
-                      ? `Nhỡ lượt (lần ${nextAppointment.deferCount || 1}) · Chờ cuối hàng`
+                      ? `Nhỡ lượt (lần ${nextAppointment.deferCount || 1}) · Đang chờ khám`
                       : "Đã tiếp đón · Đang chờ khám"}
                   </span>
                   {nextAppointment.roomName && (

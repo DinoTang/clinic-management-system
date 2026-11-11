@@ -289,7 +289,7 @@ function SchedulePage() {
           <p>Quản lý lịch trực khám bệnh</p>
         </div>
         <button className="btn-refresh" onClick={handleFullRefresh}>
-          🔄 Làm mới
+          Làm mới
         </button>
       </div>
 
