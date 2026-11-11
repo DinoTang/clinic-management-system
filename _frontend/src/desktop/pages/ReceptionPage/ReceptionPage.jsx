@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { getCollectionData } from "../../../utils/apiResponse.js";
 import { getLocalDateString } from "../../../utils/date.js";
+import { getSymptomsBySpecialty } from "../../constants/medicalConstants.js";
 import QrCheckInScanner from "./QrCheckInScanner.jsx";
 import "../../styles/reception.css";
 import "../../styles/desktop-schedule.css";
@@ -14,6 +15,7 @@ const ROOM_API = "http://localhost:8080/api/rooms";
 const DOCTOR_API = "http://localhost:8080/api/doctors";
 const PATIENT_API = "http://localhost:8080/api/patients";
 const SPECIALTY_API = "http://localhost:8080/api/specialties";
+const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
 
 function ReceptionPage() {
   const today = getLocalDateString();
@@ -45,6 +47,7 @@ function ReceptionPage() {
   const [rooms, setRooms] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [queueList, setQueueList] = useState([]);
+  const [todaySchedules, setTodaySchedules] = useState([]);
 
   const [lookupAppointmentId, setLookupAppointmentId] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -129,6 +132,33 @@ function ReceptionPage() {
     fetchTodayQueue();
   }, [fetchTodayQueue]);
 
+  // Tải danh sách lịch trực theo ngày tiếp nhận
+  useEffect(() => {
+    const d = formData.receptionDate || today;
+    axios
+      .get(`${SCHEDULE_API}/date?date=${d}`)
+      .then((res) => {
+        const list = getCollectionData(res.data) || [];
+        setTodaySchedules(list);
+      })
+      .catch((err) => console.error("Lỗi tải lịch trực bác sĩ:", err));
+  }, [formData.receptionDate, today]);
+
+  // Kiểm tra bác sĩ có lịch trực hợp lệ trong ngày hay không
+  const isDoctorOnDuty = useCallback(
+    (docId) => {
+      if (!docId) return false;
+      return todaySchedules.some(
+        (s) =>
+          String(s.doctor?.id || s.doctorId) === String(docId) &&
+          !s.deleted &&
+          s.status !== "DaHuy" &&
+          s.status !== "CANCELLED",
+      );
+    },
+    [todaySchedules],
+  );
+
   // 4. Xử lý khi chọn Chuyên Khoa -> reset bác sĩ & phòng để lọc lại
   const handleSpecialtyChange = (specId) => {
     setSelectedSpecialtyId(specId);
@@ -139,24 +169,32 @@ function ReceptionPage() {
     }));
   };
 
-  // 5. Xử lý khi chọn Bác Sĩ -> tự gán phòng khám cùng chuyên khoa
+  // 5. Xử lý khi chọn Bác Sĩ -> tự gán phòng khám theo lịch trực hoặc chuyên khoa
   const handleDoctorChange = (selectedDoctorId) => {
     const doc = doctors.find((d) => String(d.id) === String(selectedDoctorId));
     let matchedRoomId = "";
 
     if (doc) {
-      const docDepartmentId =
-        doc.departmentId || doc.specialtyId || doc.specialty?.id;
-      if (docDepartmentId) {
-        const foundRoom = rooms.find((r) => {
-          const roomDept =
-            r.departmentId ||
-            r.specialtyId ||
-            r.machuyenkhoa ||
-            r.specialty?.id;
-          return roomDept && String(roomDept) === String(docDepartmentId);
-        });
-        if (foundRoom) matchedRoomId = foundRoom.id;
+      // Ưu tiên phòng trực từ lịch phân công thực tế
+      const dutySchedule = todaySchedules.find(
+        (s) => String(s.doctor?.id || s.doctorId) === String(selectedDoctorId) && !s.deleted
+      );
+      if (dutySchedule && dutySchedule.roomId) {
+        matchedRoomId = dutySchedule.roomId;
+      } else {
+        const docDepartmentId =
+          doc.departmentId || doc.specialtyId || doc.specialty?.id;
+        if (docDepartmentId) {
+          const foundRoom = rooms.find((r) => {
+            const roomDept =
+              r.departmentId ||
+              r.specialtyId ||
+              r.machuyenkhoa ||
+              r.specialty?.id;
+            return roomDept && String(roomDept) === String(docDepartmentId);
+          });
+          if (foundRoom) matchedRoomId = foundRoom.id;
+        }
       }
     }
 
@@ -165,6 +203,35 @@ function ReceptionPage() {
       doctorId: selectedDoctorId,
       roomId: matchedRoomId || prev.roomId,
     }));
+  };
+
+  // Triệu chứng thường gặp theo chuyên khoa đang chọn
+  const suggestedSymptoms = useMemo(() => {
+    return getSymptomsBySpecialty(selectedSpecialtyId);
+  }, [selectedSpecialtyId]);
+
+  const handleToggleSymptom = (symp) => {
+    const current = (formData.initialSymptoms || "").trim();
+    if (!current) {
+      setFormData((prev) => ({ ...prev, initialSymptoms: symp }));
+      return;
+    }
+    const items = current
+      .split(/[,;\n]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const exists = items.some(
+      (item) => item.toLowerCase() === symp.toLowerCase(),
+    );
+    let updated;
+    if (exists) {
+      updated = items.filter(
+        (item) => item.toLowerCase() !== symp.toLowerCase(),
+      );
+    } else {
+      updated = [...items, symp];
+    }
+    setFormData((prev) => ({ ...prev, initialSymptoms: updated.join(", ") }));
   };
 
   // 6. Quét QR / tra cứu lịch hẹn tại quầy (mọi lần quét đều ghi vết vào bảng lichsucheckin)
@@ -333,6 +400,19 @@ function ReceptionPage() {
     if (!formData.roomId) return alert("Vui lòng chọn Phòng khám!");
     if (!formData.doctorId) return alert("Vui lòng chọn Bác sĩ khám!");
 
+    // Chặn nếu bác sĩ không có lịch trực trong ngày tiếp nhận
+    if (!isDoctorOnDuty(formData.doctorId)) {
+      const doc = doctors.find((d) => String(d.id) === String(formData.doctorId));
+      const docName = doc?.user?.fullName || doc?.fullName || doc?.name || formData.doctorId;
+      Swal.fire({
+        icon: "error",
+        title: "Bác sĩ không có lịch trực!",
+        html: `Bác sĩ <b>${docName}</b> không có lịch trực vào ngày <b>${formData.receptionDate || today}</b>.<br/><br/><span style="color: #dc2626; font-size: 13.5px; font-weight: 600;">Hệ thống đã chặn không cho lưu tiếp đón! Vui lòng chọn bác sĩ đang có lịch trực.</span>`,
+        confirmButtonColor: "#dc2626",
+      });
+      return;
+    }
+
     const payload = {
       ...formData,
       employeeId: activeStaffId,
@@ -357,7 +437,13 @@ function ReceptionPage() {
         handleResetForm();
       })
       .catch((err) => {
-        alert(err.response?.data?.message || "Lỗi khi tạo lượt tiếp đón!");
+        const msg = err.response?.data?.message || err.message || "Lỗi khi tạo lượt tiếp đón!";
+        Swal.fire({
+          icon: "error",
+          title: "Không thể tiếp đón",
+          text: msg,
+          confirmButtonColor: "#dc2626",
+        });
       });
   };
 
@@ -655,13 +741,20 @@ function ReceptionPage() {
                       d.departmentId || d.specialtyId || d.specialty?.id;
                     return String(docSpec) === String(selectedSpecialtyId);
                   })
-                  .map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.user?.fullName || d.fullName || d.name || "Bác sĩ"} (
-                      {d.id})
-                    </option>
-                  ))}
+                  .map((d) => {
+                    const onDuty = isDoctorOnDuty(d.id);
+                    return (
+                      <option key={d.id} value={d.id}>
+                        {d.user?.fullName || d.fullName || d.name || "Bác sĩ"} ({d.id}) {onDuty ? "✓ [Có lịch trực]" : "✗ [Không có lịch trực]"}
+                      </option>
+                    );
+                  })}
               </select>
+              {formData.doctorId && !isDoctorOnDuty(formData.doctorId) && (
+                <div style={{ color: "#dc2626", fontSize: "12px", marginTop: "4px", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
+                  ⚠️ Bác sĩ này KHÔNG CÓ lịch trực ngày {formData.receptionDate || today}! Hệ thống sẽ chặn lưu.
+                </div>
+              )}
             </div>
 
             <div>
@@ -701,13 +794,50 @@ function ReceptionPage() {
 
           {/* TRIỆU CHỨNG */}
           <div>
-            <label className="input-label">
-              Triệu Chứng / Lý Do Đến Khám *
-            </label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <label className="input-label" style={{ marginBottom: 0 }}>
+                Triệu Chứng / Lý Do Đến Khám *
+              </label>
+              <span style={{ fontSize: "12px", color: "#0284c7", fontWeight: 500 }}>
+                {selectedSpecialtyId ? "Gợi ý triệu chứng theo khoa:" : "Gợi ý triệu chứng phổ biến:"}
+              </span>
+            </div>
+
+            {/* Quick symptom chips */}
+            {suggestedSymptoms && suggestedSymptoms.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                {suggestedSymptoms.map((symp, idx) => {
+                  const currentText = (formData.initialSymptoms || "").toLowerCase();
+                  const isSelected = currentText.includes(symp.toLowerCase());
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleToggleSymptom(symp)}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: "16px",
+                        fontSize: "12px",
+                        border: isSelected ? "1px solid #0284c7" : "1px solid #cbd5e1",
+                        backgroundColor: isSelected ? "#e0f2fe" : "#f8fafc",
+                        color: isSelected ? "#0369a1" : "#475569",
+                        cursor: "pointer",
+                        fontWeight: isSelected ? "600" : "normal",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      {isSelected ? "✓ " : "+ "}
+                      {symp}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <textarea
               className="form-control"
               rows="2"
-              placeholder="Ghi nhận triệu chứng sơ bộ..."
+              placeholder="Ghi nhận triệu chứng sơ bộ hoặc bấm chọn gợi ý ở trên..."
               value={formData.initialSymptoms}
               onChange={(e) =>
                 setFormData({ ...formData, initialSymptoms: e.target.value })

@@ -1,9 +1,10 @@
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { getCollectionData } from "../../../utils/apiResponse.js";
 import { getLocalDateString } from "../../../utils/date.js";
 import { downloadTicketPdf } from "../../../utils/appointmentTicketPdf.js";
+import { getSymptomsBySpecialty } from "../../constants/medicalConstants.js";
 import "../../styles/booking.css";
 import "../../styles/desktop-schedule.css";
 
@@ -74,6 +75,35 @@ function PatientBookingPage({ patientProfile = null, isMobile = false }) {
     } else {
       setFilteredDoctors([]);
     }
+  };
+
+  // Triệu chứng thường gặp theo chuyên khoa đang chọn
+  const suggestedSymptoms = useMemo(() => {
+    return getSymptomsBySpecialty(bookingData.specialtyId);
+  }, [bookingData.specialtyId]);
+
+  const handleToggleSymptom = (symp) => {
+    const current = (bookingData.reason || "").trim();
+    if (!current) {
+      setBookingData((prev) => ({ ...prev, reason: symp }));
+      return;
+    }
+    const items = current
+      .split(/[,;\n]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const exists = items.some(
+      (item) => item.toLowerCase() === symp.toLowerCase(),
+    );
+    let updated;
+    if (exists) {
+      updated = items.filter(
+        (item) => item.toLowerCase() !== symp.toLowerCase(),
+      );
+    } else {
+      updated = [...items, symp];
+    }
+    setBookingData((prev) => ({ ...prev, reason: updated.join(", ") }));
   };
 
   // Tìm kiếm ca trực khả dụng của bác sĩ trong ngày chọn
@@ -414,11 +444,47 @@ function PatientBookingPage({ patientProfile = null, isMobile = false }) {
               </div>
 
               <div>
-                <label className="input-label">Triệu Chứng / Lý Do Khám</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                  <label className="input-label" style={{ marginBottom: 0 }}>Triệu Chứng / Lý Do Khám</label>
+                  <span style={{ fontSize: "12px", color: "#0284c7", fontWeight: 500 }}>
+                    {bookingData.specialtyId ? "Gợi ý triệu chứng theo khoa:" : "Gợi ý triệu chứng phổ biến:"}
+                  </span>
+                </div>
+
+                {suggestedSymptoms && suggestedSymptoms.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                    {suggestedSymptoms.map((symp, idx) => {
+                      const currentText = (bookingData.reason || "").toLowerCase();
+                      const isSelected = currentText.includes(symp.toLowerCase());
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleToggleSymptom(symp)}
+                          style={{
+                            padding: "4px 10px",
+                            borderRadius: "16px",
+                            fontSize: "12px",
+                            border: isSelected ? "1px solid #0284c7" : "1px solid #cbd5e1",
+                            backgroundColor: isSelected ? "#e0f2fe" : "#f8fafc",
+                            color: isSelected ? "#0369a1" : "#475569",
+                            cursor: "pointer",
+                            fontWeight: isSelected ? "600" : "normal",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          {isSelected ? "✓ " : "+ "}
+                          {symp}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <textarea
                   className="form-control"
                   rows="3"
-                  placeholder="Mô tả tóm tắt tình trạng khó chịu hoặc bệnh lý hiện tại..."
+                  placeholder="Mô tả tóm tắt tình trạng khó chịu hoặc chọn gợi ý ở trên..."
                   value={bookingData.reason}
                   onChange={(e) =>
                     setBookingData({ ...bookingData, reason: e.target.value })

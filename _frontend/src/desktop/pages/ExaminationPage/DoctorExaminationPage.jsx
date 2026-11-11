@@ -3,6 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { getCollectionData } from "../../../utils/apiResponse.js";
 import { getLocalDateString } from "../../../utils/date.js";
+import {
+  ICD10_CATALOG,
+  ICD10_MEDICINE_PRESETS,
+} from "../../constants/medicalConstants.js";
 import "../../styles/desktop-schedule.css";
 import "../../styles/examination.css";
 
@@ -41,6 +45,103 @@ const FALLBACK_SERVICES = [
     price: 450000,
   },
 ];
+
+// Danh mục mẫu kết quả định sẵn cho từng loại dịch vụ chỉ định
+const SERVICE_RESULT_TEMPLATES = {
+  DV_ECG: [
+    "Bình thường - Nhịp xoang đều, tần số trong giới hạn sinh lý",
+    "Nhịp xoang nhanh (tần số > 100 lần/phút)",
+    "Nhịp xoang chậm (tần số < 60 lần/phút)",
+    "Ngoại tâm thu thất rải rác",
+    "Thiếu máu cơ tim cục bộ (sóng T âm / ST chênh nhẹ)",
+    "Dày thất trái theo tiêu chuẩn điện thế",
+  ],
+  DV_ECHO: [
+    "Bình thường - Chức năng tâm thu thất trái bảo tồn (EF > 60%), không rối loạn vận động vùng",
+    "Hở van hai lá nhẹ (1/4), buồng thất trái không dãn",
+    "Hở van động mạch chủ nhẹ (1/4), không hẹp van",
+    "Dày đồng tâm thành thất trái nhẹ, giảm thư giãn thất trái độ 1",
+    "Suy giảm chức năng tâm thu thất trái mức độ nhẹ (EF 48%)",
+  ],
+  DV_NSDD: [
+    "Bình thường - Niêm mạc thực quản, dạ dày và tá tràng trơn láng",
+    "Viêm sung huyết hang vị dạ dày mức độ nhẹ",
+    "Viêm trợt niêm mạc hang vị dạ dày",
+    "Trào ngược dạ dày thực quản (GERD độ A)",
+    "Loét bờ cong nhỏ dạ dày (kích thước ~5mm, đáy sạch)",
+    "Viêm loét hành tá tràng sung huyết",
+  ],
+  DV_XNBL: [
+    "Âm tính (-) - Không nhiễm vi khuẩn Helicobacter pylori",
+    "Dương tính (+) - Nhiễm vi khuẩn Helicobacter pylori",
+    "Dương tính mạnh (+++) - Nhiễm Helicobacter pylori nồng độ cao",
+  ],
+};
+
+function getResultTemplatesForService(serviceId, serviceName = "") {
+  if (serviceId && SERVICE_RESULT_TEMPLATES[serviceId]) {
+    return SERVICE_RESULT_TEMPLATES[serviceId];
+  }
+  const sName = (serviceName || "").toLowerCase();
+  if (
+    sName.includes("x-quang") ||
+    sName.includes("xquang") ||
+    sName.includes("chụp")
+  ) {
+    return [
+      "Bình thường - Tim phổi chưa thấy tổn thương bệnh lý trên phim",
+      "Viêm phế quản - Rốn phổi hai bên đậm, tăng tuần hoàn rốn phổi",
+      "Đám mờ thùy dưới phổi (hình ảnh theo dõi viêm phổi)",
+      "Bóng tim to nhẹ, các phế trường sáng",
+      "Không thấy tổn thương gãy xương hoặc trật khớp",
+    ];
+  }
+  if (
+    sName.includes("máu") ||
+    sName.includes("huyết học") ||
+    sName.includes("cbc")
+  ) {
+    return [
+      "Các chỉ số tế bào máu trong giới hạn bình thường",
+      "Bạch cầu tăng nhẹ (theo dõi phản ứng viêm / nhiễm khuẩn)",
+      "Thiếu máu nhược sắc mức độ nhẹ (Hb giảm nhẹ)",
+      "Tiểu cầu trong giới hạn bình thường",
+    ];
+  }
+  if (
+    sName.includes("đường") ||
+    sName.includes("glucose") ||
+    sName.includes("hba1c")
+  ) {
+    return [
+      "Đường huyết lúc đói bình thường (4.4 - 6.1 mmol/L)",
+      "Tăng đường huyết lúc đói (> 7.0 mmol/L)",
+      "Hạ đường huyết nhẹ (< 3.9 mmol/L)",
+      "HbA1c đạt mục tiêu kiểm soát (< 6.5%)",
+    ];
+  }
+  if (sName.includes("nước tiểu")) {
+    return [
+      "Tổng phân tích nước tiểu 10 thông số trong giới hạn bình thường",
+      "Có hồng cầu và bạch cầu niệu (theo dõi nhiễm khuẩn tiết niệu)",
+      "Protein niệu dương tính (+)",
+    ];
+  }
+  if (sName.includes("siêu âm")) {
+    return [
+      "Chưa phát hiện hình ảnh bất thường trên siêu âm",
+      "Gan nhiễm mỡ độ 1, nhu mô gan đều",
+      "Sỏi thận kích thước nhỏ (< 4mm), đài bể thận không ứ nước",
+      "Dày thành túi mật nhẹ",
+    ];
+  }
+  return [
+    "Bình thường - Không phát hiện dấu hiệu bất thường",
+    "Kết quả trong giới hạn sinh lý bình thường",
+    "Có dấu hiệu viêm nhẹ, đề nghị theo dõi lâm sàng",
+    "Bất thường - Đề nghị làm thêm chẩn đoán chuyên sâu",
+  ];
+}
 
 const STATUS_META = {
   ChoKham: { label: "Chờ khám", cls: "status-chokham" },
@@ -139,6 +240,13 @@ function DoctorExaminationPage() {
   const [vitals, setVitals] = useState(EMPTY_VITALS);
   const [medicalRecordId, setMedicalRecordId] = useState("");
 
+  /* ---------- ICD-10 & Chẩn đoán ---------- */
+  const [primaryIcd, setPrimaryIcd] = useState("");
+  const [secondaryIcds, setSecondaryIcds] = useState([]);
+  const [clinicalDiagnosisNote, setClinicalDiagnosisNote] = useState("");
+  const [isManualDiagnosis, setIsManualDiagnosis] = useState(false);
+  const [showAllSpecialtyIcd, setShowAllSpecialtyIcd] = useState(false);
+
   /* ---------- Đơn thuốc / chỉ định ---------- */
   const [medLines, setMedLines] = useState([
     { medicineId: "", quantity: 1, dosage: "", unitPrice: 0 },
@@ -151,6 +259,11 @@ function DoctorExaminationPage() {
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState(false);
   const [showPrint, setShowPrint] = useState(false);
+
+  /* ---------- Modal trả kết quả dịch vụ ---------- */
+  const [resultModalIndex, setResultModalIndex] = useState(null);
+  const [selectedTemplateResult, setSelectedTemplateResult] = useState("");
+  const [customResultText, setCustomResultText] = useState("");
 
   const notify = (type, text) => setNotice({ type, text, at: Date.now() });
 
@@ -345,6 +458,10 @@ function DoctorExaminationPage() {
           medLines,
           svcLines,
           medicalRecordId,
+          primaryIcd,
+          secondaryIcds,
+          clinicalDiagnosisNote,
+          isManualDiagnosis,
           savedAt: new Date().toISOString(),
         }),
       );
@@ -360,9 +477,13 @@ function DoctorExaminationPage() {
     setSelected(item);
     setPatient(null);
     setHistory([]);
-    setExam(EMPTY_EXAM);
+    setExam({ ...EMPTY_EXAM, symptoms: item.initialSymptoms || "" });
     setVitals(EMPTY_VITALS);
     setMedicalRecordId("");
+    setPrimaryIcd("");
+    setSecondaryIcds([]);
+    setClinicalDiagnosisNote("");
+    setIsManualDiagnosis(false);
     setMedLines([{ medicineId: "", quantity: 1, dosage: "", unitPrice: 0 }]);
     setSvcLines([{ serviceId: "", quantity: 1, unitPrice: 0 }]);
 
@@ -393,6 +514,15 @@ function DoctorExaminationPage() {
         if (Array.isArray(draft.svcLines) && draft.svcLines.length) {
           setSvcLines(draft.svcLines);
         }
+        if (draft.primaryIcd !== undefined) setPrimaryIcd(draft.primaryIcd);
+        else if (draft.exam?.diagnosis) {
+          const match = draft.exam.diagnosis.match(/^\[([A-Z0-9.]+)\]/);
+          if (match && match[1]) setPrimaryIcd(match[1]);
+        }
+        if (draft.secondaryIcds !== undefined) setSecondaryIcds(draft.secondaryIcds);
+        if (draft.clinicalDiagnosisNote !== undefined) setClinicalDiagnosisNote(draft.clinicalDiagnosisNote);
+        if (draft.isManualDiagnosis !== undefined) setIsManualDiagnosis(draft.isManualDiagnosis);
+
         setMedicalRecordId(draft.medicalRecordId || "");
         notify(
           "info",
@@ -633,7 +763,8 @@ function DoctorExaminationPage() {
           serviceId: line.serviceId,
           quantity: Number(line.quantity) || 1,
           unitPrice: Number(line.unitPrice) || 0,
-          status: "DaChiDinh",
+          status: line.result ? "COMPLETED" : "DaChiDinh",
+          result: line.result || "",
         });
       } catch (err) {
         if (isMissingApi(err)) {
@@ -916,6 +1047,162 @@ function DoctorExaminationPage() {
     [svcLines],
   );
 
+  /* ================= ICD-10 & PHÁC ĐỒ THUỐC ================= */
+
+  // Lấy thông tin bác sĩ & chuyên khoa của bác sĩ để lọc ICD-10
+  const currentDoctor = useMemo(() => {
+    return doctors.find((d) => String(d.id) === String(doctorId));
+  }, [doctors, doctorId]);
+
+  const doctorSpecialtyId = useMemo(() => {
+    return (
+      currentDoctor?.specialty?.id ||
+      currentDoctor?.specialtyId ||
+      currentDoctor?.departmentId ||
+      currentDoctor?.machuyenkhoa ||
+      ""
+    );
+  }, [currentDoctor]);
+
+  const doctorSpecialtyName = useMemo(() => {
+    return (
+      currentDoctor?.specialty?.name ||
+      currentDoctor?.specialty?.specialtyName ||
+      currentDoctor?.specialtyName ||
+      (doctorSpecialtyId ? `Khoa ${doctorSpecialtyId}` : "")
+    );
+  }, [currentDoctor, doctorSpecialtyId]);
+
+  // Lọc danh mục mã bệnh ICD-10 theo chuyên khoa của bác sĩ
+  const availableIcdCatalog = useMemo(() => {
+    if (showAllSpecialtyIcd || !doctorSpecialtyId) {
+      return ICD10_CATALOG;
+    }
+    const specKey = String(doctorSpecialtyId).toUpperCase();
+    const filtered = ICD10_CATALOG.filter((item) => {
+      if (!item.specialty) return true;
+      const itemSpec = String(item.specialty).toUpperCase();
+      if (specKey.includes("TIM") && itemSpec.includes("TIM")) return true;
+      if (
+        (specKey.includes("TAI") ||
+          specKey.includes("TMH") ||
+          specKey.includes("HOHAP")) &&
+        itemSpec.includes("TAI")
+      )
+        return true;
+      if (specKey.includes("NHI") && itemSpec.includes("NHI")) return true;
+      if (
+        specKey.includes("NOI") &&
+        (itemSpec.includes("NOI") || itemSpec.includes("DEFAULT"))
+      )
+        return true;
+      return itemSpec === specKey;
+    });
+    return filtered.length > 0 ? filtered : ICD10_CATALOG;
+  }, [showAllSpecialtyIcd, doctorSpecialtyId]);
+
+  // Cập nhật exam.diagnosis đồng bộ với ICD-10
+  const buildDiagnosisString = (pCode, sCodes, note) => {
+    const parts = [];
+    if (pCode) {
+      const pItem = ICD10_CATALOG.find((c) => c.code === pCode);
+      parts.push(`[${pCode}] ${pItem ? pItem.name : ""}`.trim());
+    }
+    if (Array.isArray(sCodes) && sCodes.length > 0) {
+      const sItems = sCodes
+        .map((sc) => {
+          const item = ICD10_CATALOG.find((c) => c.code === sc);
+          return `[${sc}] ${item ? item.name : ""}`.trim();
+        })
+        .join(", ");
+      parts.push(`Kèm theo: ${sItems}`);
+    }
+    if (note && note.trim()) {
+      parts.push(`Chi tiết: ${note.trim()}`);
+    }
+    return parts.join(" ; ");
+  };
+
+  const handleSelectPrimaryIcd = (code) => {
+    setPrimaryIcd(code);
+    if (!isManualDiagnosis) {
+      const newDiag = buildDiagnosisString(code, secondaryIcds, clinicalDiagnosisNote);
+      setExam((prev) => ({ ...prev, diagnosis: newDiag }));
+    }
+  };
+
+  const handleToggleSecondaryIcd = (code) => {
+    let updated;
+    if (secondaryIcds.includes(code)) {
+      updated = secondaryIcds.filter((c) => c !== code);
+    } else {
+      updated = [...secondaryIcds, code];
+    }
+    setSecondaryIcds(updated);
+    if (!isManualDiagnosis) {
+      const newDiag = buildDiagnosisString(primaryIcd, updated, clinicalDiagnosisNote);
+      setExam((prev) => ({ ...prev, diagnosis: newDiag }));
+    }
+  };
+
+  const handleClinicalNoteChange = (text) => {
+    setClinicalDiagnosisNote(text);
+    if (!isManualDiagnosis) {
+      const newDiag = buildDiagnosisString(primaryIcd, secondaryIcds, text);
+      setExam((prev) => ({ ...prev, diagnosis: newDiag }));
+    }
+  };
+
+  // Phác đồ gợi ý thuốc theo mã ICD-10 chính
+  const suggestedPrescription = useMemo(() => {
+    if (!primaryIcd || !ICD10_MEDICINE_PRESETS[primaryIcd]) return null;
+    const preset = ICD10_MEDICINE_PRESETS[primaryIcd];
+    const icdItem = ICD10_CATALOG.find((c) => c.code === primaryIcd);
+    return {
+      icdCode: primaryIcd,
+      name: icdItem?.name || primaryIcd,
+      items: preset.map((p) => {
+        const med = medicines.find((m) => m.id === p.medicineId);
+        return {
+          medicineId: p.medicineId,
+          medicineName: med?.name || p.medicineId,
+          quantity: p.quantity,
+          dosage: p.dosage,
+          unitPrice: med?.price || med?.unitPrice || 0,
+        };
+      }),
+    };
+  }, [primaryIcd, medicines]);
+
+  // Áp dụng phác đồ thuốc gợi ý
+  const handleApplyIcdPrescription = () => {
+    if (!suggestedPrescription || !suggestedPrescription.items.length) return;
+    const newItems = suggestedPrescription.items.map((it) => ({
+      medicineId: it.medicineId,
+      quantity: it.quantity,
+      dosage: it.dosage,
+      unitPrice: it.unitPrice || 0,
+    }));
+
+    // Nếu medLines hiện tại chỉ có 1 dòng rỗng thì thay thế
+    const validLines = medLines.filter((l) => l.medicineId);
+    if (validLines.length === 0) {
+      setMedLines(newItems);
+    } else {
+      const existingIds = new Set(validLines.map((l) => l.medicineId));
+      const toAdd = newItems.filter((it) => !existingIds.has(it.medicineId));
+      if (toAdd.length === 0) {
+        notify("info", "Các thuốc trong phác đồ đã có sẵn trong đơn.");
+        return;
+      }
+      setMedLines([...validLines, ...toAdd]);
+    }
+    notify(
+      "success",
+      `Đã áp dụng phác đồ thuốc theo chuẩn ICD-10 cho [${suggestedPrescription.icdCode} - ${suggestedPrescription.name}]!`,
+    );
+  };
+
   /* ================= XỬ LÝ DÒNG KÊ ================= */
 
   const updateMedLine = (index, patch) => {
@@ -954,7 +1241,43 @@ function DoctorExaminationPage() {
     updateSvcLine(index, {
       serviceId,
       unitPrice: svc ? svc.price : 0,
+      result: "",
     });
+  };
+
+  const openResultModal = (index) => {
+    const line = svcLines[index];
+    if (!line || !line.serviceId) return;
+    setResultModalIndex(index);
+    setCustomResultText(line.result || "");
+    setSelectedTemplateResult(line.result || "");
+  };
+
+  const closeResultModal = () => {
+    setResultModalIndex(null);
+    setCustomResultText("");
+    setSelectedTemplateResult("");
+  };
+
+  const handleApplyResult = () => {
+    if (resultModalIndex === null) return;
+    const finalResult = customResultText.trim();
+    setSvcLines((prev) =>
+      prev.map((l, i) =>
+        i === resultModalIndex ? { ...l, result: finalResult } : l,
+      ),
+    );
+    closeResultModal();
+  };
+
+  const handleClearResult = () => {
+    if (resultModalIndex === null) return;
+    setSvcLines((prev) =>
+      prev.map((l, i) =>
+        i === resultModalIndex ? { ...l, result: "" } : l,
+      ),
+    );
+    closeResultModal();
   };
 
   /* ================= HIỂN THỊ ================= */
@@ -1468,14 +1791,37 @@ function DoctorExaminationPage() {
                 />
               </div>
 
-              {/* Khám lâm sàng */}
+              {/* Khám lâm sàng: 2 cột cân đối */}
               <div className="exam-form-grid">
                 <div className="exam-form-section">
-                  <label htmlFor="ex-symptoms">
-                    Triệu chứng <span className="exam-required">*</span>
-                  </label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <label htmlFor="ex-symptoms" style={{ margin: 0 }}>
+                      Triệu chứng <span className="exam-required">*</span>
+                    </label>
+                    {selected?.initialSymptoms && !exam.symptoms && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExam({ ...exam, symptoms: selected.initialSymptoms })
+                        }
+                        disabled={!examEditable}
+                        style={{
+                          fontSize: "11px",
+                          color: "#0284c7",
+                          background: "#f0f9ff",
+                          border: "1px solid #bae6fd",
+                          borderRadius: "4px",
+                          padding: "2px 6px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Lấy từ tiếp nhận
+                      </button>
+                    )}
+                  </div>
                   <textarea
                     id="ex-symptoms"
+                    rows="3"
                     placeholder="Chief complaint, diễn biến, thời gian..."
                     value={exam.symptoms}
                     disabled={!examEditable}
@@ -1484,10 +1830,12 @@ function DoctorExaminationPage() {
                     }
                   />
                 </div>
+
                 <div className="exam-form-section">
                   <label htmlFor="ex-general">Khám toàn trạng</label>
                   <textarea
                     id="ex-general"
+                    rows="3"
                     placeholder="Tỉnh táo, da niêm mạc, tim phổi..."
                     value={exam.generalExam}
                     disabled={!examEditable}
@@ -1496,10 +1844,12 @@ function DoctorExaminationPage() {
                     }
                   />
                 </div>
+
                 <div className="exam-form-section">
                   <label htmlFor="ex-local">Khám tại chỗ</label>
                   <textarea
                     id="ex-local"
+                    rows="3"
                     placeholder="Phần tử thuộc chuyên khoa..."
                     value={exam.localExam}
                     disabled={!examEditable}
@@ -1508,24 +1858,12 @@ function DoctorExaminationPage() {
                     }
                   />
                 </div>
-                <div className="exam-form-section">
-                  <label htmlFor="ex-diagnosis">
-                    Chẩn đoán <span className="exam-required">*</span>
-                  </label>
-                  <textarea
-                    id="ex-diagnosis"
-                    placeholder="Chẩn đoán chính / phân biệt..."
-                    value={exam.diagnosis}
-                    disabled={!examEditable}
-                    onChange={(e) =>
-                      setExam({ ...exam, diagnosis: e.target.value })
-                    }
-                  />
-                </div>
+
                 <div className="exam-form-section">
                   <label htmlFor="ex-prognosis">Tiên lượng</label>
                   <textarea
                     id="ex-prognosis"
+                    rows="3"
                     placeholder="Dự tiến triển, tái khám..."
                     value={exam.prognosis}
                     disabled={!examEditable}
@@ -1534,18 +1872,180 @@ function DoctorExaminationPage() {
                     }
                   />
                 </div>
-                <div className="exam-form-section">
-                  <label htmlFor="ex-notes">
-                    Ghi chú điều trị <span className="exam-required">*</span>
-                  </label>
-                  <textarea
-                    id="ex-notes"
-                    placeholder="Hướng điều trị, dặn dò, theo dõi..."
-                    value={exam.notes}
-                    disabled={!examEditable}
-                    onChange={(e) => setExam({ ...exam, notes: e.target.value })}
-                  />
+              </div>
+
+              {/* Chẩn đoán (Chuẩn ICD-10): Khung độc lập, toàn chiều rộng, chuẩn hóa y khoa */}
+              <div className="exam-form-section exam-icd-diagnosis-section" style={{ marginTop: "12px" }}>
+                <div className="exam-icd-header">
+                  <div className="exam-icd-title-group">
+                    <label
+                      htmlFor="ex-diagnosis"
+                      style={{
+                        margin: 0,
+                        fontWeight: 700,
+                        fontSize: "13px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      Chẩn đoán (Chuẩn ICD-10) <span className="exam-required">*</span>
+                    </label>
+                    {doctorSpecialtyName && (
+                      <span className="exam-icd-dept-badge">
+                        Khoa: {doctorSpecialtyName}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="exam-icd-actions-group">
+                    <label className="exam-icd-filter-toggle">
+                      <input
+                        type="checkbox"
+                        checked={showAllSpecialtyIcd}
+                        onChange={(e) => setShowAllSpecialtyIcd(e.target.checked)}
+                      />
+                      <span>Hiện tất cả chuyên khoa</span>
+                    </label>
+                    <button
+                      type="button"
+                      className="exam-icd-mode-btn"
+                      onClick={() => setIsManualDiagnosis(!isManualDiagnosis)}
+                    >
+                      {isManualDiagnosis ? "Dùng chọn ICD-10" : "Sửa văn bản trực tiếp"}
+                    </button>
+                  </div>
                 </div>
+
+                {!isManualDiagnosis ? (
+                  <div className="exam-icd-controls">
+                    {/* Dòng 1: Chọn mã ICD-10 bệnh chính */}
+                    <div>
+                      <label className="exam-field-sublabel">
+                        Mã bệnh chính (ICD-10 chính) <span className="exam-required">*</span>:
+                      </label>
+                      <select
+                        id="ex-primary-icd"
+                        className="form-control exam-icd-select"
+                        value={primaryIcd}
+                        disabled={!examEditable}
+                        onChange={(e) => handleSelectPrimaryIcd(e.target.value)}
+                      >
+                        <option value="">
+                          {doctorSpecialtyName && !showAllSpecialtyIcd
+                            ? `-- Chọn mã ICD-10 (${doctorSpecialtyName}) --`
+                            : "-- Chọn mã bệnh chính ICD-10 --"}
+                        </option>
+                        {availableIcdCatalog.map((it) => (
+                          <option key={it.code} value={it.code}>
+                            [{it.code}] {it.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Dòng 2: Hai cột cân xứng - Bệnh kèm theo & Diễn giải lâm sàng */}
+                    <div className="exam-icd-two-cols">
+                      {/* Cột trái: Bệnh kèm theo */}
+                      <div className="exam-icd-col">
+                        <label className="exam-field-sublabel">
+                          Bệnh kèm theo (ICD-10 phụ):
+                        </label>
+                        <select
+                          className="form-control exam-icd-select-secondary"
+                          value=""
+                          disabled={!examEditable}
+                          onChange={(e) => {
+                            if (e.target.value) handleToggleSecondaryIcd(e.target.value);
+                          }}
+                        >
+                          <option value="">+ Thêm mã bệnh kèm theo...</option>
+                          {(showAllSpecialtyIcd ? ICD10_CATALOG : availableIcdCatalog)
+                            .filter(
+                              (it) =>
+                                it.code !== primaryIcd &&
+                                !secondaryIcds.includes(it.code)
+                            )
+                            .map((it) => (
+                              <option key={it.code} value={it.code}>
+                                [{it.code}] {it.name}
+                              </option>
+                            ))}
+                        </select>
+
+                        {/* Chips mã kèm theo đã chọn */}
+                        {secondaryIcds.length > 0 && (
+                          <div className="exam-icd-chips-wrap">
+                            {secondaryIcds.map((code) => {
+                              const it = ICD10_CATALOG.find((c) => c.code === code);
+                              return (
+                                <span key={code} className="exam-icd-chip">
+                                  <strong>[{code}]</strong> {it ? it.name : code}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleSecondaryIcd(code)}
+                                    disabled={!examEditable}
+                                    title="Xóa bệnh kèm theo"
+                                  >
+                                    ✕
+                                  </button>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Cột phải: Diễn giải chi tiết lâm sàng */}
+                      <div className="exam-icd-col">
+                        <label className="exam-field-sublabel">
+                          Diễn giải / Chi tiết lâm sàng:
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="VD: Cấp tính, khởi phát ngày thứ 3..."
+                          value={clinicalDiagnosisNote}
+                          disabled={!examEditable}
+                          onChange={(e) =>
+                            handleClinicalNoteChange(e.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <textarea
+                      id="ex-diagnosis"
+                      rows="3"
+                      placeholder="Nhập chẩn đoán tự do..."
+                      value={exam.diagnosis}
+                      disabled={!examEditable}
+                      onChange={(e) =>
+                        setExam({ ...exam, diagnosis: e.target.value })
+                      }
+                    />
+                    <small style={{ color: "#64748b", fontSize: "11px" }}>
+                      Đang ở chế độ nhập tự do. Nội dung này sẽ được lưu trực tiếp vào hồ sơ bệnh án.
+                    </small>
+                  </div>
+                )}
+              </div>
+
+              {/* Ghi chú điều trị: Khung độc lập, rộng rãi */}
+              <div className="exam-form-section" style={{ marginTop: "12px" }}>
+                <label htmlFor="ex-notes">
+                  Ghi chú điều trị <span className="exam-required">*</span>
+                </label>
+                <textarea
+                  id="ex-notes"
+                  rows="2"
+                  placeholder="Hướng điều trị, dặn dò, theo dõi..."
+                  value={exam.notes}
+                  disabled={!examEditable}
+                  onChange={(e) => setExam({ ...exam, notes: e.target.value })}
+                />
               </div>
             </div>
           )}
@@ -1567,6 +2067,40 @@ function DoctorExaminationPage() {
           ) : (
             <>
               <div className="exam-right-scroll">
+                {/* Gợi ý phác đồ thuốc theo chuẩn ICD-10 */}
+                {suggestedPrescription && (
+                  <div className="exam-icd-presc-box">
+                    <div className="exam-icd-presc-header">
+                      <div className="exam-icd-presc-title">
+                        <span className="exam-icd-code-badge">
+                          {suggestedPrescription.icdCode}
+                        </span>
+                        <span>
+                          Gợi ý phác đồ: <strong>{suggestedPrescription.name}</strong>
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="exam-icd-apply-btn"
+                        onClick={handleApplyIcdPrescription}
+                        disabled={!examEditable}
+                        title="Tự động điền danh mục thuốc và liều lượng gợi ý theo mã ICD-10"
+                      >
+                        Áp dụng phác đồ gợi ý
+                      </button>
+                    </div>
+                    <div className="exam-icd-presc-items">
+                      {suggestedPrescription.items.map((it, idx) => (
+                        <div key={idx} className="exam-icd-presc-item">
+                          <span className="exam-icd-presc-name">• <strong>{it.medicineName}</strong></span>
+                          <span className="exam-icd-presc-qty">SL: {it.quantity}</span>
+                          <span className="exam-icd-presc-dosage">({it.dosage})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Đơn thuốc */}
                 <div className="exam-sub-title">
                   Đơn thuốc
@@ -1727,17 +2261,54 @@ function DoctorExaminationPage() {
                             style={{
                               fontSize: "11px",
                               color: "#475569",
-                              marginTop: "3px",
+                              marginTop: "4px",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              flexWrap: "wrap",
+                              gap: "4px",
                             }}
                           >
-                            Đơn giá: {formatVnd(line.unitPrice)} · Thành tiền:{" "}
-                            <b style={{ color: "#0d47a1" }}>
-                              {formatVnd(
-                                (Number(line.quantity) || 0) *
-                                  (Number(line.unitPrice) || 0),
-                              )}
-                            </b>
+                            <span>
+                              Đơn giá: {formatVnd(line.unitPrice)} · Thành tiền:{" "}
+                              <b style={{ color: "#0d47a1" }}>
+                                {formatVnd(
+                                  (Number(line.quantity) || 0) *
+                                    (Number(line.unitPrice) || 0),
+                                )}
+                              </b>
+                            </span>
+
+                            {line.serviceId && (
+                              <button
+                                type="button"
+                                className={`exam-btn-result ${line.result ? "completed" : "pending"}`}
+                                onClick={() => openResultModal(index)}
+                                disabled={!examEditable}
+                                title="Nhập hoặc chọn mẫu kết quả cho dịch vụ này"
+                              >
+                                {line.result ? "Sửa kết quả" : "Trả kết quả"}
+                              </button>
+                            )}
                           </div>
+
+                          {line.result && (
+                            <div className="exam-result-badge">
+                              <span style={{ wordBreak: "break-word" }}>
+                                <b>KQ:</b> {line.result}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "10px",
+                                  color: "#15803d",
+                                  fontWeight: 700,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                Đã có KQ
+                              </span>
+                            </div>
+                          )}
                         </td>
                         <td>
                           <input
@@ -2042,8 +2613,22 @@ function DoctorExaminationPage() {
                         <tr key={`print-svc-${index}`}>
                           <td>{index + 1}</td>
                           <td>
-                            {services.find((s) => s.id === line.serviceId)
-                              ?.name || line.serviceId}
+                            <div>
+                              {services.find((s) => s.id === line.serviceId)
+                                ?.name || line.serviceId}
+                            </div>
+                            {line.result && (
+                              <div
+                                style={{
+                                  fontSize: "11px",
+                                  color: "#166534",
+                                  fontStyle: "italic",
+                                  marginTop: "2px",
+                                }}
+                              >
+                                KQ: {line.result}
+                              </div>
+                            )}
                           </td>
                           <td>{line.quantity}</td>
                           <td>
@@ -2097,6 +2682,206 @@ function DoctorExaminationPage() {
               >
                 In phiếu
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TRẢ KẾT QUẢ DỊCH VỤ CẬN LÂM SÀNG */}
+      {resultModalIndex !== null && svcLines[resultModalIndex] && (
+        <div className="exam-result-modal-backdrop">
+          <div className="exam-result-modal-card">
+            {/* Modal Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderBottom: "1px solid #e2e8f0",
+                paddingBottom: "10px",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: "16px", color: "#1e3a8a" }}>
+                Trả kết quả dịch vụ cận lâm sàng
+              </h3>
+              <button
+                type="button"
+                onClick={closeResultModal}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  color: "#64748b",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Dịch vụ đang chọn */}
+            <div
+              style={{
+                fontSize: "13px",
+                backgroundColor: "#f8fafc",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              <b>Dịch vụ:</b>{" "}
+              <span style={{ color: "#0f766e", fontWeight: 600 }}>
+                {services.find(
+                  (s) => s.id === svcLines[resultModalIndex]?.serviceId,
+                )?.name || svcLines[resultModalIndex]?.serviceId}
+              </span>
+            </div>
+
+            {/* Dropdown chọn kết quả mẫu */}
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "12.5px",
+                  fontWeight: 600,
+                  color: "#334155",
+                  marginBottom: "5px",
+                }}
+              >
+                Chọn kết quả định sẵn:
+              </label>
+              <select
+                style={{
+                  width: "100%",
+                  padding: "8px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #cbd5e1",
+                  fontSize: "13px",
+                  backgroundColor: "#ffffff",
+                  outline: "none",
+                }}
+                value={selectedTemplateResult}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedTemplateResult(val);
+                  if (val) {
+                    setCustomResultText(val);
+                  }
+                }}
+              >
+                <option value="">-- Bấm để chọn mẫu kết quả --</option>
+                {getResultTemplatesForService(
+                  svcLines[resultModalIndex]?.serviceId,
+                  services.find(
+                    (s) => s.id === svcLines[resultModalIndex]?.serviceId,
+                  )?.name,
+                ).map((tpl, idx) => (
+                  <option key={`tpl-${idx}`} value={tpl}>
+                    {tpl}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Ô nhập/sửa nội dung kết quả */}
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "12.5px",
+                  fontWeight: 600,
+                  color: "#334155",
+                  marginBottom: "5px",
+                }}
+              >
+                Chi tiết kết quả (có thể chỉnh sửa theo thực tế):
+              </label>
+              <textarea
+                rows={3}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "8px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #cbd5e1",
+                  fontSize: "13px",
+                  fontFamily: "inherit",
+                  resize: "vertical",
+                  outline: "none",
+                }}
+                placeholder="Chọn mẫu ở trên hoặc gõ kết quả xét nghiệm / chẩn đoán hình ảnh..."
+                value={customResultText}
+                onChange={(e) => setCustomResultText(e.target.value)}
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "4px",
+                paddingTop: "10px",
+                borderTop: "1px solid #f1f5f9",
+              }}
+            >
+              {svcLines[resultModalIndex]?.result ? (
+                <button
+                  type="button"
+                  onClick={handleClearResult}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid #fecaca",
+                    backgroundColor: "#fef2f2",
+                    color: "#dc2626",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Xóa kết quả
+                </button>
+              ) : (
+                <div />
+              )}
+
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={closeResultModal}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: "1px solid #cbd5e1",
+                    backgroundColor: "#ffffff",
+                    color: "#475569",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyResult}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "6px",
+                    border: "none",
+                    backgroundColor: "#16a34a",
+                    color: "#ffffff",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    boxShadow: "0 2px 4px rgba(22, 163, 74, 0.25)",
+                  }}
+                >
+                  Lưu kết quả
+                </button>
+              </div>
             </div>
           </div>
         </div>

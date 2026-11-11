@@ -4,6 +4,8 @@ import com.clinic.management._appointment.AppointmentRepository;
 import com.clinic.management._checkin.CheckInService;
 import com.clinic.management._patient.Patient;
 import com.clinic.management._patient.PatientRepository;
+import com.clinic.management._schedule.DoctorSchedule;
+import com.clinic.management._schedule.DoctorScheduleRepository;
 import com.clinic.management._staff.repositories.StaffRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +27,20 @@ public class ReceptionServiceImpl implements ReceptionService {
     private final AppointmentRepository appointmentRepository;
     private final CheckInService checkInService;
     private final StaffRepository staffRepository;
+    private final DoctorScheduleRepository doctorScheduleRepository;
 
     public ReceptionServiceImpl(ReceptionRepository receptionRepository,
                                 PatientRepository patientRepository,
                                 AppointmentRepository appointmentRepository,
                                 CheckInService checkInService,
-                                StaffRepository staffRepository) {
+                                StaffRepository staffRepository,
+                                DoctorScheduleRepository doctorScheduleRepository) {
         this.receptionRepository = receptionRepository;
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
         this.checkInService = checkInService;
         this.staffRepository = staffRepository;
+        this.doctorScheduleRepository = doctorScheduleRepository;
     }
 
     @Override
@@ -82,6 +87,17 @@ public class ReceptionServiceImpl implements ReceptionService {
         }
         requireValue(reception.getRoomId(), "Mã phòng không được để trống");
         requireValue(reception.getDoctorId(), "Mã bác sĩ không được để trống");
+
+        LocalDate targetDate = (reception.getReceptionDate() != null) ? reception.getReceptionDate() : LocalDate.now();
+        List<DoctorSchedule> schedules = doctorScheduleRepository.findByDoctorIdAndExaminationDate(reception.getDoctorId(), targetDate);
+        boolean hasDuty = schedules != null && schedules.stream().anyMatch(s ->
+                !Boolean.TRUE.equals(s.getDeleted())
+                && !"DaHuy".equalsIgnoreCase(s.getStatus())
+                && !"CANCELLED".equalsIgnoreCase(s.getStatus())
+        );
+        if (!hasDuty) {
+            throw new IllegalStateException("Bác sĩ " + reception.getDoctorId() + " không có lịch trực vào ngày " + targetDate + ". Vui lòng chọn bác sĩ đang có lịch trực!");
+        }
 
         if (reception.getAppointmentId() == null
                 || reception.getAppointmentId().trim().isEmpty()

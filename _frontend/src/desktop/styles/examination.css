@@ -1047,3 +1047,321 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Modal & Nút trả kết quả dịch vụ cận lâm sàng ---------- */
+.exam-btn-result {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.exam-btn-result.pending {
+  border: 1px solid #3b82f6;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.exam-btn-result.pending:hover:not(:disabled) {
+  background-color: #dbeafe;
+}
+
+.exam-btn-result.completed {
+  border: 1px solid #16a34a;
+  background-color: #f0fdf4;
+  color: #15803d;
+}
+
+.exam-btn-result.completed:hover:not(:disabled) {
+  background-color: #dcfce7;
+}
+
+.exam-result-badge {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #166534;
+  background-color: #dcfce7;
+  border: 1px solid #bbf7d0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  line-height: 1.35;
+}
+
+.exam-result-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.exam-result-modal-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  width: 480px;
+  max-width: 95vw;
+  padding: 20px 22px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ==============================================================
+   ICD-10 & PHÁC ĐỒ ĐIỀU TRỊ CHUẨN Y KHOA
+   ============================================================== */
+.exam-icd-diagnosis-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.exam-icd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.exam-icd-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.exam-icd-dept-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.exam-icd-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exam-icd-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.exam-icd-filter-toggle input[type="checkbox"] {
+  cursor: pointer;
+  margin: 0;
+}
+
+.exam-icd-mode-btn {
+  font-size: 11.5px;
+  color: #0284c7;
+  background: #ffffff;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.exam-icd-mode-btn:hover {
+  background: #f0f9ff;
+  border-color: #0284c7;
+}
+
+.exam-field-sublabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.exam-icd-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exam-icd-two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.exam-icd-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.exam-icd-select,
+.exam-icd-select-secondary {
+  width: 100%;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+.exam-icd-select:focus,
+.exam-icd-select-secondary:focus {
+  border-color: #0284c7;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+.exam-icd-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.exam-icd-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e0f2fe;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  padding: 3px 8px;
+  border-radius: 14px;
+  font-size: 11.5px;
+  line-height: 1.2;
+  gap: 6px;
+}
+
+.exam-icd-chip button {
+  border: none;
+  background: transparent;
+  color: #ef4444;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.exam-icd-chip button:hover {
+  color: #b91c1c;
+}
+
+/* Khung gợi ý phác đồ thuốc theo mã ICD-10 */
+.exam-icd-presc-box {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.exam-icd-presc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.exam-icd-presc-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #166534;
+}
+
+.exam-icd-code-badge {
+  background: #15803d;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.exam-icd-apply-btn {
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.exam-icd-apply-btn:hover:not(:disabled) {
+  background: #15803d;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);
+}
+
+.exam-icd-apply-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.exam-icd-presc-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exam-icd-presc-item {
+  font-size: 11.5px;
+  color: #14532d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.exam-icd-presc-name {
+  font-weight: 600;
+}
+
+.exam-icd-presc-qty {
+  background: #dcfce7;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.exam-icd-presc-dosage {
+  color: #166534;
+  font-style: italic;
+}
+
