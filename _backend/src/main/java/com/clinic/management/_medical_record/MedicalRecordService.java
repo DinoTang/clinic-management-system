@@ -1,5 +1,7 @@
 package com.clinic.management._medical_record;
 
+import com.clinic.management._reception.Reception;
+import com.clinic.management._reception.ReceptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +15,11 @@ import java.util.List;
 public class MedicalRecordService {
 
     private final MedicalRecordRepository repository;
+    private final ReceptionRepository receptionRepository;
 
-    public MedicalRecordService(MedicalRecordRepository repository) {
+    public MedicalRecordService(MedicalRecordRepository repository, ReceptionRepository receptionRepository) {
         this.repository = repository;
+        this.receptionRepository = receptionRepository;
     }
 
     @Transactional
@@ -23,6 +27,17 @@ public class MedicalRecordService {
         if (request.getReceptionId() == null || request.getReceptionId().isBlank()) {
             throw new IllegalArgumentException("BR-041: hồ sơ khám phải gắn với một lượt khám.");
         }
+
+        Reception reception = receptionRepository.findById(request.getReceptionId())
+                .filter(r -> !Boolean.TRUE.equals(r.getDeleted()))
+                .orElse(null);
+        if (reception != null) {
+            if ("QuaHan".equalsIgnoreCase(reception.getQueueStatus()) ||
+                    (reception.getReceptionDate() != null && reception.getReceptionDate().isBefore(LocalDate.now()) && !"DaKham".equalsIgnoreCase(reception.getQueueStatus()))) {
+                throw new IllegalStateException("Lượt tiếp đón ngày " + reception.getReceptionDate() + " đã quá hạn do ca khám đã kết thúc. Không thể khám hoặc lưu hồ sơ khám!");
+            }
+        }
+
         if (request.getSymptoms() == null || request.getSymptoms().isBlank()) {
             throw new IllegalArgumentException("BR-042: phải nhập Triệu chứng.");
         }

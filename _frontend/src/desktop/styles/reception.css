@@ -175,6 +175,11 @@
   color: #15803d;
 }
 
+.status-quahan {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
 /* Modal Phiếu Khám */
 .modal-overlay {
   position: fixed;
