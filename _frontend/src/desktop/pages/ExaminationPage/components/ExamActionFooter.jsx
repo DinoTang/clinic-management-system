@@ -13,6 +13,8 @@ export default function ExamActionFooter({
   selected,
   examEditable,
   busy,
+  isPastDate,
+  examDate,
 }) {
   return (
     <>
@@ -68,7 +70,7 @@ export default function ExamActionFooter({
         >
           Lưu hồ sơ khám
         </button>
-        {selected?.queueStatus === "DangKham" && (
+        {selected?.queueStatus === "DangKham" && !isPastDate && (
           <button
             type="button"
             className="exam-btn-defer"
@@ -88,7 +90,12 @@ export default function ExamActionFooter({
         >
           {busy ? "Đang xử lý..." : "Hoàn tất khám & in phiếu"}
         </button>
-        {selected?.queueStatus === "ChoKham" && (
+        {(isPastDate || selected?.queueStatus === "QuaHan") && (
+          <p className="exam-hint" style={{ color: "#dc2626", fontWeight: 600 }}>
+            Ca khám ngày {selected?.receptionDate || examDate} đã kết thúc. Lượt khám này đã quá hạn và chỉ có thể xem lại.
+          </p>
+        )}
+        {selected?.queueStatus === "ChoKham" && !isPastDate && (
           <p className="exam-hint">
             Lượt này chưa được gọi khám — bấm &quot;Gọi khám&quot; trước khi
             hoàn tất (BR-039).

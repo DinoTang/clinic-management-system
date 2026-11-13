@@ -31,6 +31,8 @@ function DoctorExaminationPage() {
     doctorName,
     examDate,
     setExamDate,
+    today,
+    isPastDate,
     doctorSpecialtyName,
     // Hàng đợi
     queue,
@@ -187,7 +189,8 @@ function DoctorExaminationPage() {
             className="exam-btn-call"
             style={{ padding: "9px 14px", fontSize: "13px" }}
             onClick={callNextPatient}
-            disabled={!doctorId}
+            disabled={!doctorId || isPastDate}
+            title={isPastDate ? "Phiên khám đã qua ngày, không thể gọi bệnh nhân tiếp theo" : "Gọi bệnh nhân chờ tiếp theo"}
           >
             Gọi bệnh nhân tiếp theo
           </button>
@@ -201,6 +204,29 @@ function DoctorExaminationPage() {
           </button>
         </div>
       </div>
+
+      {/* ===== CẢNH BÁO CA KHÁM ĐÃ QUA ===== */}
+      {isPastDate && (
+        <div
+          style={{
+            margin: "0 24px 16px 24px",
+            padding: "12px 16px",
+            backgroundColor: "#fff1f2",
+            border: "1px solid #fecdd3",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            color: "#9f1239",
+            fontSize: "13.5px",
+          }}
+        >
+          <span style={{ fontSize: "18px" }}>⚠️</span>
+          <span>
+            <b>Phiên làm việc ngày {examDate} đã kết thúc.</b> Hệ thống đã tự động chuyển trạng thái các bệnh nhân chưa khám sang <b>&quot;Quá hạn&quot;</b> và khóa tính năng khám mới. Bạn đang ở chế độ <b>chỉ xem lại lịch sử</b>.
+          </span>
+        </div>
+      )}
 
       {/* ===== THÔNG BÁO ===== */}
       {notice && (
@@ -229,6 +255,7 @@ function DoctorExaminationPage() {
           onSelectReception={selectReception}
           onChangeStatus={changeStatus}
           onDeferPatient={deferPatient}
+          isPastDate={isPastDate}
         />
 
         {/* ---------- CỘT 2: HỒ SƠ + KHÁM LÂM SÀNG ---------- */}
@@ -289,6 +316,8 @@ function DoctorExaminationPage() {
                 setMedicalRecordId={setMedicalRecordId}
                 examEditable={examEditable}
                 STATUS_META={STATUS_META}
+                isPastDate={isPastDate}
+                examDate={examDate}
               />
 
               <ClinicalExamSection
@@ -383,6 +412,8 @@ function DoctorExaminationPage() {
                 selected={selected}
                 examEditable={examEditable}
                 busy={busy}
+                isPastDate={isPastDate}
+                examDate={examDate}
               />
             </>
           )}

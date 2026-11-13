@@ -25,12 +25,12 @@ export const isMissingApi = (err) =>
   [404, 405, 501].includes(err?.response?.status);
 
 /**
- * Sắp xếp hàng đợi: DangKham -> ChoKham (chưa hoãn theo STT, hoãn theo thời điểm) -> BoQua -> DaKham
+ * Sắp xếp hàng đợi: DangKham -> ChoKham (chưa hoãn theo STT, hoãn theo thời điểm) -> BoQua -> DaKham -> QuaHan
  */
 export const sortQueueItems = (a, b) => {
-  const statusPriority = { DangKham: 1, ChoKham: 2, BoQua: 3, DaKham: 4 };
-  const pA = statusPriority[a.queueStatus] || 5;
-  const pB = statusPriority[b.queueStatus] || 5;
+  const statusPriority = { DangKham: 1, ChoKham: 2, BoQua: 3, DaKham: 4, QuaHan: 5 };
+  const pA = statusPriority[a.queueStatus] || 6;
+  const pB = statusPriority[b.queueStatus] || 6;
   if (pA !== pB) return pA - pB;
 
   if (a.queueStatus === "ChoKham" && b.queueStatus === "ChoKham") {

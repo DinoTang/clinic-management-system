@@ -60,10 +60,12 @@ export default function TodayQueueTable({
                           ? "status-chokham"
                           : item.queueStatus === "DangKham"
                             ? "status-dangkham"
-                            : "status-dakham"
+                            : item.queueStatus === "QuaHan"
+                              ? "status-quahan"
+                              : "status-dakham"
                       }`}
                     >
-                      {item.queueStatus}
+                      {item.queueStatus === "QuaHan" ? "Quá hạn" : item.queueStatus}
                     </span>
                     {item.deferredAt && item.queueStatus === "ChoKham" && (
                       <span

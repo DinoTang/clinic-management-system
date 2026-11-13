@@ -21,6 +21,7 @@ public class ReceptionServiceImpl implements ReceptionService {
     private static final String STATUS_ARRIVED = "DaDen";
     private static final String STATUS_QUEUE_DONE = "DaKham";
     private static final String STATUS_APPOINTMENT_COMPLETED = "HoanTat";
+    private static final String STATUS_EXPIRED = "QuaHan";
 
     private final ReceptionRepository receptionRepository;
     private final PatientRepository patientRepository;
@@ -45,6 +46,7 @@ public class ReceptionServiceImpl implements ReceptionService {
 
     @Override
     public List<Reception> getAllReceptions() {
+        expirePastReceptions();
         return receptionRepository.findByDeletedFalse();
     }
 
@@ -57,16 +59,19 @@ public class ReceptionServiceImpl implements ReceptionService {
 
     @Override
     public List<Reception> getReceptionsByDate(LocalDate date) {
+        expirePastReceptions();
         return receptionRepository.findByDate(date);
     }
 
     @Override
     public List<Reception> getQueueByRoomAndDate(String roomId, LocalDate date) {
+        expirePastReceptions();
         return receptionRepository.findByRoomAndDate(roomId, date);
     }
 
     @Override
     public List<Reception> getQueueByDoctorAndDate(String doctorId, LocalDate date) {
+        expirePastReceptions();
         return receptionRepository.findByDoctorAndDate(doctorId, date);
     }
 
@@ -215,12 +220,45 @@ public class ReceptionServiceImpl implements ReceptionService {
 
     @Override
     @Transactional
+    public void expirePastReceptions() {
+        LocalDate today = LocalDate.now();
+        List<Reception> pastUnfinished = receptionRepository.findPastUnfinished(today);
+        if (pastUnfinished != null && !pastUnfinished.isEmpty()) {
+            for (Reception r : pastUnfinished) {
+                r.setQueueStatus(STATUS_EXPIRED);
+                receptionRepository.save(r);
+                if (r.getAppointmentId() != null) {
+                    appointmentRepository.findById(r.getAppointmentId())
+                            .filter(a -> !Boolean.TRUE.equals(a.getDeleted()))
+                            .ifPresent(appointment -> {
+                                if (!STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())
+                                        && !STATUS_APPOINTMENT_COMPLETED.equalsIgnoreCase(appointment.getStatus())) {
+                                    appointment.setStatus(STATUS_CANCELLED);
+                                    appointmentRepository.save(appointment);
+                                }
+                            });
+                }
+            }
+        }
+    }
+
+    @Override
+    @Transactional
     public Reception updateQueueStatus(String id, String status) {
         Reception reception = receptionRepository.findById(id)
                 .filter(r -> !Boolean.TRUE.equals(r.getDeleted()))
                 .orElse(null);
         if (reception == null) {
             return null;
+        }
+
+        if (reception.getReceptionDate() != null && reception.getReceptionDate().isBefore(LocalDate.now())) {
+            reception.setQueueStatus(STATUS_EXPIRED);
+            receptionRepository.save(reception);
+            throw new IllegalStateException("Lượt tiếp đón ngày " + reception.getReceptionDate() + " đã quá hạn do ca khám đã kết thúc. Không thể thực hiện khám lại!");
+        }
+        if (STATUS_EXPIRED.equalsIgnoreCase(reception.getQueueStatus())) {
+            throw new IllegalStateException("Lượt tiếp đón đã quá hạn, không thể thay đổi trạng thái!");
         }
 
         String oldStatus = reception.getQueueStatus();
@@ -258,6 +296,11 @@ public class ReceptionServiceImpl implements ReceptionService {
                 .orElse(null);
         if (reception == null) {
             return null;
+        }
+        if (reception.getReceptionDate() != null && reception.getReceptionDate().isBefore(LocalDate.now())) {
+            reception.setQueueStatus(STATUS_EXPIRED);
+            receptionRepository.save(reception);
+            throw new IllegalStateException("Lượt tiếp đón ngày " + reception.getReceptionDate() + " đã quá hạn do ca khám đã kết thúc. Không thể thao tác!");
         }
         reception.setQueueStatus("ChoKham");
         reception.setDeferredAt(LocalDateTime.now());

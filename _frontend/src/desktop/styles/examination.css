@@ -372,6 +372,16 @@
   color: #64748b;
 }
 
+.status-quahan {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.exam-tag-quahan {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .exam-patient-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

@@ -130,6 +130,7 @@ export const STATUS_META = {
   DangKham: { label: "Đang khám", cls: "status-dangkham" },
   DaKham: { label: "Đã khám", cls: "status-dakham" },
   BoQua: { label: "Bỏ qua", cls: "status-boqua" },
+  QuaHan: { label: "Quá hạn", cls: "status-quahan" },
 };
 
 export const EMPTY_EXAM = {

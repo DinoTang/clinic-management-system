@@ -14,6 +14,8 @@ export default function PatientSummaryCard({
   setMedicalRecordId,
   examEditable,
   STATUS_META,
+  isPastDate,
+  examDate,
 }) {
   return (
     <>
@@ -40,13 +42,39 @@ export default function PatientSummaryCard({
             </span>
             {(STATUS_META[selected.queueStatus]?.label ||
               selected.queueStatus) && (
-              <span className="exam-tag exam-tag-green">
+              <span
+                className={`exam-tag ${
+                  selected.queueStatus === "QuaHan"
+                    ? "exam-tag-quahan"
+                    : selected.queueStatus === "DangKham"
+                      ? "exam-tag-amber"
+                      : "exam-tag-green"
+                }`}
+              >
                 {STATUS_META[selected.queueStatus]?.label ||
                   selected.queueStatus}
               </span>
             )}
           </div>
         </div>
+
+        {(selected.queueStatus === "QuaHan" || isPastDate) && (
+          <div
+            style={{
+              marginTop: "12px",
+              padding: "10px 14px",
+              backgroundColor: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "6px",
+              color: "#991b1b",
+              fontSize: "12.5px",
+              fontWeight: 500,
+              lineHeight: 1.5,
+            }}
+          >
+            ⚠️ <b>Lượt khám này đã kết thúc do hết ngày ({selected.receptionDate || examDate}).</b> Hệ thống đã chuyển trạng thái sang <b>&quot;Quá hạn&quot;</b> và không cho phép chỉnh sửa, khám lại hoặc kê đơn.
+          </div>
+        )}
 
         <div className="exam-patient-grid">
           <div>

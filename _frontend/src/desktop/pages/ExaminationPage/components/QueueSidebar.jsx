@@ -14,6 +14,7 @@ export default function QueueSidebar({
   onSelectReception,
   onChangeStatus,
   onDeferPatient,
+  isPastDate,
 }) {
   return (
     <section className="exam-panel">
@@ -35,6 +36,7 @@ export default function QueueSidebar({
             ["ChoKham", "Chờ"],
             ["DangKham", "Đang K"],
             ["DaKham", "Đã K"],
+            ["QuaHan", "Quá hạn"],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -42,7 +44,7 @@ export default function QueueSidebar({
               className={`exam-status-tab ${statusFilter === key ? "active" : ""}`}
               onClick={() => setStatusFilter(key)}
             >
-              {label} ({statusCounts[key]})
+              {label} ({statusCounts[key] || 0})
             </button>
           ))}
         </div>
@@ -97,7 +99,18 @@ export default function QueueSidebar({
                     flexWrap: "wrap",
                   }}
                 >
-                  {item.queueStatus === "ChoKham" && (
+                  {item.queueStatus === "QuaHan" && (
+                    <span
+                      style={{
+                        fontSize: "11.5px",
+                        color: "#b91c1c",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Đã quá hạn
+                    </span>
+                  )}
+                  {item.queueStatus === "ChoKham" && !isPastDate && (
                     <button
                       type="button"
                       className="exam-btn-call"
@@ -109,7 +122,18 @@ export default function QueueSidebar({
                       Gọi khám
                     </button>
                   )}
-                  {item.queueStatus === "BoQua" && (
+                  {item.queueStatus === "ChoKham" && isPastDate && (
+                    <span
+                      style={{
+                        fontSize: "11.5px",
+                        color: "#b91c1c",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Đã quá hạn
+                    </span>
+                  )}
+                  {item.queueStatus === "BoQua" && !isPastDate && (
                     <button
                       type="button"
                       className="exam-btn-call"
@@ -122,7 +146,18 @@ export default function QueueSidebar({
                       Đưa về chờ
                     </button>
                   )}
-                  {item.queueStatus === "DangKham" && (
+                  {item.queueStatus === "BoQua" && isPastDate && (
+                    <span
+                      style={{
+                        fontSize: "11.5px",
+                        color: "#b91c1c",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Đã quá hạn
+                    </span>
+                  )}
+                  {item.queueStatus === "DangKham" && !isPastDate && (
                     <>
                       <button
                         type="button"
@@ -156,6 +191,17 @@ export default function QueueSidebar({
                         Bỏ qua
                       </button>
                     </>
+                  )}
+                  {item.queueStatus === "DangKham" && isPastDate && (
+                    <span
+                      style={{
+                        fontSize: "11.5px",
+                        color: "#b91c1c",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Đã quá hạn
+                    </span>
                   )}
                   {item.queueStatus === "DaKham" && (
                     <span

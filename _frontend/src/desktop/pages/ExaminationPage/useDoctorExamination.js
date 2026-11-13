@@ -118,7 +118,15 @@ export function useDoctorExamination() {
       const res = await axios.get(`${RECEPTION_API}/queue/doctor/${doctorId}`, {
         params: { date: examDate },
       });
-      const list = Array.isArray(res.data) ? res.data : [];
+      let list = Array.isArray(res.data) ? res.data : [];
+      if (examDate < today) {
+        list = list.map((item) => {
+          if (item.queueStatus !== "DaKham") {
+            return { ...item, queueStatus: "QuaHan" };
+          }
+          return item;
+        });
+      }
       setQueue(list);
       setSelected((prev) => {
         if (!prev) return prev;
@@ -377,6 +385,20 @@ export function useDoctorExamination() {
   };
 
   const changeStatus = (item, status) => {
+    if (examDate < today || (item.receptionDate && item.receptionDate < today)) {
+      notify(
+        "error",
+        `Phiên khám ngày ${item.receptionDate || examDate} đã kết thúc. Không thể thay đổi trạng thái hoặc khám lại!`,
+      );
+      return;
+    }
+    if (item.queueStatus === "QuaHan") {
+      notify(
+        "error",
+        "Lượt khám này đã quá hạn (hết ngày khám). Không thể thực hiện khám!",
+      );
+      return;
+    }
     /* BR-038: không hoàn thành lượt chưa được khám */
     if (status === "DaKham" && item.queueStatus !== "DangKham") {
       notify(
@@ -405,6 +427,13 @@ export function useDoctorExamination() {
   /** Bệnh nhân vắng mặt khi gọi: đưa về cuối hàng chờ, giữ nguyên STT */
   const deferPatient = (item) => {
     if (!item) return;
+    if (examDate < today || item.queueStatus === "QuaHan" || (item.receptionDate && item.receptionDate < today)) {
+      notify(
+        "error",
+        `Phiên khám ngày ${item.receptionDate || examDate} đã kết thúc. Không thể thao tác!`,
+      );
+      return;
+    }
     axios
       .post(`${RECEPTION_API}/${item.id}/defer`)
       .then(() => {
@@ -426,6 +455,13 @@ export function useDoctorExamination() {
   };
 
   const callNextPatient = () => {
+    if (examDate < today) {
+      notify(
+        "warn",
+        `Phiên khám ngày ${examDate} đã kết thúc. Không thể gọi bệnh nhân tiếp theo!`,
+      );
+      return;
+    }
     const choKhamList = queue.filter((item) => item.queueStatus === "ChoKham");
     const next = [...choKhamList].sort(sortQueueItems)[0];
 
@@ -439,6 +475,13 @@ export function useDoctorExamination() {
 
   const saveVitals = () => {
     if (!selected) return;
+    if (examDate < today || selected.queueStatus === "QuaHan" || (selected.receptionDate && selected.receptionDate < today)) {
+      notify(
+        "error",
+        `Phiên khám ngày ${selected.receptionDate || examDate} đã kết thúc. Không thể lưu sinh hiệu!`,
+      );
+      return;
+    }
     setBusy(true);
     const payload = {
       ...selected,
@@ -593,6 +636,14 @@ export function useDoctorExamination() {
 
   const validateExam = () => {
     if (!selected) return "Hãy chọn một lượt khám trong hàng đợi.";
+    if (examDate < today || (selected.receptionDate && selected.receptionDate < today)) {
+      return `Phiên khám ngày ${selected.receptionDate || examDate} đã kết thúc. Không thể thực hiện khám lại!`;
+    }
+    if (selected.queueStatus === "QuaHan") {
+      return "Lượt khám này đã quá hạn (hết ngày khám). Không thể thực hiện khám!";
+    }
+    if (selected.queueStatus === "DaKham")
+      return "Lượt khám này đã được hoàn tất trước đó.";
     if (selected.queueStatus === "BoQua")
       return "Lượt này đang bị bỏ qua. Hãy đưa về hàng đợi trước.";
     if (!exam.symptoms.trim()) return "BR-042: phải nhập Triệu chứng.";
@@ -710,6 +761,20 @@ export function useDoctorExamination() {
   };
 
   const handleSaveMedicalRecordAction = () => {
+    if (examDate < today || (selected?.receptionDate && selected.receptionDate < today)) {
+      notify(
+        "error",
+        `Phiên khám ngày ${selected?.receptionDate || examDate} đã kết thúc. Không thể lưu hồ sơ khám!`,
+      );
+      return;
+    }
+    if (selected?.queueStatus === "QuaHan") {
+      notify(
+        "error",
+        "Lượt khám này đã quá hạn (hết ngày khám). Không thể lưu hồ sơ khám!",
+      );
+      return;
+    }
     if (!exam.symptoms.trim() || !exam.diagnosis.trim()) {
       notify(
         "error",
@@ -864,6 +929,7 @@ export function useDoctorExamination() {
       ChoKham: queue.filter((i) => i.queueStatus === "ChoKham").length,
       DangKham: queue.filter((i) => i.queueStatus === "DangKham").length,
       DaKham: queue.filter((i) => i.queueStatus === "DaKham").length,
+      QuaHan: queue.filter((i) => i.queueStatus === "QuaHan").length,
     }),
     [queue],
   );
@@ -1160,8 +1226,15 @@ export function useDoctorExamination() {
 
   const age = patient ? calcAge(patient.dateOfBirth) : null;
 
+  const isPastDate = examDate < today;
+
   const examEditable =
-    selected && selected.queueStatus !== "DaKham" && selected.queueStatus !== "BoQua";
+    !isPastDate &&
+    selected &&
+    selected.queueStatus !== "DaKham" &&
+    selected.queueStatus !== "BoQua" &&
+    selected.queueStatus !== "QuaHan" &&
+    (!selected.receptionDate || selected.receptionDate >= today);
 
   return {
     // Session & Bác sĩ
@@ -1172,6 +1245,8 @@ export function useDoctorExamination() {
     doctorName,
     examDate,
     setExamDate,
+    today,
+    isPastDate,
     currentDoctor,
     doctorSpecialtyName,
     // Hàng đợi
