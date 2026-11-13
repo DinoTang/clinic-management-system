@@ -4,6 +4,8 @@ import com.clinic.management.common.enums.RoomStatus;
 import com.clinic.management._specialty.interfaces.ISpecialtyQuery;
 import com.clinic.management._specialty.entities.Specialty;
 import com.clinic.management._room.dtos.ProfileCreateRequest;
+import com.clinic.management._room.dtos.ProfileUpdateRequest;
+import com.clinic.management._room.dtos.UpdateStatusRequest;
 import com.clinic.management._room.interfaces.IRoomUpdate;
 import com.clinic.management._room.entities.Room;
 import com.clinic.management._room.repositories.RoomRepository;
@@ -24,22 +26,11 @@ public class RoomUpdateService implements IRoomUpdate{
 	}
 
 	@Override
-	public Room updateStatus(String roomId, RoomStatus status){
-		Room room = roomRepository.findById(roomId).
+	public Room updateProfile(ProfileUpdateRequest request){
+		Room room = roomRepository.findById(request.getRoomId()).
 			orElseThrow(
 				() -> new RuntimeException("Phòng khám không tồn tại")
 			);
-		room.setStatus(status);
-		return roomRepository.save(room);
-	}
-
-	@Override
-	public Room updateProfile(String roomId, ProfileCreateRequest request){
-		Room room = roomRepository.findById(roomId).
-			orElseThrow(
-				() -> new RuntimeException("Phòng khám không tồn tại")
-			);
-
 		Specialty specialty = specialtyQueryService.findById(request.getSpecialtyId());
 
 		room.setSpecialty(specialty);
@@ -49,4 +40,15 @@ public class RoomUpdateService implements IRoomUpdate{
 
 		return roomRepository.save(room);		
 	}
+
+	@Override
+    public Room updateStatus(UpdateStatusRequest request){
+		Room room = roomRepository.findById(request.getRoomId()).
+			orElseThrow(
+				() -> new RuntimeException("Phòng khám không tồn tại")
+			);
+		room.setStatus(request.getStatus());
+		return roomRepository.save(room);
+    }
+
 }

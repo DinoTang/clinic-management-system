@@ -2,6 +2,8 @@ package com.clinic.management._room.controllers;
 
 import com.clinic.management.common.enums.RoomStatus;
 import com.clinic.management._room.dtos.ProfileCreateRequest;
+import com.clinic.management._room.dtos.ProfileUpdateRequest;
+import com.clinic.management._room.dtos.UpdateStatusRequest;
 import com.clinic.management._room.entities.Room;
 import com.clinic.management._room.interfaces.IRoomCreate;
 import com.clinic.management._room.interfaces.IRoomDelete;
@@ -56,12 +58,19 @@ public class RoomController {
     @GetMapping
     public ResponseEntity<Page<Room>> findAll(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String search
     ) {
-        Page<Room> rooms = roomQueryService.findAll(page, size);
+
+        RoomStatus statusEnum = (status == null || status.equalsIgnoreCase("all"))
+            ? null : RoomStatus.valueOf(status.toUpperCase());
+
+        Page<Room> rooms = roomQueryService.findAll(page, size, statusEnum, search);
 
         return ResponseEntity.ok(rooms);
     }
+
 
     @GetMapping("/{roomId}")
     public ResponseEntity<Room> findById(
@@ -71,12 +80,19 @@ public class RoomController {
         return ResponseEntity.ok(room);
     }
 
-    @PutMapping("/update-status/{roomId}")
+    @PutMapping("/update-profile")
+    public ResponseEntity<Room> updateProfile(
+        @Valid
+        @RequestBody ProfileUpdateRequest request){
+        Room room = roomUpdateService.updateProfile(request);
+        return ResponseEntity.ok(room);
+    }
+
+    @PutMapping("/update-status")
     public ResponseEntity<Room> updateStatus(
-        @PathVariable String roomId,
-        @RequestBody RoomStatus request
-    ){
-        Room room = roomUpdateService.updateStatus(roomId, request);
+        @Valid
+        @RequestBody UpdateStatusRequest request){
+        Room room = roomUpdateService.updateStatus(request);
         return ResponseEntity.ok(room);
     }
 

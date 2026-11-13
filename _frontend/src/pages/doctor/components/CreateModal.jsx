@@ -54,7 +54,7 @@ function CreateModal({ onClose, fetchDoctors, specialties}) {
       setLoading(false);
     }
   }
-  console.log(specialties);
+
   return (
     <>
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 !p-[1rem]">

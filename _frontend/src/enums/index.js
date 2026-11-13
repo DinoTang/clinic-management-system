@@ -15,3 +15,8 @@ export const SPECIALTY_STATUS = Object.freeze({
   ACTIVE: 'Đang hoạt động',
   INACTIVE: 'Chuyên khoa ngừng hoạt động',
 });
+
+export const ROOM_STATUS = Object.freeze({
+  ACTIVE: 'Đang hoạt động',
+  INACTIVE: 'Phòng khám ngừng hoạt động',
+});
