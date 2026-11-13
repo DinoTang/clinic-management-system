@@ -17,13 +17,20 @@ public interface ReceptionRepository extends JpaRepository<Reception, String> {
 
     List<Reception> findByAppointmentIdAndDeletedFalse(String appointmentId);
 
+    @Query("SELECT r FROM Reception r WHERE r.receptionDate < :today " +
+            "AND r.queueStatus IN ('ChoKham', 'DangKham', 'BoQua') " +
+            "AND r.deleted = false")
+    List<Reception> findPastUnfinished(@Param("today") LocalDate today);
+
     @Query("SELECT r FROM Reception r WHERE r.receptionDate = :date AND r.deleted = false " +
             "ORDER BY CASE " +
             "  WHEN r.queueStatus = 'DangKham' THEN 1 " +
             "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NULL THEN 2 " +
             "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NOT NULL THEN 3 " +
             "  WHEN r.queueStatus = 'BoQua' THEN 4 " +
-            "  ELSE 5 " +
+            "  WHEN r.queueStatus = 'DaKham' THEN 5 " +
+            "  WHEN r.queueStatus = 'QuaHan' THEN 6 " +
+            "  ELSE 7 " +
             "END ASC, r.deferredAt ASC, r.queueNumber ASC")
     List<Reception> findByDate(@Param("date") LocalDate date);
 
@@ -33,7 +40,9 @@ public interface ReceptionRepository extends JpaRepository<Reception, String> {
             "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NULL THEN 2 " +
             "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NOT NULL THEN 3 " +
             "  WHEN r.queueStatus = 'BoQua' THEN 4 " +
-            "  ELSE 5 " +
+            "  WHEN r.queueStatus = 'DaKham' THEN 5 " +
+            "  WHEN r.queueStatus = 'QuaHan' THEN 6 " +
+            "  ELSE 7 " +
             "END ASC, r.deferredAt ASC, r.queueNumber ASC")
     List<Reception> findByRoomAndDate(@Param("roomId") String roomId, @Param("date") LocalDate date);
 
@@ -43,7 +52,9 @@ public interface ReceptionRepository extends JpaRepository<Reception, String> {
             "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NULL THEN 2 " +
             "  WHEN r.queueStatus = 'ChoKham' AND r.deferredAt IS NOT NULL THEN 3 " +
             "  WHEN r.queueStatus = 'BoQua' THEN 4 " +
-            "  ELSE 5 " +
+            "  WHEN r.queueStatus = 'DaKham' THEN 5 " +
+            "  WHEN r.queueStatus = 'QuaHan' THEN 6 " +
+            "  ELSE 7 " +
             "END ASC, r.deferredAt ASC, r.queueNumber ASC")
     List<Reception> findByDoctorAndDate(@Param("doctorId") String doctorId, @Param("date") LocalDate date);
 

@@ -14,4 +14,5 @@ public interface ReceptionService {
     Reception updateQueueStatus(String id, String status);
     Reception deferReception(String id);
     void deleteReception(String id);
+    void expirePastReceptions();
 }
