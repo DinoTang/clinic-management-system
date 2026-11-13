@@ -1,29 +1,12 @@
 import { useState, useEffect } from "react";
 import { Search, Filter } from "@boxicons/react";
 import { SPECIALTY_STATUS } from "../../../enums/index.js";
-import { getAll as getAllSpecialties } from "../../../services/specialty/specialtyService.js";
 
 function DataToolbar({ status, setStatus, search, setSearch }) {
   const [query, setQuery] = useState(search);
   const [specialties, setSpecialties] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  const fetchSpecialties = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAllSpecialties();
-      setSpecialties(data);
-    } catch (error) {
-      console.error("Không lấy được chuyên khoa", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSpecialties();
-  }, []);
-
   return (
     <div className="flex flex-wrap items-center gap-[0.75rem]">
       {/* Ô tìm kiếm */}

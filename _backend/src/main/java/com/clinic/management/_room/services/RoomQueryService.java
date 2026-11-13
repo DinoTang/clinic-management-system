@@ -1,6 +1,6 @@
 package com.clinic.management._room.services;
 
-
+import com.clinic.management.common.enums.RoomStatus;
 import com.clinic.management._room.interfaces.IRoomQuery;
 import com.clinic.management._room.entities.Room;
 import com.clinic.management._room.repositories.RoomRepository;
@@ -20,11 +20,25 @@ public class RoomQueryService implements IRoomQuery{
 		this.roomRepository = roomRepository;
 	}
 
-	@Override
-	public Page<Room> findAll(int page, int size) {
-	    Pageable pageable = PageRequest.of(page, size);
-	    return roomRepository.findAll(pageable);
-	}
+
+    public Page<Room> findAll(int page, int size, RoomStatus status, String search) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return roomRepository.findAll((root, query, cb) -> cb.and(
+
+            status == null
+                ? cb.conjunction() 
+                : cb.equal(root.get("status"), status),
+
+            search == null || search.isBlank()
+                ? cb.conjunction()
+                : cb.or(
+                    cb.like(cb.lower(root.get("id")), "%" + search.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("roomName")), "%" + search.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("roomNumber")), "%" + search.toLowerCase() + "%")
+                )
+        ), pageable);
+    }
 
 	@Override
 	public Room findById(String roomId){

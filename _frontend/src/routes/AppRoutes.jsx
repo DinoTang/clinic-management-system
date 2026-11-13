@@ -3,6 +3,7 @@ import { lazy } from "react";
 import LoginPage from "../pages/login/Login.jsx";
 import AdminPage from "../pages/admin/Admin.jsx";
 import AccountPage from "../pages/account/Account";
+import RoomPage from "../pages/room/Room";
 import PatientPage from "../pages/patient/Patient";
 import SpecialtyPage from "../pages/specialty/Specialty";
 import DoctorPage from "../pages/doctor/Doctor";
@@ -36,6 +37,7 @@ function AppRoutes() {
                 <Route path="/admin/patients" element={<PatientPage/>} />
                 <Route path="/admin/doctors" element={<DoctorPage/>} />
                 <Route path="/admin/specialties" element={<SpecialtyPage/>} />
+                <Route path="/admin/clinics" element={<RoomPage/>} />
                 <Route path="/admin/schedules" element={<DesktopSchedulePage />} />
                 <Route path="/schedules" element={<DesktopSchedulePage />} />
             </Route>
