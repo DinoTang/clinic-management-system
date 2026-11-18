@@ -7,6 +7,7 @@ import com.clinic.management._patient.PatientRepository;
 import com.clinic.management._schedule.DoctorSchedule;
 import com.clinic.management._schedule.DoctorScheduleRepository;
 import com.clinic.management._staff.repositories.StaffRepository;
+import com.clinic.management.common.enums.AppointmentStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -156,15 +157,17 @@ public class ReceptionServiceImpl implements ReceptionService {
                     .filter(a -> !Boolean.TRUE.equals(a.getDeleted()))
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Không tìm thấy lịch hẹn: " + reception.getAppointmentId()));
-            if (STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())) {
+
+            if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
                 throw new IllegalStateException(
                         "Lịch hẹn " + appointment.getId() + " đã bị huỷ, không thể tiếp đón.");
             }
-            if (STATUS_APPOINTMENT_COMPLETED.equalsIgnoreCase(appointment.getStatus())
-                    || STATUS_QUEUE_DONE.equalsIgnoreCase(appointment.getStatus())) {
+            if (appointment.getStatus() == AppointmentStatus.COMPLETED
+                    || appointment.getStatus() == AppointmentStatus.EXAMINED) {
                 throw new IllegalStateException(
                         "Lịch hẹn " + appointment.getId() + " đã hoàn tất khám bệnh, không thể tiếp đón lại.");
             }
+
             List<Reception> existing = receptionRepository.findByAppointmentIdAndDeletedFalse(appointment.getId());
             boolean inQueue = existing.stream()
                     .anyMatch(r -> "ChoKham".equalsIgnoreCase(r.getQueueStatus()) || "DangKham".equalsIgnoreCase(r.getQueueStatus()));
@@ -178,7 +181,8 @@ public class ReceptionServiceImpl implements ReceptionService {
                 throw new IllegalStateException(
                         "Lịch hẹn " + appointment.getId() + " đã hoàn tất khám bệnh, không thể tiếp đón lại.");
             }
-            appointment.setStatus(STATUS_ARRIVED);
+
+            appointment.setStatus(AppointmentStatus.ARRIVED);
             appointmentRepository.save(appointment);
         }
 
@@ -217,7 +221,6 @@ public class ReceptionServiceImpl implements ReceptionService {
 
         return receptionRepository.save(existing);
     }
-
     @Override
     @Transactional
     public void expirePastReceptions() {
@@ -231,9 +234,10 @@ public class ReceptionServiceImpl implements ReceptionService {
                     appointmentRepository.findById(r.getAppointmentId())
                             .filter(a -> !Boolean.TRUE.equals(a.getDeleted()))
                             .ifPresent(appointment -> {
-                                if (!STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())
-                                        && !STATUS_APPOINTMENT_COMPLETED.equalsIgnoreCase(appointment.getStatus())) {
-                                    appointment.setStatus(STATUS_CANCELLED);
+                                if (appointment.getStatus() != AppointmentStatus.CANCELLED
+                                        && appointment.getStatus() != AppointmentStatus.COMPLETED
+                                        && appointment.getStatus() != AppointmentStatus.EXAMINED) {
+                                    appointment.setStatus(AppointmentStatus.CANCELLED);
                                     appointmentRepository.save(appointment);
                                 }
                             });
@@ -279,8 +283,8 @@ public class ReceptionServiceImpl implements ReceptionService {
             appointmentRepository.findById(saved.getAppointmentId())
                     .filter(a -> !Boolean.TRUE.equals(a.getDeleted()))
                     .ifPresent(appointment -> {
-                        if (!STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())) {
-                            appointment.setStatus(STATUS_APPOINTMENT_COMPLETED);
+                        if (appointment.getStatus() != AppointmentStatus.CANCELLED) {
+                            appointment.setStatus(AppointmentStatus.COMPLETED);
                             appointmentRepository.save(appointment);
                         }
                     });

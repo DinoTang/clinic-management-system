@@ -1,6 +1,8 @@
 package com.clinic.management._appointment;
 
+import com.clinic.management.common.enums.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -9,7 +11,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface AppointmentRepository extends JpaRepository<Appointment, String> {
+public interface AppointmentRepository extends
+        JpaRepository<Appointment, String>,
+        JpaSpecificationExecutor<Appointment> {
 
     List<Appointment> findByDeletedFalse();
 
@@ -21,11 +25,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, String
 
     List<Appointment> findByAppointmentDateAndDeletedFalse(LocalDate date);
 
-    // Kiểm tra bệnh nhân đã đặt ca này chưa
-    boolean existsByPatientIdAndScheduleIdAndDeletedFalseAndStatusNot(String patientId, String scheduleId, String status);
+    boolean existsByPatientIdAndScheduleIdAndDeletedFalseAndStatusNot(
+            String patientId, 
+            String scheduleId, 
+            AppointmentStatus status
+    );
 
-    // Đếm số lượng bệnh nhân đã đặt thành công trong ca trực
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.scheduleId = :scheduleId AND a.deleted = false AND a.status <> 'DaHuy'")
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.scheduleId = :scheduleId AND a.deleted = false AND a.status <> com.clinic.management.common.enums.AppointmentStatus.CANCELLED")
     long countActiveAppointmentsByScheduleId(@Param("scheduleId") String scheduleId);
 
     @Query(value = "SELECT MALICHHEN FROM lichhenkham WHERE MALICHHEN REGEXP '^LH[0-9]+$' " +

@@ -1,12 +1,21 @@
 package com.clinic.management._appointment;
 
+import com.clinic.management.common.enums.AppointmentStatus;
+import com.clinic.management.common.enums.AppointmentStatusConverter;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "lichhenkham")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Appointment {
 
     @Id
@@ -34,107 +43,12 @@ public class Appointment {
     @Column(name = "NGAYTAO", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "TRANGTHAI", length = 30)
-    private String status = "DaDat";
+    @Builder.Default
+    @Convert(converter = AppointmentStatusConverter.class)
+    @Column(name = "TRANGTHAI", length = 20, nullable = false)
+    private AppointmentStatus status = AppointmentStatus.BOOKED;
 
+    @Builder.Default
     @Column(name = "TRANGTHAIXOA")
     private Boolean deleted = false;
-
-    public Appointment() {
-    }
-
-    public Appointment(String id, String patientId, String doctorId, String scheduleId,
-                       LocalDate appointmentDate, LocalTime appointmentTime,
-                       String reason, LocalDateTime createdAt, String status, Boolean deleted) {
-        this.id = id;
-        this.patientId = patientId;
-        this.doctorId = doctorId;
-        this.scheduleId = scheduleId;
-        this.appointmentDate = appointmentDate;
-        this.appointmentTime = appointmentTime;
-        this.reason = reason;
-        this.createdAt = createdAt;
-        this.status = status;
-        this.deleted = deleted;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getPatientId() {
-        return patientId;
-    }
-
-    public void setPatientId(String patientId) {
-        this.patientId = patientId;
-    }
-
-    public String getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(String doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public String getScheduleId() {
-        return scheduleId;
-    }
-
-    public void setScheduleId(String scheduleId) {
-        this.scheduleId = scheduleId;
-    }
-
-    public LocalDate getAppointmentDate() {
-        return appointmentDate;
-    }
-
-    public void setAppointmentDate(LocalDate appointmentDate) {
-        this.appointmentDate = appointmentDate;
-    }
-
-    public LocalTime getAppointmentTime() {
-        return appointmentTime;
-    }
-
-    public void setAppointmentTime(LocalTime appointmentTime) {
-        this.appointmentTime = appointmentTime;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
 }

@@ -23,6 +23,8 @@ import com.clinic.management._schedule.DoctorSchedule;
 import com.clinic.management._schedule.DoctorScheduleRepository;
 import com.clinic.management._user.entities.User;
 import com.clinic.management._user.repositories.UserRepository;
+import com.clinic.management.common.enums.AppointmentStatus;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -164,15 +166,15 @@ public class PatientPortalService {
         if (!Objects.equals(appointment.getPatientId(), patientId)) {
             throw new IllegalArgumentException("Lịch hẹn không thuộc hồ sơ bệnh nhân này.");
         }
-        if (STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())) {
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
             return toAppointment(appointment);
         }
-        if (!"DaDat".equalsIgnoreCase(appointment.getStatus())) {
+        if (appointment.getStatus() != AppointmentStatus.BOOKED) {
             throw new IllegalStateException(
                     "Lịch hẹn đã được tiếp đón, vui lòng liên hệ quầy lễ tân để thay đổi.");
         }
 
-        appointment.setStatus(STATUS_CANCELLED);
+        appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
         return toAppointment(appointment);
     }

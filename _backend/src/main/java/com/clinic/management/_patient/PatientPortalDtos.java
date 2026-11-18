@@ -1,5 +1,7 @@
 package com.clinic.management._patient;
 
+import com.clinic.management.common.enums.AppointmentStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +30,7 @@ public final class PatientPortalDtos {
 
     public record AppointmentDto(
             String id,
-            String status,
+            AppointmentStatus status,
             LocalDate date,
             LocalTime time,
             LocalTime endTime,
@@ -46,7 +48,7 @@ public final class PatientPortalDtos {
     ) {
         public AppointmentDto(
                 String id,
-                String status,
+                AppointmentStatus status,
                 LocalDate date,
                 LocalTime time,
                 LocalTime endTime,

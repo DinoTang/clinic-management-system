@@ -3,6 +3,11 @@ package com.clinic.management._appointment;
 import com.clinic.management._patient.PatientRepository;
 import com.clinic.management._schedule.DoctorSchedule;
 import com.clinic.management._schedule.DoctorScheduleRepository;
+import com.clinic.management.common.enums.AppointmentStatus;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,19 +15,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final DoctorScheduleRepository scheduleRepository;
     private final PatientRepository patientRepository;
-
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
-                                  DoctorScheduleRepository scheduleRepository,
-                                  PatientRepository patientRepository) {
-        this.appointmentRepository = appointmentRepository;
-        this.scheduleRepository = scheduleRepository;
-        this.patientRepository = patientRepository;
-    }
 
     private synchronized String generateNextAppointmentId() {
         String latestId = appointmentRepository.findLatestAppointmentId();
@@ -39,6 +37,25 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findByDeletedFalse();
+    }
+
+    @Override
+    public Page<Appointment> findAll(int page, int size, AppointmentStatus status, String search) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return appointmentRepository.findAll((root, query, cb) -> cb.and(
+            status == null
+                ? cb.conjunction() : cb.equal(root.get("status"), status),
+            search == null || search.isBlank()
+            ? cb.conjunction()
+            : cb.or(
+                cb.like(cb.lower(root.get("id")), "%" + search.toLowerCase() + "%"),
+                cb.like(cb.lower(root.get("patientId")), "%" + search.toLowerCase() + "%"),
+                cb.like(cb.lower(root.get("doctorId")), "%" + search.toLowerCase() + "%"),
+                cb.like(cb.lower(root.get("scheduleId")), "%" + search.toLowerCase() + "%"),
+                cb.like(cb.lower(root.get("reason")), "%" + search.toLowerCase() + "%")
+            )
+        ), pageable);
     }
 
     @Override
@@ -100,7 +117,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         boolean alreadyBooked = appointmentRepository.existsByPatientIdAndScheduleIdAndDeletedFalseAndStatusNot(
-                appointment.getPatientId(), appointment.getScheduleId(), "DaHuy"
+                appointment.getPatientId(), appointment.getScheduleId(), AppointmentStatus.CANCELLED
         );
         if (alreadyBooked) {
             throw new IllegalStateException("Bệnh nhân này đã có lịch hẹn trong ca trực hiện tại!");
@@ -115,8 +132,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointment.setId(generateNextAppointmentId());
         }
         appointment.setDeleted(false);
-        if (appointment.getStatus() == null || appointment.getStatus().isBlank()) {
-            appointment.setStatus("DaDat");
+
+        if (appointment.getStatus() == null) {
+            appointment.setStatus(AppointmentStatus.BOOKED);
         }
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
@@ -140,7 +158,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         existing.setAppointmentDate(appointment.getAppointmentDate());
         existing.setAppointmentTime(appointment.getAppointmentTime());
         existing.setReason(appointment.getReason());
-        existing.setStatus(appointment.getStatus());
+        if (appointment.getStatus() != null) {
+            existing.setStatus(appointment.getStatus());
+        }
         return appointmentRepository.save(existing);
     }
 
