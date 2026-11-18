@@ -1,8 +1,11 @@
 package com.clinic.management._appointment;
 
+import com.clinic.management.common.enums.AppointmentStatus;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+
 import java.util.Map;
 
 import java.time.LocalDate;
@@ -22,6 +25,23 @@ public class AppointmentController {
     @GetMapping
     public List<Appointment> getAllAppointments() {
         return appointmentService.getAllAppointments();
+    }
+
+    @GetMapping("/v2")
+    public ResponseEntity<Page<Appointment>> findAll(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String search
+    ) {
+        AppointmentStatus statusEnum = (status == null || status.equalsIgnoreCase("all"))
+            ? null : AppointmentStatus.valueOf(status.toUpperCase());
+
+        Page<Appointment> appointments = appointmentService.findAll(
+            page, size, statusEnum, search
+        );
+
+        return ResponseEntity.ok(appointments);
     }
 
     @GetMapping("/{id}")

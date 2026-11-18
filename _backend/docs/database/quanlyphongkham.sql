@@ -362,7 +362,6 @@ INSERT INTO `hoadon` (`MAHOADON`, `MABENHAN`, `MANHANVIEN`, `TIENKHACHDUA`, `TIE
 --
 -- Table structure for table `lichhenkham`
 --
-
 CREATE TABLE `lichhenkham` (
   `MALICHHEN` varchar(20) NOT NULL,
   `MABENHNHAN` varchar(20) NOT NULL,
@@ -372,7 +371,7 @@ CREATE TABLE `lichhenkham` (
   `GIOHEN` time NOT NULL,
   `LYDOKHAM` text DEFAULT NULL,
   `NGAYTAO` timestamp NOT NULL DEFAULT current_timestamp(),
-  `TRANGTHAI` varchar(20) DEFAULT 'DaDat',
+  `TRANGTHAI` varchar(20) DEFAULT 'BOOKED',
   `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -381,23 +380,23 @@ CREATE TABLE `lichhenkham` (
 --
 
 INSERT INTO `lichhenkham` (`MALICHHEN`, `MABENHNHAN`, `MABACSI`, `MALICHTRUC`, `NGAYHEN`, `GIOHEN`, `LYDOKHAM`, `NGAYTAO`, `TRANGTHAI`, `TRANGTHAIXOA`) VALUES
-('LH001', 'BN001', 'BS001', 'LT001', '2026-09-18', '08:00:00', 'Đau thắt ngực khi gắng sức, chóng mặt', '2026-09-18 01:33:16', 'HoanTat', 0),
-('LH002', 'BN002', 'BS002', 'LT002', '2026-09-18', '08:30:00', 'Đau rát vùng thượng vị nhiều ngày qua', '2026-09-18 01:33:16', 'DaDen', 0),
-('LH003', 'BN003', 'BS003', 'LT003', '2026-09-18', '14:00:00', 'Sốt cao, ho có đờm', '2026-09-18 01:33:16', 'HoanTat', 0),
-('LH005', 'BN001', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'scavdsbfd', '2026-10-10 06:40:10', 'DaDat', 0),
-('LH006', 'BN004', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'csavdsbf', '2026-10-10 06:40:39', 'DaDat', 0),
-('LH007', 'BN002', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'scavds', '2026-10-10 12:35:47', 'DaDat', 0),
-('LH008', 'BN003', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'scavds', '2026-10-10 12:43:38', 'DaDat', 0),
-('LH009', 'BN001', 'BS002', 'LT005', '2026-10-14', '07:30:00', 'scavdsb', '2026-10-14 00:41:12', 'HoanTat', 0),
-('LH010', 'BN001', 'BS002', 'LT006', '2026-10-16', '07:30:00', 'svdsfd', '2026-10-16 00:53:46', 'DaDat', 0),
-('LH011', 'BN007', 'BS002', 'LT007', '2026-10-18', '07:30:00', 'savdsbf', '2026-10-18 10:20:52', 'HoanTat', 0),
-('LH012', 'BN007', 'BS001', 'LT008', '2026-10-18', '07:30:00', 'svdsfbd', '2026-10-18 10:34:33', 'HoanTat', 0),
-('LH013', 'BN001', 'BS001', 'LT009', '2026-10-21', '07:30:00', 'sdafsd', '2026-10-21 03:45:05', 'HoanTat', 0),
-('LH014', 'BN008', 'BS002', 'LT010', '2026-10-25', '07:30:00', 'Abc', '2026-10-25 07:28:35', 'HoanTat', 0),
-('LH015', 'BN007', 'BS001', 'LT011', '2026-10-25', '07:30:00', 'fadsfbg', '2026-10-25 11:57:34', 'DaHuy', 0),
-('LH016', 'BN007', 'BS001', 'LT011', '2026-10-25', '07:30:00', 'fegwr', '2026-10-25 13:50:30', 'HoanTat', 0),
-('LH017', 'BN007', 'BS002', 'LT010', '2026-10-25', '07:30:00', 'Khám bệnh theo yêu cầu', '2026-10-25 14:15:12', 'HoanTat', 0),
-('LH018', 'BN007', 'BS002', 'LT012', '2026-10-25', '07:30:00', 'Khám bệnh theo yêu cầu', '2026-10-25 14:28:36', 'DaDen', 0);
+('LH001', 'BN001', 'BS001', 'LT001', '2026-09-18', '08:00:00', 'Đau thắt ngực khi gắng sức, chóng mặt', '2026-09-18 01:33:16', 'COMPLETED', 0),
+('LH002', 'BN002', 'BS002', 'LT002', '2026-09-18', '08:30:00', 'Đau rát vùng thượng vị nhiều ngày qua', '2026-09-18 01:33:16', 'ARRIVED', 0),
+('LH003', 'BN003', 'BS003', 'LT003', '2026-09-18', '14:00:00', 'Sốt cao, ho có đờm', '2026-09-18 01:33:16', 'COMPLETED', 0),
+('LH005', 'BN001', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'scavdsbfd', '2026-10-10 06:40:10', 'BOOKED', 0),
+('LH006', 'BN004', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'csavdsbf', '2026-10-10 06:40:39', 'BOOKED', 0),
+('LH007', 'BN002', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'scavds', '2026-10-10 12:35:47', 'BOOKED', 0),
+('LH008', 'BN003', 'BS003', 'LT004', '2026-10-10', '07:30:00', 'scavds', '2026-10-10 12:43:38', 'BOOKED', 0),
+('LH009', 'BN001', 'BS002', 'LT005', '2026-10-14', '07:30:00', 'scavdsb', '2026-10-14 00:41:12', 'COMPLETED', 0),
+('LH010', 'BN001', 'BS002', 'LT006', '2026-10-16', '07:30:00', 'svdsfd', '2026-10-16 00:53:46', 'BOOKED', 0),
+('LH011', 'BN007', 'BS002', 'LT007', '2026-10-18', '07:30:00', 'savdsbf', '2026-10-18 10:20:52', 'COMPLETED', 0),
+('LH012', 'BN007', 'BS001', 'LT008', '2026-10-18', '07:30:00', 'svdsfbd', '2026-10-18 10:34:33', 'COMPLETED', 0),
+('LH013', 'BN001', 'BS001', 'LT009', '2026-10-21', '07:30:00', 'sdafsd', '2026-10-21 03:45:05', 'COMPLETED', 0),
+('LH014', 'BN008', 'BS002', 'LT010', '2026-10-25', '07:30:00', 'Abc', '2026-10-25 07:28:35', 'COMPLETED', 0),
+('LH015', 'BN007', 'BS001', 'LT011', '2026-10-25', '07:30:00', 'fadsfbg', '2026-10-25 11:57:34', 'CANCELLED', 0),
+('LH016', 'BN007', 'BS001', 'LT011', '2026-10-25', '07:30:00', 'fegwr', '2026-10-25 13:50:30', 'COMPLETED', 0),
+('LH017', 'BN007', 'BS002', 'LT010', '2026-10-25', '07:30:00', 'Khám bệnh theo yêu cầu', '2026-10-25 14:15:12', 'COMPLETED', 0),
+('LH018', 'BN007', 'BS002', 'LT012', '2026-10-25', '07:30:00', 'Khám bệnh theo yêu cầu', '2026-10-25 14:28:36', 'ARRIVED', 0);
 
 -- --------------------------------------------------------
 

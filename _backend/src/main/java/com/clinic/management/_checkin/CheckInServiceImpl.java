@@ -9,6 +9,8 @@ import com.clinic.management._patient.PatientRepository;
 import com.clinic.management._reception.Reception;
 import com.clinic.management._reception.ReceptionRepository;
 import com.clinic.management._schedule.DoctorScheduleRepository;
+import com.clinic.management.common.enums.AppointmentStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +21,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CheckInServiceImpl implements CheckInService {
 
-    private static final String STATUS_CANCELLED = "DaHuy";
-    private static final String STATUS_ARRIVED = "DaDen";
-    private static final String STATUS_COMPLETED = "HoanTat";
     private static final String STATUS_EXAMINED = "DaKham";
     private static final String QUEUE_WAITING = "ChoKham";
     private static final String QUEUE_EXAMINING = "DangKham";
@@ -37,20 +37,6 @@ public class CheckInServiceImpl implements CheckInService {
     private final DoctorRepository doctorRepository;
     private final DoctorScheduleRepository scheduleRepository;
     private final ReceptionRepository receptionRepository;
-
-    public CheckInServiceImpl(CheckInLogRepository checkInLogRepository,
-                              AppointmentRepository appointmentRepository,
-                              PatientRepository patientRepository,
-                              DoctorRepository doctorRepository,
-                              DoctorScheduleRepository scheduleRepository,
-                              ReceptionRepository receptionRepository) {
-        this.checkInLogRepository = checkInLogRepository;
-        this.appointmentRepository = appointmentRepository;
-        this.patientRepository = patientRepository;
-        this.doctorRepository = doctorRepository;
-        this.scheduleRepository = scheduleRepository;
-        this.receptionRepository = receptionRepository;
-    }
 
     @Override
     @Transactional
@@ -75,8 +61,9 @@ public class CheckInServiceImpl implements CheckInService {
         }
 
         log.setPatientId(appointment.getPatientId());
+        AppointmentStatus currentStatus = appointment.getStatus();
 
-        if (STATUS_CANCELLED.equalsIgnoreCase(appointment.getStatus())) {
+        if (currentStatus == AppointmentStatus.CANCELLED) {
             return saveFailure(log, CheckInLog.RESULT_CANCELLED,
                     "Lịch hẹn " + code + " đã bị huỷ, không thể tiếp đón.");
         }
@@ -94,9 +81,9 @@ public class CheckInServiceImpl implements CheckInService {
             return saveFailure(log, CheckInLog.RESULT_ALREADY_CHECKED_IN, queueMsg);
         }
 
-        // 2. Kiểm tra nếu lịch hẹn đã khám xong (trạng thái HoanTat, DaKham hoặc lượt tiếp đón đã khám)
-        boolean isExamined = STATUS_COMPLETED.equalsIgnoreCase(appointment.getStatus())
-                || STATUS_EXAMINED.equalsIgnoreCase(appointment.getStatus())
+        // 2. Kiểm tra nếu lịch hẹn đã khám xong (trạng thái COMPLETED, EXAMINED hoặc lượt tiếp đón đã khám)
+        boolean isExamined = currentStatus == AppointmentStatus.COMPLETED
+                || currentStatus == AppointmentStatus.EXAMINED
                 || existingReceptions.stream().anyMatch(r -> STATUS_EXAMINED.equalsIgnoreCase(r.getQueueStatus()));
         if (isExamined) {
             return saveFailure(log, STATUS_EXAMINED,
@@ -104,7 +91,7 @@ public class CheckInServiceImpl implements CheckInService {
         }
 
         // 3. Nếu lịch hẹn ghi nhận đã đến trước đó nhưng chưa hoàn tất
-        if (STATUS_ARRIVED.equalsIgnoreCase(appointment.getStatus())) {
+        if (currentStatus == AppointmentStatus.ARRIVED) {
             return saveFailure(log, CheckInLog.RESULT_ALREADY_CHECKED_IN,
                     "Lịch hẹn " + code + " đã được tiếp đón trước đó, không thể tiếp đón lại.");
         }
