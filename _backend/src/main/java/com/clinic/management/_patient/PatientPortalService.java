@@ -246,7 +246,10 @@ public class PatientPortalService {
                 ? null
                 : scheduleRepository.findById(appointment.getScheduleId()).orElse(null);
         Doctor doctor = schedule != null ? schedule.getDoctor() : findDoctor(appointment.getDoctorId());
-        String roomId = schedule != null ? schedule.getRoomId() : null;
+        
+        // Lấy roomId và roomName ban đầu từ schedule (kiểm tra null an toàn)
+        String roomId = (schedule != null && schedule.getRoom() != null) ? schedule.getRoom().getId() : null;
+        String roomName = (schedule != null && schedule.getRoom() != null) ? schedule.getRoom().getRoomName() : null;
 
         Reception reception = receptionRepository
                 .findByAppointmentIdAndDeletedFalse(appointment.getId())
@@ -257,12 +260,9 @@ public class PatientPortalService {
         Integer queueNumber = reception != null ? reception.getQueueNumber() : null;
         String queueStatus = reception != null ? reception.getQueueStatus() : null;
 
+        // Nếu reception có chỉ định phòng khám riêng thì ưu tiên lấy theo reception
         if (reception != null && reception.getRoomId() != null) {
             roomId = reception.getRoomId();
-        }
-
-        String roomName = null;
-        if (roomId != null) {
             roomName = roomRepository.findById(roomId)
                     .map(Room::getRoomName)
                     .orElse(roomId);

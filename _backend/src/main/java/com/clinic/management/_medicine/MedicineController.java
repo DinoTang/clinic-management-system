@@ -1,73 +1,85 @@
 package com.clinic.management._medicine;
 
+import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/medicines")
+@CrossOrigin(origins = "http://localhost:5173")
 public class MedicineController {
 
-    private final MedicineRepository medicineRepository;
+    private final MedicineService medicineService;
 
-    public MedicineController(MedicineRepository medicineRepository) {
-        this.medicineRepository = medicineRepository;
+    public MedicineController(MedicineService medicineService) {
+        this.medicineService = medicineService;
     }
 
     @GetMapping
-    public List<Medicine> getAll() {
-        return medicineRepository.findByDeletedFalse();
+    public List<Medicine> findAll() {
+        return medicineService.findAll();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Medicine> getById(@PathVariable String id) {
-        return medicineRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+    @GetMapping("/v2")
+    public ResponseEntity<Page<Medicine>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search) {
 
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody Medicine medicine) {
-        if (medicine.getId() == null || medicine.getId().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mã thuốc không được để trống."));
-        }
-        if (medicineRepository.existsById(medicine.getId())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mã thuốc đã tồn tại: " + medicine.getId()));
-        }
-        if (medicine.getStock() != null && medicine.getStock() < 0) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Tồn kho không được âm."));
-        }
-        if (medicine.getDeleted() == null) {
-            medicine.setDeleted(false);
-        }
-        return ResponseEntity.ok(medicineRepository.save(medicine));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Medicine medicine) {
-        return medicineRepository.findById(id).map(existing -> {
-            if (medicine.getStock() != null && medicine.getStock() < 0) {
-                return ResponseEntity.badRequest().body(Map.of("message", "Tồn kho không được âm."));
+        Boolean deletedFilter = null;
+        if (status != null && !status.equalsIgnoreCase("all") && !status.isBlank()) {
+            if (status.equalsIgnoreCase("deleted") || status.equalsIgnoreCase("true") || status.equalsIgnoreCase("inactive")) {
+                deletedFilter = true;
+            } else if (status.equalsIgnoreCase("active") || status.equalsIgnoreCase("false")) {
+                deletedFilter = false;
             }
-            if (medicine.getName() != null) existing.setName(medicine.getName());
-            if (medicine.getActiveIngredient() != null) existing.setActiveIngredient(medicine.getActiveIngredient());
-            if (medicine.getUnit() != null) existing.setUnit(medicine.getUnit());
-            if (medicine.getPrice() != null) existing.setPrice(medicine.getPrice());
-            if (medicine.getStock() != null) existing.setStock(medicine.getStock());
-            if (medicine.getUsage() != null) existing.setUsage(medicine.getUsage());
-            if (medicine.getDeleted() != null) existing.setDeleted(medicine.getDeleted());
-            return ResponseEntity.ok(medicineRepository.save(existing));
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+        }
+
+        Page<Medicine> medicines = medicineService.findAll(page, size, deletedFilter, search);
+        return ResponseEntity.ok(medicines);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id) {
-        return medicineRepository.findById(id).map(existing -> {
-            existing.setDeleted(true);
-            medicineRepository.save(existing);
-            return ResponseEntity.noContent().build();
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/{medicineId}")
+    public ResponseEntity<Medicine> findById(@PathVariable String medicineId) {
+        Medicine result = medicineService.findById(medicineId);
+        return ResponseEntity.ok(result);
+    }
+
+    // Thêm mới thuốc
+    @PostMapping
+    public ResponseEntity<Medicine> create(@Valid @RequestBody MedicineCreateRequest request) {
+        Medicine medicine = medicineService.create(request);
+        return ResponseEntity.ok(medicine);
+    }
+
+    // Cập nhật thông tin thuốc (nhận ID từ body của request)
+    @PutMapping("/update-profile")
+    public ResponseEntity<Medicine> updateProfile(@Valid @RequestBody MedicineUpdateRequest request) {
+        Medicine medicine = medicineService.update(request);
+        return ResponseEntity.ok(medicine);
+    }
+
+    // Khôi phục thuốc đã xóa mềm
+    @PutMapping("/restore/{medicineId}")
+    public ResponseEntity<Medicine> restoreById(@PathVariable String medicineId) {
+        Medicine medicine = medicineService.restoreById(medicineId);
+        return ResponseEntity.ok(medicine);
+    }
+
+    // Xóa mềm
+    @DeleteMapping("/soft-delete/{medicineId}")
+    public ResponseEntity<Medicine> softDeleteById(@PathVariable String medicineId) {
+        Medicine medicine = medicineService.softDeleteById(medicineId);
+        return ResponseEntity.ok(medicine);
+    }
+
+    // Xóa cứng khỏi database
+    @DeleteMapping("/hard-delete/{medicineId}")
+    public ResponseEntity<Medicine> hardDeleteById(@PathVariable String medicineId) {
+        Medicine medicine = medicineService.hardDeleteById(medicineId);
+        return ResponseEntity.ok(medicine);
     }
 }

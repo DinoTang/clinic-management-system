@@ -54,13 +54,13 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
                 .filter(s -> !Boolean.TRUE.equals(s.getDeleted()))
                 .toList();
     }
-
+    
     @Override
     public DoctorSchedule createSchedule(DoctorSchedule schedule) {
         if (schedule.getDoctor() == null || schedule.getDoctor().getId() == null || schedule.getDoctor().getId().isBlank()) {
             throw new IllegalArgumentException("Bác sĩ không được để trống!");
         }
-        if (schedule.getRoomId() == null || schedule.getRoomId().isBlank()) {
+        if (schedule.getRoom() == null || schedule.getRoom().getId() == null || schedule.getRoom().getId().isBlank()) {
             throw new IllegalArgumentException("Phòng khám không được để trống!");
         }
         if (schedule.getExaminationDate() == null) {
@@ -87,7 +87,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
             return null;
         }
         existing.setDoctor(schedule.getDoctor());
-        existing.setRoomId(schedule.getRoomId());
+        existing.setRoom(schedule.getRoom());
         existing.setExaminationDate(schedule.getExaminationDate());
         existing.setStartTime(schedule.getStartTime());
         existing.setEndTime(schedule.getEndTime());

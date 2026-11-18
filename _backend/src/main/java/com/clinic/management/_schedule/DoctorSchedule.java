@@ -1,6 +1,7 @@
 package com.clinic.management._schedule;
 
 import com.clinic.management._doctor.entities.Doctor;
+import com.clinic.management._room.entities.Room; 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -8,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "LICHTRUCBACSI")
+@Table(name = "lichtrucbacsi")
 public class DoctorSchedule {
 
     @Id
@@ -19,8 +20,9 @@ public class DoctorSchedule {
     @JoinColumn(name = "MABACSI", referencedColumnName = "MABACSI")
     private Doctor doctor;
 
-    @Column(name = "MAPHONG", length = 20)
-    private String roomId;
+    @ManyToOne
+    @JoinColumn(name = "MAPHONG", referencedColumnName = "MAPHONG")
+    private Room room;
 
     @Column(name = "NGAYKHAM")
     private LocalDate examinationDate;
@@ -43,11 +45,11 @@ public class DoctorSchedule {
     public DoctorSchedule() {
     }
 
-    public DoctorSchedule(String id, Doctor doctor, String roomId, LocalDate examinationDate,
+    public DoctorSchedule(String id, Doctor doctor, Room room, LocalDate examinationDate,
                           LocalTime startTime, LocalTime endTime, Integer maxPatients, String status, Boolean deleted) {
         this.id = id;
         this.doctor = doctor;
-        this.roomId = roomId;
+        this.room = room;
         this.examinationDate = examinationDate;
         this.startTime = startTime;
         this.endTime = endTime;
