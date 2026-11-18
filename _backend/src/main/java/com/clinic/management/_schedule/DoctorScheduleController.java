@@ -1,5 +1,7 @@
 package com.clinic.management._schedule;
 
+import com.clinic.management._room.entities.Room;
+import com.clinic.management._room.interfaces.IRoomQuery;
 import com.clinic.management._doctor.entities.Doctor;
 import com.clinic.management._doctor.repositories.DoctorRepository;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,12 +16,15 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class DoctorScheduleController {
 
+    private final IRoomQuery roomQueryService;
     private final DoctorScheduleService scheduleService;
     private final DoctorRepository doctorRepository;
 
     public DoctorScheduleController(
+        IRoomQuery roomQueryService,
             DoctorScheduleService scheduleService,
             DoctorRepository doctorRepository) {
+        this.roomQueryService=roomQueryService;
         this.scheduleService = scheduleService;
         this.doctorRepository = doctorRepository;
     }
@@ -66,13 +71,19 @@ public class DoctorScheduleController {
 
     private DoctorSchedule toSchedule(DoctorScheduleRequest request) {
         DoctorSchedule schedule = new DoctorSchedule();
+        
         DoctorScheduleRequest.DoctorReference doctorReference = request.getDoctor();
         if (doctorReference != null && doctorReference.getId() != null
                 && !doctorReference.getId().isBlank()) {
             Doctor doctor = doctorRepository.findById(doctorReference.getId()).orElse(null);
             schedule.setDoctor(doctor);
         }
-        schedule.setRoomId(request.getRoomId());
+        
+        if (request.getRoomId() != null && !request.getRoomId().isBlank()) {
+            Room room = roomQueryService.findById(request.getRoomId());
+            schedule.setRoom(room);
+        }
+        
         schedule.setExaminationDate(request.getExaminationDate());
         schedule.setStartTime(request.getStartTime());
         schedule.setEndTime(request.getEndTime());

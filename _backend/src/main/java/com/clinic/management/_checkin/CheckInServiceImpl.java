@@ -152,7 +152,6 @@ public class CheckInServiceImpl implements CheckInService {
         checkInLogRepository.save(log);
         return buildResult(false, resultCode, log.getId(), false, message);
     }
-
     private void fillAppointmentInfo(CheckInScanResult result, Appointment appointment) {
         result.setAppointmentId(appointment.getId());
         result.setAppointmentStatus(appointment.getStatus());
@@ -176,7 +175,11 @@ public class CheckInServiceImpl implements CheckInService {
 
         if (appointment.getScheduleId() != null) {
             scheduleRepository.findById(appointment.getScheduleId())
-                    .ifPresent(schedule -> result.setRoomId(schedule.getRoomId()));
+                    .ifPresent(schedule -> {
+                        if (schedule.getRoom() != null) {
+                            result.setRoomId(schedule.getRoom().getId());
+                        }
+                    });
         }
     }
 
