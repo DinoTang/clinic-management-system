@@ -19,6 +19,8 @@ import {
     StaffRoleRoutes,
 } from "../desktop/RoleWorkspaceRoutes.jsx";
 
+import { ProtectedRoute } from "./ProtectedRoute";
+
 const PatientMobileApp = lazy(() =>
     import("../mobile/PatientMobileApp.jsx")
 );
@@ -34,26 +36,41 @@ function AppRoutes() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/oauth/callback" element={<GoogleCallback />} />
 
-            <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<AdminPage/>} />
-                <Route path="/admin/accounts" element={<AccountPage/>} />
-                <Route path="/admin/patients" element={<PatientPage/>} />
-                <Route path="/admin/doctors" element={<DoctorPage/>} />
-                <Route path="/admin/specialties" element={<SpecialtyPage/>} />
-                <Route path="/admin/clinics" element={<RoomPage/>} />
-                <Route path="/admin/schedules" element={<DesktopSchedulePage />} />
-                <Route path="/admin/appointments" element={<AppointmentPage />} />
-                <Route path="/admin/medicines" element={<MedicinePage />} />
-                <Route path="/admin/services" element={<ServiceCatalogPage />} />
-                <Route path="/schedules" element={<DesktopSchedulePage />} />
+            {/* 2. Nhóm Route dành riêng cho ADMIN */}
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "DEV"]} />}>
+                <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/admin/accounts" element={<AccountPage />} />
+                    <Route path="/admin/patients" element={<PatientPage />} />
+                    <Route path="/admin/doctors" element={<DoctorPage />} />
+                    <Route path="/admin/specialties" element={<SpecialtyPage />} />
+                    <Route path="/admin/clinics" element={<RoomPage />} />
+                    <Route path="/admin/schedules" element={<DesktopSchedulePage />} />
+                    <Route path="/admin/appointments" element={<AppointmentPage />} />
+                    <Route path="/admin/medicines" element={<MedicinePage />} />
+                    <Route path="/admin/services" element={<ServiceCatalogPage />} />
+                    <Route path="/schedules" element={<DesktopSchedulePage />} />
+                </Route>
+                <Route path="/a/*" element={<AdminRoleRoutes />} />
             </Route>
 
-            <Route path="/a/*" element={<AdminRoleRoutes />} />
-            <Route path="/doctor/*" element={<DoctorRoleRoutes />} />
-            <Route path="/staff/*" element={<StaffRoleRoutes />} />
+            {/* 3. Nhóm Route dành cho BÁC SĨ (có thể cho phép cả Admin vào xem nếu muốn) */}
+            <Route element={<ProtectedRoute allowedRoles={["DOCTOR", "ADMIN", "DEV"]} />}>
+                <Route path="/doctor/*" element={<DoctorRoleRoutes />} />
+            </Route>
 
-            <Route path="/mobile/*" element={<PatientMobileApp />} />
-            <Route path="/patient/*" element={<PatientMobileApp />} />
+            {/* 4. Nhóm Route dành cho NHÂN VIÊN */}
+            <Route element={<ProtectedRoute allowedRoles={["STAFF", "ADMIN", "DEV"]} />}>
+                <Route path="/staff/*" element={<StaffRoleRoutes />} />
+            </Route>
+
+            {/* 5. Nhóm Route dành cho BỆNH NHÂN */}
+            <Route element={<ProtectedRoute allowedRoles={["PATIENT", "DEV"]} />}>
+                <Route path="/mobile/*" element={<PatientMobileApp />} />
+                <Route path="/patient/*" element={<PatientMobileApp />} />
+            </Route>
+
+            {/* Các trang chung hoặc fallback */}
             <Route path="/desktop/*" element={<DesktopApp />} />
             <Route path="/*" element={<PatientMobileApp />} />
         </Routes>

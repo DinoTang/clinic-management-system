@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -8,15 +9,7 @@ import {
   Bar,
   LabelList,
 } from "recharts";
-
-const data = [
-  { month: "T1", revenue: 12000000 },
-  { month: "T2", revenue: 15000000 },
-  { month: "T3", revenue: 11000000 },
-  { month: "T4", revenue: 18000000 },
-  { month: "T5", revenue: 13442000 },
-  { month: "T6", revenue: 20000000 },
-];
+import dashboardService from "../../../services/dashboard/dashboardService";
 
 function formatMillions(value) {
   return (
@@ -26,7 +19,40 @@ function formatMillions(value) {
   );
 }
 
-function RevenueChart() {
+function RevenueChart({ year }) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRevenue = async () => {
+      try {
+        setLoading(true);
+        const response = await dashboardService.getMonthlyRevenue(year);
+
+        const formattedData = (response || []).map((item) => ({
+          month: `T${item.month}`,
+          revenue: Number(item.revenue || 0),
+        }));
+
+        setData(formattedData);
+      } catch (error) {
+        console.error("Lỗi tải biểu đồ doanh thu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRevenue();
+  }, [year]);
+
+  if (loading) {
+    return (
+      <div className="mt-6 flex h-[19rem] w-full items-center justify-center text-xs text-[#98a2b3]">
+        Đang tải dữ liệu doanh thu...
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6 h-[19rem] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -51,7 +77,9 @@ function RevenueChart() {
             <LabelList
               dataKey="revenue"
               position="top"
-              formatter={(value) => formatMillions(Number(value))}
+              formatter={(value) =>
+                Number(value) > 0 ? formatMillions(Number(value)) : ""
+              }
             />
           </Bar>
         </BarChart>

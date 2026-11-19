@@ -10,4 +10,5 @@ public interface MedicineRepository extends JpaRepository<Medicine, String>, Jpa
     long count();
     List<Medicine> findByDeletedFalse();
 
+    long countByStockLessThanAndDeletedFalse(Integer threshold);
 }

@@ -87,7 +87,7 @@ public class AuthService implements IAuth{
 
 		User user = userQueryService.findByGoogleId(googleId);
 
-		String token = jwtService.generateToken(user.getUsername());
+		String token = jwtService.generateToken(user.getUsername(), user.getRole());
 		return createLoginResponse(token, user);
 	}
 
@@ -100,7 +100,8 @@ public class AuthService implements IAuth{
 		if(!isPassword){
 			throw new RuntimeException("Tên tài khoản hoặc mật khẩu không chính xác");
 		}
-		String token = jwtService.generateToken(request.getUsername());
+		
+		String token = jwtService.generateToken(user.getUsername(), user.getRole());
 		return createLoginResponse(token, user);
 	}
 
@@ -135,15 +136,13 @@ public class AuthService implements IAuth{
     @Transactional
     public LoginResponse registerPatient(PatientRegisterRequest request) {
         RegisterRequest userRequest = new RegisterRequest(
-                request.getPhone(), // Dùng số điện thoại làm username
+                request.getPhone(),
                 request.getPassword(),
                 request.getFullName(),
                 request.getEmail(),
                 request.getPhone()
         );
 
-        // Service này đã kiểm tra username, email, số điện thoại trùng
-        // và mã hóa mật khẩu trước khi lưu tài khoản.
         User user = userRegistrationService.createByLocal(userRequest);
 
         String patientId = generateNextPatientId();
@@ -161,7 +160,6 @@ public class AuthService implements IAuth{
         );
         patientRepository.save(patient);
 
-        // Đăng ký xong trả token luôn; username trong token là số điện thoại.
         return loginLocal(new LoginRequest(request.getPhone(), request.getPassword()));
     }
 
@@ -217,7 +215,7 @@ public class AuthService implements IAuth{
             throw new RuntimeException("Số điện thoại hoặc mật khẩu không chính xác");
         }
 
-        String token = jwtService.generateToken(user.getUsername());
+        String token = jwtService.generateToken(user.getUsername(), user.getRole());
         return createLoginResponse(token, user);
     }
 }

@@ -27,7 +27,7 @@ function HeaderAdmin({className}) {
 					onClick={()=>setShowPopup(!showPopup)}
 					className="relative flex flex-row gap-2 items-center"
 					type="button">
-					<span className="flex w-[2rem] h-[2rem] items-start justify-center border border-[#d7e6f5] rounded-full text-[#216bb3] bg-[#eaf3fc] font-bold">
+					<span className="flex w-[2rem] h-[2rem] items-center justify-center border border-[#d7e6f5] rounded-full text-[#216bb3] bg-[#eaf3fc] font-bold">
 						{user.username[0]}
 					</span>
 					<span className="flex flex-col text-[0.8rem] text-left">
