@@ -5,7 +5,10 @@ import AdminPage from "../pages/admin/Admin.jsx";
 import AccountPage from "../pages/account/Account";
 import RoomPage from "../pages/room/Room";
 import PatientPage from "../pages/patient/Patient";
+import MedicinePage from "../pages/medicine/Medicine";
+import AppointmentPage from "../pages/appointment/Appointment";
 import SpecialtyPage from "../pages/specialty/Specialty";
+import ServiceCatalogPage from "../pages/serviceCatalog/ServiceCatalog";
 import DoctorPage from "../pages/doctor/Doctor";
 import GoogleCallback from "../pages/callback/GoogleCallback";
 import AdminLayout from "../layouts/AdminLayout.jsx";
@@ -39,6 +42,9 @@ function AppRoutes() {
                 <Route path="/admin/specialties" element={<SpecialtyPage/>} />
                 <Route path="/admin/clinics" element={<RoomPage/>} />
                 <Route path="/admin/schedules" element={<DesktopSchedulePage />} />
+                <Route path="/admin/appointments" element={<AppointmentPage />} />
+                <Route path="/admin/medicines" element={<MedicinePage />} />
+                <Route path="/admin/services" element={<ServiceCatalogPage />} />
                 <Route path="/schedules" element={<DesktopSchedulePage />} />
             </Route>
 
