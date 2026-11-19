@@ -1,5 +1,7 @@
 package com.clinic.management.security;
 
+import com.clinic.management.common.enums.Role;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -14,38 +16,45 @@ public class JwtService {
 	@Value("${jwt.secret}")
 	private String SECRET_KEY;
 
-	public String generateToken(String username){
+	public String generateToken(String username, Role role) {
 		return Jwts.builder()
 				.subject(username)
+				.claim("role", role.name())
 				.issuedAt(new Date())
-				.expiration( new Date(System.currentTimeMillis()+ 86400000))
+				.expiration(new Date(System.currentTimeMillis() + 86400000))
 				.signWith(getKey())
 				.compact();
 	}
 
-	public String extractUsername(String token){
+	public String extractUsername(String token) {
+		return extractAllClaims(token).getSubject();
+	}
+
+	public String extractRole(String token) {
+		return extractAllClaims(token).get("role", String.class);
+	}
+
+	private Claims extractAllClaims(String token) {
 		return Jwts.parser()
 				.verifyWith(getKey())
 				.build()
 				.parseSignedClaims(token)
-				.getPayload()
-				.getSubject();
+				.getPayload();
 	}
 
-	public boolean isValid(String token){
-		try{
+	public boolean isValid(String token) {
+		try {
 			Jwts.parser()
 				.verifyWith(getKey())
 				.build()
 				.parseSignedClaims(token);
 			return true;
-		}
-		catch( Exception e){
+		} catch (Exception e) {
 			return false;
 		}
 	}
 
-	private SecretKey getKey(){
+	private SecretKey getKey() {
 		return Keys.hmacShaKeyFor(
 			SECRET_KEY.getBytes(StandardCharsets.UTF_8)
 		);

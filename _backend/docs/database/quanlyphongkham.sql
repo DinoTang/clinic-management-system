@@ -509,6 +509,7 @@ CREATE TABLE `nguoidung` (
 -- Dumping data for table `nguoidung`
 --
 
+-- Password123
 INSERT INTO `nguoidung` (`MANGUOIDUNG`, `TENDANGNHAP`, `MATKHAU`, `HOTEN`, `EMAIL`, `SODIENTHOAI`, `VAITRO`, `TRANGTHAI`, `TRANGTHAIXOA`, `NGAYTAO`, `NGAYCAPNHAT`, `GOOGLE_ID`) VALUES
 ('ND00010', '0816808776', '$2a$10$f66i7udTOc4GVPQfEC3kXOig0Q21gm7G4zOYkqyAnjQyeVHZLj8yS', 'Gia Huy Võ', 'giahuya6k5@gmail.com', '0816808776', 'PATIENT', 'ACTIVE', 0, '2026-10-16 00:41:49', '2026-10-25 05:25:20', NULL),
 ('ND00011', '0886121849', '$2a$10$GE2fn6xNtKvoF20K0Ol84.qztAyQZh4l1orDu/4XoCdAHooMkugby', 'Tăng Huỳnh Quốc Khánh', 'quockhanhtanghuynh@gmail.com', '0886121849', 'PATIENT', 'ACTIVE', 0, '2026-10-25 03:47:39', '2026-10-25 03:47:39', '103289369891999916708'),
