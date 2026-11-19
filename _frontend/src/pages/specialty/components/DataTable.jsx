@@ -61,10 +61,8 @@ function DataTable({specialties, fetchSpecialties }) {
               <td className="whitespace-nowrap !px-[0.875rem] !py-[0.75rem]">
                 {formatMoney(specialty.standardFee)}
               </td>
-              <td className="whitespace-nowrap !px-[0.875rem] !py-[0.75rem]">
-                {specialty.status}
-              </td>
-				<td className="whitespace-nowrap !px-[0.875rem] !py-[0.75rem]">
+
+      				<td className="whitespace-nowrap !px-[0.875rem] !py-[0.75rem]">
                 <span
                   className={`inline-flex items-center gap-[0.375rem] rounded-full !px-[0.625rem] !py-[0.3125rem] text-[0.6875rem] font-medium ${
                     specialty.status == SPECIALTY_STATUS.ACTIVE

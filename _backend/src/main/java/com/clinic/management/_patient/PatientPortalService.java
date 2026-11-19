@@ -353,12 +353,13 @@ public class PatientPortalService {
         return new PatientPortalDtos.InvoiceDto(
                 invoice.getId(),
                 invoice.getTotal(),
-                invoice.getPaymentStatus(),
-                invoice.getPaymentMethod(),
+                invoice.getPaymentStatus() != null ? invoice.getPaymentStatus().name() : null,
+                invoice.getPaymentMethod() != null ? invoice.getPaymentMethod().name() : null,
                 invoice.getPaidAt(),
                 invoice.getCreatedAt(),
                 items
         );
+
     }
 
     private Doctor findDoctor(String doctorId) {

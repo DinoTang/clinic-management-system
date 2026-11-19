@@ -46,7 +46,7 @@ function Sidebar({ className }) {
         { path: "/admin/medicines", label: "Thuốc & tồn kho", icon: <Pill /> },
         { path: "/admin/services", label: "Dịch vụ y tế", icon: <PlusBig /> },
         { path: "/admin/invoices", label: "Hóa đơn", icon: <Receipt /> },
-        { path: "/admin/reports", label: "Báo cáo", icon: <ChartLine /> },
+        // { path: "/admin/reports", label: "Báo cáo", icon: <ChartLine /> },
       ]
     }
   ];

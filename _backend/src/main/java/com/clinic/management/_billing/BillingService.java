@@ -15,6 +15,8 @@ import com.clinic.management._service_catalog.ServiceCatalog;
 import com.clinic.management._service_catalog.ServiceCatalogRepository;
 import com.clinic.management._staff.entities.Staff;
 import com.clinic.management._staff.repositories.StaffRepository;
+import com.clinic.management.common.enums.PaymentMethod;
+import com.clinic.management.common.enums.PaymentStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -203,7 +205,7 @@ public class BillingService {
         invoice.setTotal(total);
         invoice.setAmountGiven(BigDecimal.ZERO);
         invoice.setChangeAmount(BigDecimal.ZERO);
-        invoice.setPaymentStatus(STATUS_UNPAID); // BR-052
+        invoice.setPaymentStatus(PaymentStatus.UNPAID); // BR-052
         invoice.setCreatedAt(LocalDateTime.now());
         invoice.setDeleted(false);
         invoice = invoiceRepository.save(invoice);
@@ -229,12 +231,13 @@ public class BillingService {
         if (Boolean.TRUE.equals(invoice.getDeleted())) {
             throw new IllegalArgumentException("Hóa đơn " + invoice.getId() + " đã bị xóa.");
         }
-        if (!STATUS_UNPAID.equals(invoice.getPaymentStatus())) {
+        if (invoice.getPaymentStatus() != PaymentStatus.UNPAID) {
             throw new IllegalArgumentException(
                     "BR-056: Chỉ hóa đơn chưa thanh toán mới được thanh toán (trạng thái hiện tại: "
                             + invoice.getPaymentStatus() + ").");
         }
-        String method = normalizeMethod(request.getMethod());
+
+        PaymentMethod method = parsePaymentMethod(request.getMethod());
         BigDecimal given = request.getAmountGiven();
         if (given == null) {
             throw new IllegalArgumentException("BR-057: Số tiền khách đưa không được để trống.");
@@ -248,8 +251,9 @@ public class BillingService {
         invoice.setPaymentMethod(method);
         invoice.setAmountGiven(given);
         invoice.setChangeAmount(given.subtract(invoice.getTotal()));
-        invoice.setPaymentStatus(STATUS_PAID); // BR-059
+        invoice.setPaymentStatus(PaymentStatus.PAID); // BR-059
         invoice.setPaidAt(LocalDateTime.now());
+
         if (request.getStaffId() != null && !request.getStaffId().isBlank()) {
             String resolvedStaffId = request.getStaffId();
             Optional<Staff> staffOpt = staffRepository.findById(resolvedStaffId)
@@ -262,6 +266,18 @@ public class BillingService {
             }
         }
         return invoiceRepository.save(invoice);
+    }
+
+    private PaymentMethod parsePaymentMethod(String rawMethod) {
+        if (rawMethod == null || rawMethod.isBlank()) {
+            throw new IllegalArgumentException("Phương thức thanh toán không được để trống.");
+        }
+        return switch (rawMethod.trim().toUpperCase()) {
+            case "CASH", "TIENMAT" -> PaymentMethod.CASH;
+            case "TRANSFER", "CHUYENKHOAN" -> PaymentMethod.TRANSFER;
+            case "CARD", "THE" -> PaymentMethod.CARD;
+            default -> throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ: " + rawMethod);
+        };
     }
 
     private String normalizeMethod(String method) {

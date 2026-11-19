@@ -4,6 +4,9 @@ import com.clinic.management._doctor.entities.Doctor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import com.clinic.management._doctor.repositories.DoctorRepository;
+import org.springframework.data.jpa.repository.Query;
+
 import java.util.List;
 
 @Repository
@@ -43,4 +46,17 @@ public interface DoctorRepository extends
         
         return this.save(doctor);
     }
+
+    @Query(value = """
+        SELECT COUNT(bs.MABACSI)
+        FROM BACSI bs
+        JOIN NGUOIDUNG nd ON bs.MANGUOIDUNG = nd.MANGUOIDUNG
+        WHERE COALESCE(bs.TRANGTHAIXOA, 0) = 0
+          AND COALESCE(nd.TRANGTHAIXOA, 0) = 0
+          AND nd.TRANGTHAI = 'ACTIVE'
+    """, nativeQuery = true)
+    long countActiveDoctors();
+
+    long countByDeletedFalse();
+
 }
