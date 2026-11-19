@@ -9,16 +9,16 @@ function DataWelcome({ fetchRooms, specialties }) {
     <>
       <div className="flex items-center justify-between gap-[1rem] max-sm:flex-col max-sm:items-start">
         <div>
-          <p className="text-[0.7rem] font-bold tracking-[0.03rem] text-[#8a96a8]">
-            QUẢN TRỊ HỆ THỐNG / QUẢN LÝ PHÒNG
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.03rem] text-[#8a96a8]">
+            QUẢN TRỊ HỆ THỐNG / QUẢN LÝ PHÒNG KHÁM
           </p>
 
           <h1 className="!mt-[0.25rem] text-[1.6rem] font-bold text-[#344054]">
-            Quản lý phòng
+            Quản lý phòng khám
           </h1>
 
           <p className="!mt-[0.25rem] text-[0.875rem] text-[#8490a0]">
-				Danh sách chuyên khoa, chuyên khoa phụ trách và phí khám.
+            Theo dõi phòng khám và chuyên khoa được phân công
           </p>
         </div>
 

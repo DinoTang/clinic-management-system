@@ -1,5 +1,7 @@
 package com.clinic.management._service_catalog;
 
+import com.clinic.management.common.enums.ServiceCatalogStatus;
+import com.clinic.management.common.enums.ServiceCatalogStatusConverter;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import lombok.Data;
@@ -28,8 +30,9 @@ public class ServiceCatalog {
     @Column(name = "MOTA", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "TRANGTHAI")
-    private Boolean active = true;
+    @Convert(converter = ServiceCatalogStatusConverter.class)
+    @Column(name = "TRANGTHAI", length = 20, nullable = false)
+    private ServiceCatalogStatus status;
 
     @Column(name = "TRANGTHAIXOA")
     private Boolean deleted = false;

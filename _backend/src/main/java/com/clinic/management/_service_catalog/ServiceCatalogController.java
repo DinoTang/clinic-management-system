@@ -1,69 +1,80 @@
 package com.clinic.management._service_catalog;
 
+import com.clinic.management.common.enums.ServiceCatalogStatus;
+import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/services")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ServiceCatalogController {
 
-    private final ServiceCatalogRepository serviceCatalogRepository;
+    private final ServiceCatalogService serviceCatalogService;
 
-    public ServiceCatalogController(ServiceCatalogRepository serviceCatalogRepository) {
-        this.serviceCatalogRepository = serviceCatalogRepository;
+    public ServiceCatalogController(ServiceCatalogService serviceCatalogService) {
+        this.serviceCatalogService = serviceCatalogService;
     }
 
     @GetMapping
-    public List<ServiceCatalog> getAll() {
-        return serviceCatalogRepository.findByDeletedFalse();
+    public List<ServiceCatalog> findAll() {
+        return serviceCatalogService.findAll();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ServiceCatalog> getById(@PathVariable String id) {
-        return serviceCatalogRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/v2")
+    public ResponseEntity<Page<ServiceCatalog>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) ServiceCatalogStatus serviceStatus,
+            @RequestParam(required = false) String specialtyId,
+            @RequestParam(required = false) String search) {
+
+        Page<ServiceCatalog> services = serviceCatalogService.findAll(
+                page, size, serviceStatus, specialtyId, search
+        );
+        return ResponseEntity.ok(services);
     }
 
+    @GetMapping("/{serviceCatalogId}")
+    public ResponseEntity<ServiceCatalog> findById(@PathVariable String serviceCatalogId) {
+        ServiceCatalog result = serviceCatalogService.findById(serviceCatalogId);
+        return ResponseEntity.ok(result);
+    }
+
+    // Thêm mới dịch vụ
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody ServiceCatalog service) {
-        if (service.getId() == null || service.getId().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mã dịch vụ không được để trống."));
-        }
-        if (serviceCatalogRepository.existsById(service.getId())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mã dịch vụ đã tồn tại: " + service.getId()));
-        }
-        if (service.getDeleted() == null) {
-            service.setDeleted(false);
-        }
-        if (service.getActive() == null) {
-            service.setActive(true);
-        }
-        return ResponseEntity.ok(serviceCatalogRepository.save(service));
+    public ResponseEntity<ServiceCatalog> create(@Valid @RequestBody ServiceCatalogCreateRequest request) {
+        ServiceCatalog serviceCatalog = serviceCatalogService.create(request);
+        return ResponseEntity.ok(serviceCatalog);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody ServiceCatalog service) {
-        return serviceCatalogRepository.findById(id).map(existing -> {
-            if (service.getName() != null) existing.setName(service.getName());
-            if (service.getPrice() != null) existing.setPrice(service.getPrice());
-            if (service.getUnit() != null) existing.setUnit(service.getUnit());
-            if (service.getDescription() != null) existing.setDescription(service.getDescription());
-            if (service.getActive() != null) existing.setActive(service.getActive());
-            if (service.getDeleted() != null) existing.setDeleted(service.getDeleted());
-            return ResponseEntity.ok(serviceCatalogRepository.save(existing));
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+    // Cập nhật thông tin dịch vụ (nhận ID từ body của request)
+    @PutMapping("/update-profile")
+    public ResponseEntity<ServiceCatalog> updateProfile(@Valid @RequestBody ServiceCatalogUpdateRequest request) {
+        ServiceCatalog serviceCatalog = serviceCatalogService.update(request);
+        return ResponseEntity.ok(serviceCatalog);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id) {
-        return serviceCatalogRepository.findById(id).map(existing -> {
-            existing.setDeleted(true);
-            serviceCatalogRepository.save(existing);
-            return ResponseEntity.noContent().build();
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+    // Khôi phục dịch vụ đã xóa mềm
+    @PutMapping("/restore/{serviceCatalogId}")
+    public ResponseEntity<ServiceCatalog> restoreById(@PathVariable String serviceCatalogId) {
+        ServiceCatalog serviceCatalog = serviceCatalogService.restoreById(serviceCatalogId);
+        return ResponseEntity.ok(serviceCatalog);
+    }
+
+    // Xóa mềm
+    @DeleteMapping("/soft-delete/{serviceCatalogId}")
+    public ResponseEntity<ServiceCatalog> softDeleteById(@PathVariable String serviceCatalogId) {
+        ServiceCatalog serviceCatalog = serviceCatalogService.softDeleteById(serviceCatalogId);
+        return ResponseEntity.ok(serviceCatalog);
+    }
+
+    // Xóa cứng khỏi database
+    @DeleteMapping("/hard-delete/{serviceCatalogId}")
+    public ResponseEntity<ServiceCatalog> hardDeleteById(@PathVariable String serviceCatalogId) {
+        ServiceCatalog serviceCatalog = serviceCatalogService.hardDeleteById(serviceCatalogId);
+        return ResponseEntity.ok(serviceCatalog);
     }
 }

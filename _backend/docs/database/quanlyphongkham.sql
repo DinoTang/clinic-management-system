@@ -273,13 +273,14 @@ INSERT INTO `chuyenkhoa` (`MACHUYENKHOA`, `TENCHUYENKHOA`, `MOTA`, `PHIKHAMCHUAN
 
 CREATE TABLE `dichvu` (
   `MADICHVU` varchar(20) NOT NULL,
-  `MACHUYENKHOA` varchar(20) NOT NULL,
+  `MACHUYENKHOA` varchar(20) DEFAULT NULL,
   `TENDICHVU` varchar(150) NOT NULL,
-  `DONGIA` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `DONGIA` decimal(12,2) DEFAULT 0.00,
   `DONVITINH` varchar(20) DEFAULT NULL,
   `MOTA` text DEFAULT NULL,
-  `TRANGTHAI` tinyint(1) NOT NULL DEFAULT 1,
-  `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0
+  `TRANGTHAI` varchar(20) NOT NULL DEFAULT 'ACTIVE',
+  `TRANGTHAIXOA` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`MADICHVU`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -287,10 +288,10 @@ CREATE TABLE `dichvu` (
 --
 
 INSERT INTO `dichvu` (`MADICHVU`, `MACHUYENKHOA`, `TENDICHVU`, `DONGIA`, `DONVITINH`, `MOTA`, `TRANGTHAI`, `TRANGTHAIXOA`) VALUES
-('DV_ECG', 'CK_TIM', 'Điện tâm đồ (ECG 12 chuyển đạo)', 100000.00, 'Lần', 'Ghi hoạt động điện của tim phát hiện rối loạn nhịp', 1, 0),
-('DV_ECHO', 'CK_TIM', 'Siêu âm tim màu Doppler', 350000.00, 'Lần', 'Đánh giá cấu trúc buồng tim và huyết động van tim', 1, 0),
-('DV_NSDD', 'CK_NOI', 'Nội soi dạ dày gây mê', 900000.00, 'Lần', 'Nội soi đường tiêu hóa trên phát hiện loét, polyp', 1, 0),
-('DV_XNBL', 'CK_NOI', 'Xét nghiệm vi khuẩn HP qua hơi thở (Urea Breath Test)', 450000.00, 'Lần', 'Kiểm tra nhiễm Helicobacter pylori đường dạ dày', 1, 0);
+('DV_ECG', 'CK_TIM', 'Điện tâm đồ (ECG 12 chuyển đạo)', 100000.00, 'Lần', 'Ghi hoạt động điện của tim phát hiện rối loạn nhịp', 'ACTIVE', 0),
+('DV_ECHO', 'CK_TIM', 'Siêu âm tim màu Doppler', 350000.00, 'Lần', 'Đánh giá cấu trúc buồng tim và huyết động van tim', 'ACTIVE', 0),
+('DV_NSDD', 'CK_NOI', 'Nội soi dạ dày gây mê', 900000.00, 'Lần', 'Nội soi đường tiêu hóa trên phát hiện loét, polyp', 'ACTIVE', 0),
+('DV_XNBL', 'CK_NOI', 'Xét nghiệm vi khuẩn HP qua hơi thở (Urea Breath Test)', 450000.00, 'Lần', 'Kiểm tra nhiễm Helicobacter pylori đường dạ dày', 'ACTIVE', 0);
 
 -- --------------------------------------------------------
 
