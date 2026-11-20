@@ -33,3 +33,21 @@ export const SERVICE_CATALOG_STATUS = Object.freeze({
   ACTIVE: 'Đang hoạt động',
   INACTIVE: 'Dịch vụ ngừng hoạt động',
 });
+
+export const PAYMENT_METHOD = Object.freeze({
+  CASH: 'Tiền mặt',
+  TRANSFER: 'Chuyển khoản',
+  CARD: 'Thẻ',
+});
+
+export const PAYMENT_STATUS = Object.freeze({
+  UNPAID: 'Chưa thanh toán',
+  PAID: 'Đã thanh toán',
+  CANCELLED: 'Đã hủy',
+});
+
+export const INVOICE_ITEM_TYPE = Object.freeze({
+  EXAMINATION_FEE: 'Phí khám',
+  SERVICE: 'Dịch vụ',
+  MEDICINE: 'Thuốc',
+});

@@ -3,6 +3,7 @@ package com.clinic.management._billing;
 import com.clinic.management.common.enums.PaymentStatus;
 import com.clinic.management._dashboard.MonthlyRevenueProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface InvoiceRepository extends JpaRepository<Invoice, String> {
+public interface InvoiceRepository extends 
+        JpaRepository<Invoice, String>,
+        JpaSpecificationExecutor<Invoice> {
 
     List<Invoice> findByPaymentStatusAndDeletedFalseOrderByCreatedAtDesc(String paymentStatus);
 

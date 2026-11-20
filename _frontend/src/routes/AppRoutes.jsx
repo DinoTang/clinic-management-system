@@ -8,6 +8,7 @@ import PatientPage from "../pages/patient/Patient";
 import MedicinePage from "../pages/medicine/Medicine";
 import AppointmentPage from "../pages/appointment/Appointment";
 import SpecialtyPage from "../pages/specialty/Specialty";
+import InvoicePage from "../pages/invoice/Invoice";
 import ServiceCatalogPage from "../pages/serviceCatalog/ServiceCatalog";
 import DoctorPage from "../pages/doctor/Doctor";
 import GoogleCallback from "../pages/callback/GoogleCallback";
@@ -49,6 +50,7 @@ function AppRoutes() {
                     <Route path="/admin/appointments" element={<AppointmentPage />} />
                     <Route path="/admin/medicines" element={<MedicinePage />} />
                     <Route path="/admin/services" element={<ServiceCatalogPage />} />
+                    <Route path="/admin/invoices" element={<InvoicePage />} />
                     <Route path="/schedules" element={<DesktopSchedulePage />} />
                 </Route>
                 <Route path="/a/*" element={<AdminRoleRoutes />} />

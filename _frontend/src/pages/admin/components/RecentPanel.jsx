@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRightStroke } from "@boxicons/react";
 import { Link } from "react-router-dom";
+import { APPOINTMENT_STATUS} from '../../../enums/index.js';
 import dashboardService from "../../../services/dashboard/dashboardService";
 
 function RecentPanel({ className = "" }) {
@@ -45,20 +46,15 @@ function RecentPanel({ className = "" }) {
     const getStatusConfig = (status) => {
         switch (status) {
             case "BOOKED":
-            case "Đã đặt":
-                return { label: "Chờ xác nhận", type: "warning" };
+                return { label: APPOINTMENT_STATUS.BOOKED, type: "warning" };
             case "ARRIVED":
-            case "Đã đến":
-                return { label: "Đã đến", type: "positive" };
+                return { label: APPOINTMENT_STATUS.ARRIVED, type: "positive" };
             case "EXAMINED":
-            case "Đã khám":
-                return { label: "Đã khám", type: "positive" };
+                return { label: APPOINTMENT_STATUS.EXAMINED, type: "positive" };
             case "COMPLETED":
-            case "Hoàn tất":
-                return { label: "Hoàn tất", type: "positive" };
+                return { label: APPOINTMENT_STATUS.COMPLETED, type: "positive" };
             case "CANCELLED":
-            case "Đã hủy":
-                return { label: "Đã hủy", type: "danger" };
+                return { label: APPOINTMENT_STATUS.CANCELLED, type: "danger" };
             default:
                 return { label: status || "Không xác định", type: "warning" };
         }
