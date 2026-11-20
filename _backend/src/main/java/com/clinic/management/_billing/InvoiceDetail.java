@@ -1,9 +1,19 @@
 package com.clinic.management._billing;
 
+import com.clinic.management.common.enums.InvoiceItemType;
+import com.clinic.management.common.enums.InvoiceItemTypeConverter;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "chitiethoadon")
 public class InvoiceDetail {
@@ -15,9 +25,9 @@ public class InvoiceDetail {
     @Column(name = "MAHOADON", length = 20, nullable = false)
     private String invoiceId;
 
-    /** PhiKham / DichVu / Thuoc */
+    @Convert(converter = InvoiceItemTypeConverter.class)
     @Column(name = "LOAIMUCTHU", length = 20)
-    private String itemType;
+    private InvoiceItemType itemType;
 
     @Column(name = "MAMUCTHU", length = 20)
     private String itemId;
@@ -25,6 +35,7 @@ public class InvoiceDetail {
     @Column(name = "TENMUCTHU", length = 150, nullable = false)
     private String itemName;
 
+    @Builder.Default
     @Column(name = "SOLUONG", nullable = false)
     private Integer quantity = 1;
 
@@ -37,89 +48,7 @@ public class InvoiceDetail {
     @Column(name = "GHICHU", columnDefinition = "TEXT")
     private String note;
 
+    @Builder.Default
     @Column(name = "TRANGTHAIXOA")
     private Boolean deleted = false;
-
-    public InvoiceDetail() {
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getInvoiceId() {
-        return invoiceId;
-    }
-
-    public void setInvoiceId(String invoiceId) {
-        this.invoiceId = invoiceId;
-    }
-
-    public String getItemType() {
-        return itemType;
-    }
-
-    public void setItemType(String itemType) {
-        this.itemType = itemType;
-    }
-
-    public String getItemId() {
-        return itemId;
-    }
-
-    public void setItemId(String itemId) {
-        this.itemId = itemId;
-    }
-
-    public String getItemName() {
-        return itemName;
-    }
-
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
 }

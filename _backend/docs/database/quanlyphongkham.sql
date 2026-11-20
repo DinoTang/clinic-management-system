@@ -203,7 +203,7 @@ INSERT INTO `chitietdonthuoc` (`MACHITIETDONTHUOC`, `MADONTHUOC`, `MATHUOC`, `SO
 CREATE TABLE `chitiethoadon` (
   `MACHITIETHOADON` varchar(20) NOT NULL,
   `MAHOADON` varchar(20) NOT NULL,
-  `LOAIMUCTHU` varchar(20) DEFAULT NULL,
+  `LOAIMUCTHU` enum('EXAMINATION_FEE', 'SERVICE', 'MEDICINE') DEFAULT NULL,
   `MAMUCTHU` varchar(20) DEFAULT NULL,
   `TENMUCTHU` varchar(150) NOT NULL,
   `SOLUONG` int(11) NOT NULL DEFAULT 1,
@@ -213,31 +213,28 @@ CREATE TABLE `chitiethoadon` (
   `TRANGTHAIXOA` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
 -- Dumping data for table `chitiethoadon`
---
-
 INSERT INTO `chitiethoadon` (`MACHITIETHOADON`, `MAHOADON`, `LOAIMUCTHU`, `MAMUCTHU`, `TENMUCTHU`, `SOLUONG`, `DONGIA`, `THANHTIEN`, `GHICHU`, `TRANGTHAIXOA`) VALUES
-('CTHD001', 'HD001', 'PhiKham', 'BS001', 'Công khám Bác sĩ CKII Tim mạch', 1, 250000.00, 250000.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD002', 'HD001', 'DichVu', 'DV_ECG', 'Điện tâm đồ (ECG 12 chuyển đạo)', 1, 100000.00, 100000.00, 'Chỉ định CD001', 0),
-('CTHD003', 'HD001', 'DichVu', 'DV_ECHO', 'Siêu âm tim màu Doppler', 1, 350000.00, 350000.00, 'Chỉ định CD002', 0),
-('CTHD004', 'HD001', 'Thuoc', 'DT001', 'Tiền đơn thuốc điều trị ngoại trú', 1, 602000.00, 602000.00, 'Tổng tiền thuốc theo đơn DT001', 0),
-('CTHD005', 'HD002', 'PhiKham', 'BS002', 'Công khám Thạc sĩ BS Nội tổng quát', 1, 180000.00, 180000.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD006', 'HD002', 'DichVu', 'DV_XNBL', 'Xét nghiệm vi khuẩn HP qua hơi thở', 1, 450000.00, 450000.00, 'Chỉ định CD003', 0),
-('CTHD007', 'HD002', 'Thuoc', 'DT002', 'Tiền đơn thuốc điều trị ngoại trú', 1, 722000.00, 722000.00, 'Tổng tiền thuốc theo đơn DT002', 0),
-('CTHD008', 'HD003', 'PhiKham', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 250000.00, 250000.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD009', 'HD004', 'PhiKham', 'BS003', 'Công khám Bác sĩ Đa khoa BS Phạm Minh Đức', 1, 150000.00, 150000.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD010', 'HD004', 'DichVu', 'DV_NSDD', 'Nội soi dạ dày gây mê', 1, 900000.00, 900000.00, 'Chỉ định CD_TD005_1', 0),
-('CTHD011', 'HD004', 'Thuoc', 'DT003', 'Tiền đơn thuốc điều trị ngoại trú', 1, 10500.00, 10500.00, 'Tổng tiền thuốc theo khoản DT003', 0),
-('CTHD012', 'HD005', 'PhiKham', 'BS002', 'Công khám Thạc sĩ Bác sĩ ThS.BS Lê Thị Lan', 1, 180000.00, 180000.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD013', 'HD005', 'DichVu', 'DV_ECHO', 'Siêu âm tim màu Doppler', 1, 350000.00, 350000.00, 'Chỉ định CD_TD010_1', 0),
-('CTHD014', 'HD005', 'Thuoc', 'DT008', 'Tiền đơn thuốc điều trị ngoại trú', 1, 264500.00, 264500.00, 'Tổng tiền thuốc theo khoản DT008', 0),
-('CTHD015', 'HD006', 'PhiKham', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD016', 'HD006', 'Thuoc', 'DT009', 'Tiền đơn thuốc điều trị ngoại trú', 1, 2500.00, 2500.00, 'Tổng tiền thuốc theo khoản DT009', 0),
-('CTHD017', 'HD007', 'PhiKham', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD018', 'HD007', 'Thuoc', 'DT010', 'Tiền đơn thuốc điều trị ngoại trú', 1, 2500.00, 2500.00, 'Tổng tiền thuốc theo khoản DT010', 0),
-('CTHD019', 'HD008', 'PhiKham', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0),
-('CTHD020', 'HD009', 'PhiKham', 'BS002', 'Công khám Thạc sĩ Bác sĩ ThS.BS Lê Thị Lan', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0);
+('CTHD001', 'HD001', 'EXAMINATION_FEE', 'BS001', 'Công khám Bác sĩ CKII Tim mạch', 1, 250000.00, 250000.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD002', 'HD001', 'SERVICE', 'DV_ECG', 'Điện tâm đồ (ECG 12 chuyển đạo)', 1, 100000.00, 100000.00, 'Chỉ định CD001', 0),
+('CTHD003', 'HD001', 'SERVICE', 'DV_ECHO', 'Siêu âm tim màu Doppler', 1, 350000.00, 350000.00, 'Chỉ định CD002', 0),
+('CTHD004', 'HD001', 'MEDICINE', 'DT001', 'Tiền đơn thuốc điều trị ngoại trú', 1, 602000.00, 602000.00, 'Tổng tiền thuốc theo đơn DT001', 0),
+('CTHD005', 'HD002', 'EXAMINATION_FEE', 'BS002', 'Công khám Thạc sĩ BS Nội tổng quát', 1, 180000.00, 180000.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD006', 'HD002', 'SERVICE', 'DV_XNBL', 'Xét nghiệm vi khuẩn HP qua hơi thở', 1, 450000.00, 450000.00, 'Chỉ định CD003', 0),
+('CTHD007', 'HD002', 'MEDICINE', 'DT002', 'Tiền đơn thuốc điều trị ngoại trú', 1, 722000.00, 722000.00, 'Tổng tiền thuốc theo đơn DT002', 0),
+('CTHD008', 'HD003', 'EXAMINATION_FEE', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 250000.00, 250000.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD009', 'HD004', 'EXAMINATION_FEE', 'BS003', 'Công khám Bác sĩ Đa khoa BS Phạm Minh Đức', 1, 150000.00, 150000.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD010', 'HD004', 'SERVICE', 'DV_NSDD', 'Nội soi dạ dày gây mê', 1, 900000.00, 900000.00, 'Chỉ định CD_TD005_1', 0),
+('CTHD011', 'HD004', 'MEDICINE', 'DT003', 'Tiền đơn thuốc điều trị ngoại trú', 1, 10500.00, 10500.00, 'Tổng tiền thuốc theo khoản DT003', 0),
+('CTHD012', 'HD005', 'EXAMINATION_FEE', 'BS002', 'Công khám Thạc sĩ Bác sĩ ThS.BS Lê Thị Lan', 1, 180000.00, 180000.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD013', 'HD005', 'SERVICE', 'DV_ECHO', 'Siêu âm tim màu Doppler', 1, 350000.00, 350000.00, 'Chỉ định CD_TD010_1', 0),
+('CTHD014', 'HD005', 'MEDICINE', 'DT008', 'Tiền đơn thuốc điều trị ngoại trú', 1, 264500.00, 264500.00, 'Tổng tiền thuốc theo khoản DT008', 0),
+('CTHD015', 'HD006', 'EXAMINATION_FEE', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD016', 'HD006', 'MEDICINE', 'DT009', 'Tiền đơn thuốc điều trị ngoại trú', 1, 2500.00, 2500.00, 'Tổng tiền thuốc theo khoản DT009', 0),
+('CTHD017', 'HD007', 'EXAMINATION_FEE', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD018', 'HD007', 'MEDICINE', 'DT010', 'Tiền đơn thuốc điều trị ngoại trú', 1, 2500.00, 2500.00, 'Tổng tiền thuốc theo khoản DT010', 0),
+('CTHD019', 'HD008', 'EXAMINATION_FEE', 'BS001', 'Công khám Bác sĩ Chuyên khoa II BS.CKII Trần Văn Nam', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0),
+('CTHD020', 'HD009', 'EXAMINATION_FEE', 'BS002', 'Công khám Thạc sĩ Bác sĩ ThS.BS Lê Thị Lan', 1, 0.00, 0.00, 'Tiền khám theo bác sĩ', 0);
 
 -- --------------------------------------------------------
 

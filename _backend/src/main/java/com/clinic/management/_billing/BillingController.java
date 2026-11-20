@@ -2,20 +2,12 @@ package com.clinic.management._billing;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import com.clinic.management.common.enums.PaymentMethod;
+import com.clinic.management.common.enums.PaymentStatus;
 
 import java.util.List;
 
-/**
- * Billing API — theo _backend/docs/api/api-contract.md:
- *   GET    /api/billing/unpaid
- *   GET    /api/billing/invoices/{id}
- *   PUT    /api/billing/invoices/{id}/payment
- * Alias (team-task-assignment.md §5.5):
- *   POST   /api/invoices
- *   GET    /api/invoices/{id}
- *   PUT    /api/invoices/{id}/payment
- * Lỗi nghiệp vụ (BR-xxx) ném IllegalArgumentException → GlobalExceptionHandler → HTTP 400 {message}.
- */
 @RestController
 @RequestMapping("/api")
 public class BillingController {
@@ -26,6 +18,25 @@ public class BillingController {
     public BillingController(BillingService billingService, InvoiceRepository invoiceRepository) {
         this.billingService = billingService;
         this.invoiceRepository = invoiceRepository;
+    }
+
+    @GetMapping({"/billing/invoices/paginate", "/invoices/paginate"})
+    public Page<Invoice> listInvoicesPaginate(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String method,
+            @RequestParam(required = false) String search
+    ) {
+        PaymentStatus paymentStatus = (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status))
+                ? PaymentStatus.valueOf(status.trim().toUpperCase())
+                : null;
+
+        PaymentMethod paymentMethod = (method != null && !method.isBlank() && !"all".equalsIgnoreCase(method))
+                ? PaymentMethod.valueOf(method.trim().toUpperCase())
+                : null;
+
+        return billingService.findAll(page, size, paymentStatus, paymentMethod, search);
     }
 
     @GetMapping("/billing/unpaid")

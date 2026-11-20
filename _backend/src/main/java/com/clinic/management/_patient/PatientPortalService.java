@@ -1,5 +1,6 @@
 package com.clinic.management._patient;
 
+import com.clinic.management.common.enums.InvoiceItemType;
 import com.clinic.management._appointment.Appointment;
 import com.clinic.management._appointment.AppointmentRepository;
 import com.clinic.management._billing.Invoice;
@@ -343,7 +344,7 @@ public class PatientPortalService {
                 .filter(d -> !Boolean.TRUE.equals(d.getDeleted()))
                 .map(d -> new PatientPortalDtos.InvoiceLineDto(
                         d.getItemName(),
-                        d.getItemType(),
+                        d.getItemType() != null ? d.getItemType().name() : null,
                         d.getQuantity(),
                         d.getUnitPrice(),
                         d.getTotalPrice()

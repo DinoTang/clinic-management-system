@@ -1,5 +1,6 @@
 package com.clinic.management._billing;
 
+import com.clinic.management.common.enums.InvoiceItemType;
 import com.clinic.management._doctor.entities.Doctor;
 import com.clinic.management._doctor.repositories.DoctorRepository;
 import com.clinic.management._medical_record.MedicalRecord;
@@ -19,6 +20,10 @@ import com.clinic.management.common.enums.PaymentMethod;
 import com.clinic.management.common.enums.PaymentStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -61,6 +66,33 @@ public class BillingService {
         this.serviceAssignmentRepository = serviceAssignmentRepository;
         this.serviceCatalogRepository = serviceCatalogRepository;
         this.prescriptionRepository = prescriptionRepository;
+    }
+
+    public Page<Invoice> findAll(
+            int page,
+            int size,
+            PaymentStatus status,
+            PaymentMethod method,
+            String search
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        return invoiceRepository.findAll((root, query, cb) -> cb.and(
+                cb.isFalse(root.get("deleted")),
+                status == null
+                        ? cb.conjunction()
+                        : cb.equal(root.get("paymentStatus"), status),
+                method == null
+                        ? cb.conjunction()
+                        : cb.equal(root.get("paymentMethod"), method),
+                search == null || search.isBlank()
+                        ? cb.conjunction()
+                        : cb.or(
+                            cb.like(cb.lower(root.get("id")), "%" + search.trim().toLowerCase() + "%"),
+                            cb.like(cb.lower(root.get("medicalRecordId")), "%" + search.trim().toLowerCase() + "%"),
+                            cb.like(cb.lower(root.get("staffId")), "%" + search.trim().toLowerCase() + "%")
+                        )
+        ), pageable);
     }
 
     public List<Invoice> listUnpaid() {
@@ -123,15 +155,17 @@ public class BillingService {
                 BigDecimal fee = doctor.getExaminationFee() == null ? BigDecimal.ZERO : doctor.getExaminationFee();
                 String degree = doctor.getAcademicDegree() == null ? "" : " " + doctor.getAcademicDegree();
                 String doctorName = doctor.getUser() == null ? doctor.getId() : doctor.getUser().getFullName();
-                InvoiceDetail feeRow = new InvoiceDetail();
-                feeRow.setId(String.format("CTHD%03d", nextDetailSeq++));
-                feeRow.setItemType("PhiKham");
-                feeRow.setItemId(doctor.getId());
-                feeRow.setItemName("Công khám" + degree + " " + doctorName);
-                feeRow.setQuantity(1);
-                feeRow.setUnitPrice(fee);
-                feeRow.setTotalPrice(fee);
-                feeRow.setNote("Tiền khám theo bác sĩ");
+
+                InvoiceDetail feeRow = InvoiceDetail.builder()
+                        .id(String.format("CTHD%03d", nextDetailSeq++))
+                        .itemType(InvoiceItemType.EXAMINATION_FEE)
+                        .itemId(doctor.getId())
+                        .itemName("Công khám" + degree + " " + doctorName)
+                        .quantity(1)
+                        .unitPrice(fee)
+                        .totalPrice(fee)
+                        .note("Tiền khám theo bác sĩ")
+                        .build();
                 details.add(feeRow);
             }
         }
@@ -147,15 +181,17 @@ public class BillingService {
                     ? assignment.getUnitPrice()
                     : (catalog != null && catalog.getPrice() != null ? catalog.getPrice() : BigDecimal.ZERO);
             int qty = assignment.getQuantity() == null ? 1 : assignment.getQuantity();
-            InvoiceDetail row = new InvoiceDetail();
-            row.setId(String.format("CTHD%03d", nextDetailSeq++));
-            row.setItemType("DichVu");
-            row.setItemId(assignment.getServiceId());
-            row.setItemName(name);
-            row.setQuantity(qty);
-            row.setUnitPrice(unitPrice);
-            row.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(qty)));
-            row.setNote("Chỉ định " + assignment.getId());
+
+            InvoiceDetail row = InvoiceDetail.builder()
+                    .id(String.format("CTHD%03d", nextDetailSeq++))
+                    .itemType(InvoiceItemType.SERVICE)
+                    .itemId(assignment.getServiceId())
+                    .itemName(name)
+                    .quantity(qty)
+                    .unitPrice(unitPrice)
+                    .totalPrice(unitPrice.multiply(BigDecimal.valueOf(qty)))
+                    .note("Chỉ định " + assignment.getId())
+                    .build();
             details.add(row);
         }
 
@@ -175,15 +211,16 @@ public class BillingService {
                 }
             }
             if (medicineTotal.compareTo(BigDecimal.ZERO) > 0) {
-                InvoiceDetail row = new InvoiceDetail();
-                row.setId(String.format("CTHD%03d", nextDetailSeq++));
-                row.setItemType("Thuoc");
-                row.setItemId(prescription.getId());
-                row.setItemName("Tiền đơn thuốc điều trị ngoại trú");
-                row.setQuantity(1);
-                row.setUnitPrice(medicineTotal);
-                row.setTotalPrice(medicineTotal);
-                row.setNote("Tổng tiền thuốc theo khoản " + prescription.getId());
+                InvoiceDetail row = InvoiceDetail.builder()
+                        .id(String.format("CTHD%03d", nextDetailSeq++))
+                        .itemType(InvoiceItemType.MEDICINE)
+                        .itemId(prescription.getId())
+                        .itemName("Tiền đơn thuốc điều trị ngoại trú")
+                        .quantity(1)
+                        .unitPrice(medicineTotal)
+                        .totalPrice(medicineTotal)
+                        .note("Tổng tiền thuốc theo khoản " + prescription.getId())
+                        .build();
                 details.add(row);
             }
         }
