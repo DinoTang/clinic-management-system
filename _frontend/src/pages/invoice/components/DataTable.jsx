@@ -1,3 +1,4 @@
+import { Hashtag } from "@boxicons/react";
 import React from 'react';
 import { PAYMENT_STATUS, PAYMENT_METHOD } from '../../../enums/index.js';
 
@@ -50,7 +51,7 @@ export default function DataTable({ invoices, loading, onViewDetail }) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
-              <th className="!py-3 !px-4">Mã hóa đơn</th>
+              <th className="!py-3 !px-4"><Hashtag /></th>
               <th className="!py-3 !px-4">Mã bệnh án</th>
               <th className="!py-3 !px-4">Nhân viên lập</th>
               <th className="!py-3 !px-4">Ngày tạo</th>
@@ -68,10 +69,18 @@ export default function DataTable({ invoices, loading, onViewDetail }) {
                 </td>
               </tr>
             ) : (
-              invoices.map((inv) => (
+              invoices.map((inv, index) => (
                 <tr key={inv.id} className="hover:bg-gray-50 transition">
                   <td className="!py-3 !px-4 font-medium text-blue-600">
-                    {inv.id}
+	                  <div className="flex items-center gap-[0.75rem]">
+	                    <span className="flex h-[2.5rem] w-[2.5rem] shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[0.8125rem] font-semibold text-[#2563eb]">
+	                      {index + 1}
+	                    </span>
+
+	                    <span className="font-medium text-[#101828]">
+		                    {inv.id}
+	                    </span>
+	                  </div>
                   </td>
                   <td className="!py-3 !px-4">{inv.medicalRecordId}</td>
                   <td className="!py-3 !px-4">{inv.staffId}</td>

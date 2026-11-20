@@ -1,35 +1,38 @@
-import { Edit, Hashtag, Shield } from "@boxicons/react";
-import {USER_STATUS, USER_ROLE} from "../../../enums/index.js";
+import { Hashtag } from "@boxicons/react";
+import { USER_STATUS } from "../../../enums/index.js";
 
-function PatientTable({ patients, fetchPatients }) {
+function PatientTable({ patients }) {
   return (
     <div className="w-full overflow-x-auto rounded-[0.75rem] border border-[#eaecf0] bg-white">
       <table className="w-full min-w-[70rem] border-collapse text-left text-[0.875rem]">
         <thead className="bg-[#f9fafb]">
           <tr>
             {[
-              <Hashtag />,
-              "Địa chỉ",
-              "Nhóm máu",
-              "Ngày sinh",
-              "Giới tính",
-              "Số điện thoại",
-              "Lượt khám",
-              "Trạng thái",
+              { id: "index", label: <Hashtag /> },
+              { id: "address", label: "Địa chỉ" },
+              { id: "bloodGroup", label: "Nhóm máu" },
+              { id: "dob", label: "Ngày sinh" },
+              { id: "gender", label: "Giới tính" },
+              { id: "phone", label: "Số điện thoại" },
+              { id: "visits", label: "Lượt khám" },
+              { id: "status", label: "Trạng thái" },
             ].map((heading) => (
               <th
-                key={heading}
+                key={heading.id}
                 className="whitespace-nowrap border-b border-[#eaecf0] !px-[1rem] !py-[0.875rem] font-semibold text-[#475467]"
               >
-                {heading}
+                {heading.label}
               </th>
             ))}
           </tr>
         </thead>
 
         <tbody className="divide-y divide-[#eaecf0]">
-          {
-            patients.map((patient, index) => (
+          {patients.map((patient, index) => {
+            const isActive = patient.user?.status === USER_STATUS.ACTIVE;
+            const hasAccount = Boolean(patient.user?.status);
+
+            return (
               <tr
                 key={patient.id}
                 className="transition-colors hover:bg-[#f9fafb]"
@@ -47,39 +50,52 @@ function PatientTable({ patients, fetchPatients }) {
                 </td>
 
                 <td className="whitespace-nowrap !px-[1rem] !py-[1rem] text-[#475467]">
-                  {patient.address}
+                  {patient.address || "-"}
                 </td>
 
                 <td className="whitespace-nowrap !px-[1rem] !py-[1rem] text-[#475467]">
-                  {patient.bloodGroup}
+                  {patient.bloodGroup || "-"}
                 </td>
 
                 <td className="whitespace-nowrap !px-[1rem] !py-[1rem] text-[#475467]">
-                  {patient.dateOfBirth}
+                  {patient.dateOfBirth || "-"}
                 </td>
 
                 <td className="whitespace-nowrap !px-[1rem] !py-[1rem] text-[#475467]">
-                  {patient.gender}
+                  {patient.gender || "-"}
                 </td>
 
                 <td className="whitespace-nowrap !px-[1rem] !py-[1rem] text-[#475467]">
-                  {patient.phoneNumber ?? patient.user.phone}
+                  {patient.phoneNumber ?? patient.user?.phone ?? "-"}
                 </td>
 
                 <td className="whitespace-nowrap !px-[1rem] !py-[1rem] text-[#475467]">
-                  {patient.visits}
+                  {patient.visits ?? 0}
                 </td>
 
                 <td className="whitespace-nowrap !px-[1rem] !py-[1rem]">
-                  <span className={`inline-flex items-center gap-[0.375rem] rounded-full !px-[0.625rem] !py-[0.25rem] text-[0.75rem] font-medium ${patient.user.status== USER_STATUS.ACTIVE
-                      ? "bg-[#eaf7f1] text-[#16805d]"
-                      : "bg-[#f2f4f7] text-[#667085]"}`}>
-                    <i className="h-[0.375rem] w-[0.375rem] rounded-full bg-[#12b76a]" />
-                    {patient.user.status}
+                  <span
+                    className={`inline-flex items-center gap-[0.375rem] rounded-full !px-[0.625rem] !py-[0.25rem] text-[0.75rem] font-medium ${
+                      isActive
+                        ? "bg-[#eaf7f1] text-[#16805d]"
+                        : "bg-[#f2f4f7] text-[#667085]"
+                    }`}
+                  >
+                    <i
+                      className={`h-[0.375rem] w-[0.375rem] rounded-full ${
+                        isActive ? "bg-[#12b76a]" : "bg-[#667085]"
+                      }`}
+                    />
+                    {isActive
+                      ? "Đang hoạt động"
+                      : hasAccount
+                      ? "Ngừng hoạt động"
+                      : "Chưa có tài khoản"}
                   </span>
                 </td>
               </tr>
-            ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
